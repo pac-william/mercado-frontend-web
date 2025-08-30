@@ -1,3 +1,12 @@
+const marketProfilePictures = [
+    '/markets/armacao_supermercado.jpeg',
+    '/markets/bahamas_mix.png',
+    '/markets/bh_supermercados.png',
+    '/markets/carrefour.png',
+    '/markets/economart_atacadista.jpeg',
+    '/markets/rede_uai.png'
+]
+
 // Tipos para os dados
 export interface Market {
     id: string;
@@ -8,6 +17,7 @@ export interface Market {
     deliveryFee: number;
     minOrder: number;
     category: string;
+    profilePicture: string;
 }
 
 export interface Product {
@@ -34,7 +44,8 @@ export const markets: Market[] = [
         rating: 4.5,
         deliveryFee: 5.90,
         minOrder: 25.00,
-        category: 'Supermercado'
+        category: 'Supermercado',
+        profilePicture: marketProfilePictures[0]
     },
     {
         id: '2',
@@ -44,7 +55,8 @@ export const markets: Market[] = [
         rating: 4.2,
         deliveryFee: 3.90,
         minOrder: 20.00,
-        category: 'Mercado'
+        category: 'Mercado',
+        profilePicture: marketProfilePictures[1]
     },
     {
         id: '3',
@@ -54,7 +66,8 @@ export const markets: Market[] = [
         rating: 4.7,
         deliveryFee: 7.90,
         minOrder: 30.00,
-        category: 'Atacado'
+        category: 'Atacado',
+        profilePicture: marketProfilePictures[2]
     },
     {
         id: '4',
@@ -64,7 +77,8 @@ export const markets: Market[] = [
         rating: 4.0,
         deliveryFee: 4.90,
         minOrder: 15.00,
-        category: 'Conveniência'
+        category: 'Conveniência',
+        profilePicture: marketProfilePictures[3]
     },
     {
         id: '5',
@@ -74,36 +88,20 @@ export const markets: Market[] = [
         rating: 4.3,
         deliveryFee: 6.90,
         minOrder: 22.00,
-        category: 'Supermercado'
+        category: 'Supermercado',
+        profilePicture: marketProfilePictures[4]
+    },
+    {
+        id: '6',
+        name: 'Supermercado São João',
+        address: 'Rua das Flores, 123 - Centro',
+        phone: '(11) 99999-9999',
+        rating: 4.5,
+        deliveryFee: 5.90,
+        minOrder: 25.00,
+        category: 'Supermercado',
+        profilePicture: marketProfilePictures[5]
     }
-];
-
-// Categorias de produtos
-const productCategories = [
-    'Frutas e Verduras',
-    'Carnes e Frios',
-    'Laticínios',
-    'Grãos e Cereais',
-    'Bebidas',
-    'Limpeza',
-    'Higiene Pessoal',
-    'Congelados',
-    'Enlatados',
-    'Padaria'
-];
-
-// Marcas de produtos
-const productBrands = [
-    'Nestlé',
-    'Coca-Cola',
-    'Pepsi',
-    'Unilever',
-    'Procter & Gamble',
-    'Kraft Heinz',
-    'General Mills',
-    'Kellogg\'s',
-    'Mars',
-    'Ferrero'
 ];
 
 // Gerar produtos fictícios
@@ -507,8 +505,8 @@ export function getProductsByMarket(marketId: string): Product[] {
 }
 
 // Função para obter mercado por ID
-export function getMarketById(marketId: string): Market | undefined {
-    return markets.find(market => market.id === marketId);
+export function getMarketById(marketId: string): Market {
+    return markets.find(market => market.id === marketId) || markets[0];
 }
 
 // Função para obter produtos por categoria
@@ -519,7 +517,7 @@ export function getProductsByCategory(category: string): Product[] {
 // Função para buscar produtos por nome
 export function searchProducts(query: string): Product[] {
     const lowercaseQuery = query.toLowerCase();
-    return products.filter(product => 
+    return products.filter(product =>
         product.name.toLowerCase().includes(lowercaseQuery) ||
         product.description.toLowerCase().includes(lowercaseQuery) ||
         product.brand.toLowerCase().includes(lowercaseQuery)

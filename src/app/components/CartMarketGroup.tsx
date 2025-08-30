@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Product } from "@/lib/mock-data";
+import { getMarketById, Product } from "@/lib/mock-data";
 import ProductCard from "./ProductCard";
 
 interface CartMarketGroupProps {
@@ -63,17 +63,17 @@ export default function CartMarketGroup({
                     <AccordionContent className="p-4 border-t">
                         <Carousel className="w-full">
                             <CarouselContent className="flex flex-1">
-                                {products.slice(0, 15).map((product, index) => (
-                                    <CarouselItem key={product.id} className="max-w-[320px] min-w-[320px] basis-1/4">
-                                        <ProductCard
-                                            market_name={marketName}
-                                            market_address={marketAddress}
-                                            product_description={product.description}
-                                            price={product.price}
-                                            index={index}
-                                        />
-                                    </CarouselItem>
-                                ))}
+                                {products.slice(0, 15).map((product) => {
+                                    const market = getMarketById(product.marketId);
+                                    return (
+                                        <CarouselItem key={product.id} className="max-w-[320px] min-w-[320px] basis-1/4">
+                                            <ProductCard
+                                                market={market}
+                                                product={product}
+                                            />
+                                        </CarouselItem>
+                                    )
+                                })}
                             </CarouselContent>
                             <CarouselPrevious />
                             <CarouselNext />
