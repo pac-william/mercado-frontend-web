@@ -9,20 +9,15 @@ import "moment/locale/pt-br";
 import { Metadata } from "next";
 import Link from "next/link";
 
-interface AgentPageProps {
-    params: {
-        suggestion_id: Promise<string>
-    }
-}
 
 export const metadata: Metadata = {
     title: 'Smart Market - Agente',
     description: 'Veja o perfil do agente',
 }
 
-export default async function AgentPage({ params }: AgentPageProps) {
+export default async function AgentPage({ params }: { params: Promise<{ suggestion_id: string }> }) {
     const { suggestion_id } = await params;
-    
+
     console.log(suggestion_id);
 
     return (
