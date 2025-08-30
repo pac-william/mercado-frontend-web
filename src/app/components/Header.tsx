@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Header() {
     return (
-        <header className="flex w-full justify-between items-center p-4 bg-white border-b border-gray-200 shadow-sm">
+        <header className="flex w-full justify-between items-center p-4 bg-white border-b border-gray-200">
             <h1 className="text-2xl font-bold text-black container mx-auto">
                 <Link href="/">
                     Smart Market
