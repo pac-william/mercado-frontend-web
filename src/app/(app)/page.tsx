@@ -1,3 +1,4 @@
+import PriceSlider from "@/components/price-slider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -34,6 +35,7 @@ export default function Home() {
                             <CardContent className="flex flex-1 flex-col">
                                 <ScrollArea className="flex flex-col flex-grow h-0 pr-4">
                                     <div className="flex flex-col flex-1 gap-4">
+                                        <PriceSlider />
                                         <Card className="flex flex-col">
                                             <CardHeader>
                                                 <Label>Categoria</Label>
