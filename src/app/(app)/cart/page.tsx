@@ -1,5 +1,6 @@
 import { getProducts } from "@/actions/products.actions";
 import CartMarketGroup from "@/app/components/CartMarketGroup";
+import RouterBack from "@/components/RouterBack";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShoppingCart } from "lucide-react";
@@ -16,6 +17,7 @@ export default async function Cart() {
         <div className="flex flex-col flex-1">
             <ScrollArea className="flex flex-col flex-grow h-0">
                 <div className="flex flex-col gap-4 container mx-auto my-4">
+                    <RouterBack />
                     <h1 className="text-2xl font-bold">Carrinho</h1>
                     <div className="flex flex-col gap-4">
                         <CartMarketGroup marketName="Mercado 1" marketAddress="Endereço 1" products={products} />

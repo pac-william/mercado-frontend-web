@@ -1,4 +1,5 @@
 import CartMarketGroup from "@/app/components/CartMarketGroup";
+import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { products } from "@/lib/mock-data";
 import moment from "moment";
@@ -18,6 +19,7 @@ export default function History() {
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 container mx-auto my-4">
+                <RouterBack />
                 <h1 className="text-2xl font-bold">Histórico de compras</h1>
                 {
                     history.map((item, index) => (
