@@ -11,7 +11,7 @@ import Link from "next/link";
 
 interface AgentPageProps {
     params: {
-        suggestion_id: string
+        suggestion_id: Promise<string>
     }
 }
 
@@ -22,6 +22,8 @@ export const metadata: Metadata = {
 
 export default async function AgentPage({ params }: AgentPageProps) {
     const { suggestion_id } = await params;
+    
+    console.log(suggestion_id);
 
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
