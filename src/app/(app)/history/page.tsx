@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 }
 
 export default function History() {
-    const history = Array.from({ length: 3 }).map((_, index) => ({
+    const history = Array.from({ length: 3 }).map(() => ({
         date: new Date(2025, 7, 29),
         products: products
     }));
