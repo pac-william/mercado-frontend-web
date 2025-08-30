@@ -56,7 +56,7 @@ export default function HeroSection() {
                     {heroImages.map((image, index) => (
                         <CarouselItem key={index} className="h-[500px]">
                             <Image
-                                src={image}
+                                src={`/mercado-frontend-web${image}`}
                                 alt={`Hero Image ${index + 1}`}
                                 width={1000}
                                 height={500}

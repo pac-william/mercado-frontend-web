@@ -24,7 +24,7 @@ export default function ProductCard({ market, product }: ProductCardProps) {
     return (
         <Card className="flex flex-col">
             <CardHeader className="flex flex-row gap-2 border-b">
-                <Image src={market.profilePicture} alt="Product" width={100} height={100} className="object-cover rounded-full w-16 h-16 shadow-md border" />
+                <Image src={`/mercado-frontend-web${market.profilePicture}`} alt="Product" width={100} height={100} className="object-cover rounded-full w-16 h-16 shadow-md border" />
                 <div className="bg-white rounded-full flex flex-col gap-1">
                     <span className="text-sm font-bold">{market.name}</span>
                     <span className="text-xs line-clamp-1">{market.address}</span>
