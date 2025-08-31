@@ -18,6 +18,7 @@ export interface Market {
     minOrder: number;
     category: string;
     profilePicture: string;
+    distance: number;
 }
 
 export interface Product {
@@ -45,7 +46,8 @@ export const markets: Market[] = [
         deliveryFee: 5.90,
         minOrder: 25.00,
         category: 'Supermercado',
-        profilePicture: marketProfilePictures[0]
+        profilePicture: marketProfilePictures[0],
+        distance: 1.5
     },
     {
         id: '2',
@@ -56,7 +58,8 @@ export const markets: Market[] = [
         deliveryFee: 3.90,
         minOrder: 20.00,
         category: 'Mercado',
-        profilePicture: marketProfilePictures[1]
+        profilePicture: marketProfilePictures[1],
+        distance: 2.5
     },
     {
         id: '3',
@@ -67,7 +70,8 @@ export const markets: Market[] = [
         deliveryFee: 7.90,
         minOrder: 30.00,
         category: 'Atacado',
-        profilePicture: marketProfilePictures[2]
+        profilePicture: marketProfilePictures[2],
+        distance: 3.5
     },
     {
         id: '4',
@@ -78,7 +82,8 @@ export const markets: Market[] = [
         deliveryFee: 4.90,
         minOrder: 15.00,
         category: 'Conveniência',
-        profilePicture: marketProfilePictures[3]
+        profilePicture: marketProfilePictures[3],
+        distance: 4.5
     },
     {
         id: '5',
@@ -89,7 +94,8 @@ export const markets: Market[] = [
         deliveryFee: 6.90,
         minOrder: 22.00,
         category: 'Supermercado',
-        profilePicture: marketProfilePictures[4]
+        profilePicture: marketProfilePictures[4],
+        distance: 5.5
     },
     {
         id: '6',
@@ -100,7 +106,8 @@ export const markets: Market[] = [
         deliveryFee: 5.90,
         minOrder: 25.00,
         category: 'Supermercado',
-        profilePicture: marketProfilePictures[5]
+        profilePicture: marketProfilePictures[5],
+        distance: 6.5
     }
 ];
 

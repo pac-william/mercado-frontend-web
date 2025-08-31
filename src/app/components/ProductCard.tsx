@@ -66,7 +66,6 @@ export default function ProductCard({ market, product }: ProductCardProps) {
             <CardFooter className="flex flex-row justify-between gap-2">
                 <InputPlusMinus />
                 <div className="flex flex-row gap-2 items-center">
-                    <span className="text-sm">Adicionar:</span>
                     <Button variant="outline" size="icon">
                         <ShoppingCart size={16} />
                     </Button>

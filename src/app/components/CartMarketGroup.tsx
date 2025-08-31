@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Checkbox } from "@/components/ui/checkbox";
 import { getMarketById, Product } from "@/lib/mock-data";
 import ProductCard from "./ProductCard";
 
@@ -33,8 +32,7 @@ export default function CartMarketGroup({
             >
                 <AccordionItem value="item-1" className="flex flex-col justify-between">
                     <div className="flex flex-row justify-between p-4 gap-4 items-center">
-                        <div className="grid grid-cols-[auto_1fr_auto] gap-2 items-center w-full">
-                            <Checkbox />
+                        <div className="grid grid-cols-[1fr_auto] gap-2 items-center w-full">
                             <div className="flex flex-row gap-2 items-center">
                                 <Avatar>
                                     <AvatarImage src="https://github.com/shadcn.png" />
