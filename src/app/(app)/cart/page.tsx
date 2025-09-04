@@ -87,10 +87,13 @@ export default async function Cart() {
                                             <div className="flex flex-col">
                                                 {cartItems.map((item) => {
                                                     return (
-                                                        <div key={item.id} className="grid grid-cols-6">
-                                                            <span className="text-sm col-span-1">{item.quantity}</span>
-                                                            <span className="text-sm col-span-4">{item.name}</span>
-                                                            <span className="text-sm col-span-1">{formatPrice(item.price * item.quantity)}</span>
+                                                        <div key={item.id} className="grid grid-cols-8">
+                                                            <div className="flex col-span-2 gap-2">
+                                                                <span className="text-sm">{item.quantity}</span>
+                                                                <span className="text-sm">{item.unit}</span>
+                                                            </div>
+                                                            <span className="text-sm col-span-4 ">{item.name}</span>
+                                                            <span className="text-sm col-span-2">{formatPrice(item.price * item.quantity)}</span>
                                                         </div>
                                                     )
                                                 })}

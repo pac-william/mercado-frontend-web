@@ -27,6 +27,7 @@ export interface Product {
     description: string;
     price: number;
     originalPrice?: number;
+    unit: string;
     category: string;
     brand: string;
     weight?: string;
@@ -119,60 +120,65 @@ export const products: Product[] = [
         name: 'Banana Prata (kg)',
         description: 'Banana prata fresca e madura, ideal para consumo imediato',
         price: 4.99,
+        unit: 'kg',
         category: 'Frutas e Verduras',
         brand: 'Produtor Local',
         weight: '1kg',
         stock: 50,
         marketId: '1',
-        images: ['banana1.jpg', 'banana2.jpg']
+        images: ['https://picsum.photos/256/256?random=1', 'https://picsum.photos/256/256?random=2']
     },
     {
         id: '2',
         name: 'Maçã Gala (kg)',
         description: 'Maçã gala crocante e suculenta, rica em fibras',
         price: 6.99,
+        unit: 'kg',
         category: 'Frutas e Verduras',
         brand: 'Produtor Local',
         weight: '1kg',
         stock: 30,
         marketId: '1',
-        images: ['maca1.jpg', 'maca2.jpg']
+        images: ['https://picsum.photos/256/256?random=3', 'https://picsum.photos/256/256?random=4']
     },
     {
         id: '3',
         name: 'Alface Crespa',
         description: 'Alface crespa fresca e crocante, perfeita para saladas',
         price: 2.49,
+        unit: 'unidade',
         category: 'Frutas e Verduras',
         brand: 'Produtor Local',
         weight: '1 unidade',
         stock: 25,
         marketId: '2',
-        images: ['alface1.jpg']
+        images: ['https://picsum.photos/256/256?random=5']
     },
     {
         id: '4',
         name: 'Tomate Cereja (bandeja)',
         description: 'Tomate cereja doce e saboroso, ideal para saladas',
         price: 8.99,
+        unit: 'bandeja',
         category: 'Frutas e Verduras',
         brand: 'Produtor Local',
         weight: '300g',
         stock: 20,
         marketId: '2',
-        images: ['tomate1.jpg', 'tomate2.jpg']
+        images: ['https://picsum.photos/256/256?random=6', 'https://picsum.photos/256/256?random=7']
     },
     {
         id: '5',
         name: 'Cenoura (kg)',
         description: 'Cenoura fresca e crocante, rica em vitamina A',
         price: 3.99,
+        unit: 'kg',
         category: 'Frutas e Verduras',
         brand: 'Produtor Local',
         weight: '1kg',
         stock: 40,
         marketId: '3',
-        images: ['cenoura1.jpg']
+        images: ['https://picsum.photos/256/256?random=8']
     },
 
     // Carnes e Frios
@@ -181,60 +187,65 @@ export const products: Product[] = [
         name: 'Carne Bovina (kg)',
         description: 'Carne bovina de primeira qualidade, macia e saborosa',
         price: 29.99,
+        unit: 'kg',
         category: 'Carnes e Frios',
         brand: 'Frigorífico Premium',
         weight: '1kg',
         stock: 15,
         marketId: '1',
-        images: ['carne1.jpg', 'carne2.jpg']
+        images: ['https://picsum.photos/256/256?random=9', 'https://picsum.photos/256/256?random=10']
     },
     {
         id: '7',
         name: 'Frango Inteiro (kg)',
         description: 'Frango inteiro fresco, ideal para assar ou cozinhar',
         price: 12.99,
+        unit: 'kg',
         category: 'Carnes e Frios',
         brand: 'Granja São Pedro',
         weight: '1kg',
         stock: 25,
         marketId: '1',
-        images: ['frango1.jpg']
+        images: ['https://picsum.photos/256/256?random=11']
     },
     {
         id: '8',
         name: 'Presunto Fatiado (200g)',
         description: 'Presunto fatiado fino, perfeito para sanduíches',
         price: 7.99,
+        unit: '200g',
         category: 'Carnes e Frios',
         brand: 'Sadia',
         weight: '200g',
         stock: 30,
         marketId: '2',
-        images: ['presunto1.jpg']
+        images: ['https://picsum.photos/256/256?random=12']
     },
     {
         id: '9',
         name: 'Queijo Mussarela (500g)',
         description: 'Queijo mussarela derretido, ideal para pizzas',
         price: 15.99,
+        unit: '500g',
         category: 'Carnes e Frios',
         brand: 'Itambé',
         weight: '500g',
         stock: 20,
         marketId: '3',
-        images: ['queijo1.jpg', 'queijo2.jpg']
+        images: ['https://picsum.photos/256/256?random=13', 'https://picsum.photos/256/256?random=14']
     },
     {
         id: '10',
         name: 'Salsicha (500g)',
         description: 'Salsicha tradicional, perfeita para cachorro-quente',
         price: 9.99,
+        unit: '500g',
         category: 'Carnes e Frios',
         brand: 'Perdigão',
         weight: '500g',
         stock: 35,
         marketId: '4',
-        images: ['salsicha1.jpg']
+        images: ['https://picsum.photos/256/256?random=15']
     },
 
     // Laticínios
@@ -243,36 +254,39 @@ export const products: Product[] = [
         name: 'Leite Integral (1L)',
         description: 'Leite integral fresco e nutritivo',
         price: 4.99,
+        unit: '1L',
         category: 'Laticínios',
         brand: 'Itambé',
         weight: '1L',
         stock: 40,
         marketId: '1',
-        images: ['leite1.jpg']
+        images: ['https://picsum.photos/256/256?random=16']
     },
     {
         id: '12',
         name: 'Iogurte Natural (170g)',
         description: 'Iogurte natural sem açúcar, rico em probióticos',
         price: 3.99,
+        unit: '170g',
         category: 'Laticínios',
         brand: 'Danone',
         weight: '170g',
         stock: 50,
         marketId: '2',
-        images: ['iogurte1.jpg']
+        images: ['https://picsum.photos/256/256?random=17']
     },
     {
         id: '13',
         name: 'Manteiga (200g)',
         description: 'Manteiga sem sal, ideal para culinária',
         price: 8.99,
+        unit: '200g',
         category: 'Laticínios',
         brand: 'Aviação',
         weight: '200g',
         stock: 25,
         marketId: '3',
-        images: ['manteiga1.jpg']
+        images: ['https://picsum.photos/256/256?random=18'] 
     },
 
     // Grãos e Cereais
@@ -281,36 +295,39 @@ export const products: Product[] = [
         name: 'Arroz Branco (5kg)',
         description: 'Arroz branco tipo 1, grãos longos e soltos',
         price: 22.99,
+        unit: '5kg',
         category: 'Grãos e Cereais',
         brand: 'Camil',
         weight: '5kg',
         stock: 30,
         marketId: '1',
-        images: ['arroz1.jpg']
+        images: ['https://picsum.photos/256/256?random=18']
     },
     {
         id: '15',
         name: 'Feijão Carioca (1kg)',
         description: 'Feijão carioca de qualidade, rico em proteínas',
         price: 6.99,
+        unit: '1kg',
         category: 'Grãos e Cereais',
         brand: 'Camil',
         weight: '1kg',
         stock: 45,
         marketId: '2',
-        images: ['feijao1.jpg']
+        images: ['https://picsum.photos/256/256?random=19']
     },
     {
         id: '16',
         name: 'Aveia em Flocos (500g)',
         description: 'Aveia em flocos finos, rica em fibras',
         price: 5.99,
+        unit: '500g',
         category: 'Grãos e Cereais',
         brand: 'Quaker',
         weight: '500g',
         stock: 35,
         marketId: '3',
-        images: ['aveia1.jpg']
+        images: ['https://picsum.photos/256/256?random=20']
     },
 
     // Bebidas
@@ -319,36 +336,39 @@ export const products: Product[] = [
         name: 'Refrigerante Coca-Cola (2L)',
         description: 'Refrigerante Coca-Cola original, 2 litros',
         price: 8.99,
+        unit: '2L',
         category: 'Bebidas',
         brand: 'Coca-Cola',
         weight: '2L',
         stock: 60,
         marketId: '1',
-        images: ['coca1.jpg', 'coca2.jpg']
+        images: ['https://picsum.photos/256/256?random=21', 'https://picsum.photos/256/256?random=22']
     },
     {
         id: '18',
         name: 'Suco de Laranja (1L)',
         description: 'Suco de laranja natural, sem conservantes',
         price: 6.99,
+        unit: '1L',
         category: 'Bebidas',
         brand: 'Del Valle',
         weight: '1L',
         stock: 30,
         marketId: '2',
-        images: ['suco1.jpg']
+        images: ['https://picsum.photos/256/256?random=23']
     },
     {
         id: '19',
         name: 'Água Mineral (500ml)',
         description: 'Água mineral natural, garrafa de 500ml',
         price: 2.49,
+        unit: '500ml',
         category: 'Bebidas',
         brand: 'Crystal',
         weight: '500ml',
         stock: 100,
         marketId: '4',
-        images: ['agua1.jpg']
+        images: ['https://picsum.photos/256/256?random=24']
     },
 
     // Limpeza
@@ -357,36 +377,39 @@ export const products: Product[] = [
         name: 'Detergente Líquido (500ml)',
         description: 'Detergente líquido para louças, remove gordura',
         price: 4.99,
+        unit: '500ml',
         category: 'Limpeza',
         brand: 'Ypê',
         weight: '500ml',
         stock: 40,
         marketId: '1',
-        images: ['detergente1.jpg']
+        images: ['https://picsum.photos/256/256?random=25']
     },
     {
         id: '21',
         name: 'Sabão em Pó (1kg)',
         description: 'Sabão em pó para roupas, remove manchas',
         price: 12.99,
+        unit: '1kg',
         category: 'Limpeza',
         brand: 'Omo',
         weight: '1kg',
         stock: 25,
         marketId: '2',
-        images: ['sabao1.jpg']
+        images: ['https://picsum.photos/256/256?random=26']
     },
     {
         id: '22',
         name: 'Papel Higiênico (30m)',
         description: 'Papel higiênico macio, 30 metros',
         price: 6.99,
+        unit: '30m',
         category: 'Limpeza',
         brand: 'Neve',
         weight: '30m',
         stock: 50,
         marketId: '3',
-        images: ['papel1.jpg']
+        images: ['https://picsum.photos/256/256?random=27']
     },
 
     // Higiene Pessoal
@@ -395,36 +418,39 @@ export const products: Product[] = [
         name: 'Shampoo (400ml)',
         description: 'Shampoo para todos os tipos de cabelo',
         price: 15.99,
+        unit: '400ml',
         category: 'Higiene Pessoal',
         brand: 'Head & Shoulders',
         weight: '400ml',
         stock: 30,
         marketId: '1',
-        images: ['shampoo1.jpg']
+        images: ['https://picsum.photos/256/256?random=28']
     },
     {
         id: '24',
         name: 'Escova de Dentes',
         description: 'Escova de dentes com cerdas macias',
         price: 8.99,
+        unit: '1 unidade',
         category: 'Higiene Pessoal',
         brand: 'Colgate',
         weight: '1 unidade',
         stock: 45,
         marketId: '2',
-        images: ['escova1.jpg']
+        images: ['https://picsum.photos/256/256?random=29']
     },
     {
         id: '25',
         name: 'Desodorante (150ml)',
         description: 'Desodorante antitranspirante, 48h de proteção',
         price: 12.99,
+        unit: '150ml',
         category: 'Higiene Pessoal',
         brand: 'Rexona',
         weight: '150ml',
         stock: 35,
         marketId: '4',
-        images: ['desodorante1.jpg']
+        images: ['https://picsum.photos/256/256?random=30']
     },
 
     // Congelados
@@ -433,24 +459,26 @@ export const products: Product[] = [
         name: 'Pizza Margherita (400g)',
         description: 'Pizza margherita congelada, massa fina',
         price: 18.99,
+        unit: '400g',
         category: 'Congelados',
         brand: 'Sadia',
         weight: '400g',
         stock: 20,
         marketId: '1',
-        images: ['pizza1.jpg']
+        images: ['https://picsum.photos/256/256?random=31']
     },
     {
         id: '27',
         name: 'Hambúrguer (400g)',
         description: 'Hambúrguer de carne bovina, 4 unidades',
         price: 16.99,
+        unit: '400g',
         category: 'Congelados',
         brand: 'Seara',
         weight: '400g',
         stock: 30,
         marketId: '3',
-        images: ['hamburguer1.jpg']
+        images: ['https://picsum.photos/256/256?random=32']
     },
 
     // Enlatados
@@ -459,24 +487,26 @@ export const products: Product[] = [
         name: 'Atum em Conserva (170g)',
         description: 'Atum em conserva de óleo, rico em ômega-3',
         price: 7.99,
+        unit: '170g',
         category: 'Enlatados',
         brand: 'Gomes da Costa',
         weight: '170g',
         stock: 40,
         marketId: '2',
-        images: ['atum1.jpg']
+        images: ['https://picsum.photos/256/256?random=33']
     },
     {
         id: '29',
         name: 'Milho Verde (170g)',
         description: 'Milho verde em conserva, doce e crocante',
         price: 4.99,
+        unit: '170g',
         category: 'Enlatados',
         brand: 'Quero',
         weight: '170g',
         stock: 35,
         marketId: '3',
-        images: ['milho1.jpg']
+        images: ['https://picsum.photos/256/256?random=34']
     },
 
     // Padaria
@@ -485,24 +515,26 @@ export const products: Product[] = [
         name: 'Pão Francês (500g)',
         description: 'Pão francês fresco, crocante por fora e macio por dentro',
         price: 3.99,
+        unit: '500g',
         category: 'Padaria',
         brand: 'Padaria Local',
         weight: '500g',
         stock: 60,
         marketId: '5',
-        images: ['pao1.jpg']
+        images: ['https://picsum.photos/256/256?random=35']
     },
     {
         id: '31',
         name: 'Bolo de Chocolate (400g)',
         description: 'Bolo de chocolate caseiro, fofinho e saboroso',
         price: 12.99,
+        unit: '400g',
         category: 'Padaria',
         brand: 'Padaria Local',
         weight: '400g',
         stock: 15,
         marketId: '5',
-        images: ['bolo1.jpg']
+        images: ['https://picsum.photos/256/256?random=36']
     }
 ];
 

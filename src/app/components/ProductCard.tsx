@@ -23,7 +23,7 @@ export default function ProductCard({ market, product }: ProductCardProps) {
     };
 
     return (
-        <Card className="flex flex-col">
+        <Card className="flex flex-col max-w-xs">
             <CardHeader className="flex flex-row gap-2">
                 <Image src={market.profilePicture} alt="Product" width={100} height={100} className="object-cover rounded-full w-16 h-16 shadow-md border" />
                 <div className="bg-white rounded-full flex flex-col gap-2">
@@ -44,10 +44,10 @@ export default function ProductCard({ market, product }: ProductCardProps) {
             <Separator />
 
             <CardContent className="p-0 relative w-full aspect-square">
-                <Image src={`https://picsum.photos/256/256?random=${product.id}`} alt="Product" fill className="object-cover" />
+                <Image src={product.images[0] ? product.images[0] : "https://picsum.photos/256/256?random=1"} alt="Product" fill className="object-cover" />
             </CardContent>
 
-            <CardFooter className="flex flex-col gap-2 items-start">
+            <CardFooter className="flex flex-col flex-1 gap-2 items-start">
                 <p className="text-sm">{product.description}</p>
                 <div className="grid grid-cols-[auto_1fr] items-center w-full">
                     <p>De</p>
