@@ -3,9 +3,21 @@
 import { Product } from "@/app/domain/product";
 import { baseUrl } from "@/config/server";
 import { ProductDTO } from "@/dtos/productDTO";
+import { buildSearchParams } from "@/lib/misc";
 
-export const getProducts = async () => {
-    const response = await fetch(`${baseUrl}/api/v1/products`)
+interface GetPaymentsFilters {
+    page?: number;
+    size?: number;
+}
+
+
+export const getProducts = async (filters?: GetPaymentsFilters) => {
+    const params = buildSearchParams({
+        page: filters?.page,
+        size: filters?.size,
+    });
+    
+    const response = await fetch(`${baseUrl}/api/v1/products?${params.toString()}`)
     const data = await response.json() as Product[]
     return data
 }
