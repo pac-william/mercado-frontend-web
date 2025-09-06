@@ -63,9 +63,10 @@ export default function CartMarketGroup({
                             <CarouselContent className="flex flex-1">
                                 {products.slice(0, 15).map((product) => {
                                     return (
-                                        <CarouselItem key={product.id} className="max-w-[320px] min-w-[320px] basis-1/4">
+                                        <CarouselItem key={product.id} className="max-w-[260px] min-w-[260px] basis-1/4">
                                             <ProductCard
                                                 product={product}
+                                                variant="history"
                                             />
                                         </CarouselItem>
                                     )

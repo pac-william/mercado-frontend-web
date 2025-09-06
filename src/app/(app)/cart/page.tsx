@@ -64,20 +64,21 @@ export default async function Cart() {
                     </Carousel>
                     <div className="flex flex-1 flex-row gap-4">
                         <div className="flex flex-1 flex-col gap-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                                 {
                                     products.map((product) => {
                                         return (
                                             <ProductCard
                                                 key={product.id}
                                                 product={product}
+                                                variant="quantity-select"
                                             />
                                         );
                                     })
                                 }
                             </div>
                         </div>
-                        <div className="w-[400px] h-[calc(100vh-113px)] sticky top-4">
+                        <div className="w-[380px] h-[calc(100vh-113px)] sticky top-4">
                             <div className="flex flex-col gap-4 h-full">
                                 <SelectMethod />
                                 <Card className="flex flex-col flex-1">
@@ -87,12 +88,12 @@ export default async function Cart() {
                                             <div className="flex flex-col">
                                                 {cartItems.map((item) => {
                                                     return (
-                                                        <div key={item.id} className="grid grid-cols-8">
+                                                        <div key={item.id} className="grid grid-cols-8 gap-2">
                                                             <div className="flex col-span-2 gap-2">
                                                                 <span className="text-sm">{item.quantity}</span>
-                                                                <span className="text-sm">{}</span>
+                                                                <span className="text-sm">un</span>
                                                             </div>
-                                                            <span className="text-sm col-span-4 ">{item.name}</span>
+                                                            <span className="text-sm col-span-4 truncate text-nowrap">{item.name}</span>
                                                             <span className="text-sm col-span-2">{formatPrice(item.price * item.quantity)}</span>
                                                         </div>
                                                     )

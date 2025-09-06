@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-    const products = await getProducts();
+    const products = await getProducts({ page: 1, size: 20 });
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 items-center my-4">
@@ -173,14 +173,14 @@ export default async function Home() {
                             </CardContent>
                         </Card>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 flex-1">
                         {
                             products.map((product) => {
                                 return (
-                                        <ProductCard
-                                            key={product.id}
-                                            product={product}
-                                        />
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                    />
                                 );
                             })
                         }
