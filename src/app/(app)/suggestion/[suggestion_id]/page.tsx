@@ -1,9 +1,9 @@
+import { getProducts } from "@/actions/products.actions";
 import ProductCard from "@/app/components/ProductCard";
 import SearchBar from "@/app/components/SearchBar";
 import RouterBack from "@/components/RouterBack";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getMarketById, products } from "@/lib/mock-data";
 import { ShoppingCart } from "lucide-react";
 import "moment/locale/pt-br";
 import { Metadata } from "next";
@@ -17,8 +17,7 @@ export const metadata: Metadata = {
 
 export default async function AgentPage({ params }: { params: Promise<{ suggestion_id: string }> }) {
     const { suggestion_id } = await params;
-
-    console.log(suggestion_id);
+    const products = await getProducts();
 
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
@@ -38,11 +37,9 @@ export default async function AgentPage({ params }: { params: Promise<{ suggesti
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 container mx-auto">
                 {
                     products.slice(0, 4).map((product) => {
-                        const market = getMarketById(product.marketId);
                         return (
                             <ProductCard
                                 key={product.id}
-                                market={market!}
                                 product={product}
                             />
                         );
@@ -55,11 +52,9 @@ export default async function AgentPage({ params }: { params: Promise<{ suggesti
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 container mx-auto">
                 {
                     products.slice(0, 3).map((product) => {
-                        const market = getMarketById(product.marketId);
                         return (
                             <ProductCard
                                 key={product.id}
-                                market={market!}
                                 product={product}
                             />
                         );
@@ -72,11 +67,9 @@ export default async function AgentPage({ params }: { params: Promise<{ suggesti
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 container mx-auto">
                 {
                     products.slice(0, 5).map((product) => {
-                        const market = getMarketById(product.marketId);
                         return (
                             <ProductCard
                                 key={product.id}
-                                market={market!}
                                 product={product}
                             />
                         );
@@ -89,11 +82,9 @@ export default async function AgentPage({ params }: { params: Promise<{ suggesti
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 container mx-auto">
                 {
                     products.slice(0, 2).map((product) => {
-                        const market = getMarketById(product.marketId);
                         return (
                             <ProductCard
                                 key={product.id}
-                                market={market!}
                                 product={product}
                             />
                         );

@@ -1,10 +1,10 @@
+import { getProducts } from "@/actions/products.actions";
 import PriceSlider from "@/components/price-slider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { getMarketById, products } from "@/lib/mock-data";
 import { Metadata } from "next";
 import HeroSection from "../components/HeroSection";
 import ProductCard from "../components/ProductCard";
@@ -16,7 +16,8 @@ export const metadata: Metadata = {
     description: 'Compre produtos de qualidade com preços acessíveis',
 }
 
-export default function Home() {
+export default async function Home() {
+    const products = await getProducts();
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 items-center my-4">
@@ -24,7 +25,7 @@ export default function Home() {
                 <div className="flex flex-col gap-4 items-center justify-center h-64">
                     <SearchBar />
                 </div>
-                <div className="flex flex-1 gap-4">
+                <div className="flex flex-1 gap-4 container mx-auto">
                     <div className="w-[300px] h-[calc(100vh-113px)] sticky top-4">
                         <Card className="flex flex-col h-full">
                             <CardHeader>
@@ -172,16 +173,14 @@ export default function Home() {
                             </CardContent>
                         </Card>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 container mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                         {
                             products.map((product) => {
-                                const market = getMarketById(product.marketId);
                                 return (
-                                    <ProductCard
-                                        key={product.id}
-                                        market={market!}
-                                        product={product}
-                                    />
+                                        <ProductCard
+                                            key={product.id}
+                                            product={product}
+                                        />
                                 );
                             })
                         }

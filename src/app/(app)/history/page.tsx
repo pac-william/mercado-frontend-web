@@ -1,7 +1,7 @@
+import { getProducts } from "@/actions/products.actions";
 import CartMarketGroup from "@/app/components/CartMarketGroup";
 import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { products } from "@/lib/mock-data";
 import moment from "moment";
 import "moment/locale/pt-br";
 import { Metadata } from "next";
@@ -11,7 +11,9 @@ export const metadata: Metadata = {
     description: 'Veja seu histórico de compras',
 }
 
-export default function History() {
+export default async function History() {
+    const products = await getProducts();
+    
     const history = Array.from({ length: 3 }).map(() => ({
         date: new Date(2025, 7, 29),
         products: products

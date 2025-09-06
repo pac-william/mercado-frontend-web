@@ -1,3 +1,4 @@
+import { Product } from "@/app/domain/product";
 import {
     Accordion,
     AccordionContent,
@@ -8,7 +9,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { getMarketById, Product } from "@/lib/mock-data";
 import ProductCard from "./ProductCard";
 
 interface CartMarketGroupProps {
@@ -62,11 +62,9 @@ export default function CartMarketGroup({
                         <Carousel className="w-full">
                             <CarouselContent className="flex flex-1">
                                 {products.slice(0, 15).map((product) => {
-                                    const market = getMarketById(product.marketId);
                                     return (
                                         <CarouselItem key={product.id} className="max-w-[320px] min-w-[320px] basis-1/4">
                                             <ProductCard
-                                                market={market}
                                                 product={product}
                                             />
                                         </CarouselItem>

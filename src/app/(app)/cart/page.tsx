@@ -1,3 +1,4 @@
+import { getMarkets } from "@/actions/market.actions";
 import { getProducts } from "@/actions/products.actions";
 import ProductCard from "@/app/components/ProductCard";
 import { formatPrice } from "@/app/utils/formatters";
@@ -8,7 +9,6 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { getMarketById, markets } from "@/lib/mock-data";
 import { Metadata } from "next";
 import SelectMethod from "./components/SelectMethod";
 
@@ -32,6 +32,8 @@ export default async function Cart() {
     const discount = subtotal * discountPercentage;
     const total = subtotal - discount + deliveryFee;
 
+    const markets = await getMarkets();
+    
     return (
         <div className="flex flex-col flex-1">
             <ScrollArea className="flex flex-col flex-grow h-0">
@@ -45,13 +47,13 @@ export default async function Cart() {
                                     <CarouselItem key={market.id} className="max-w-[320px] min-w-[320px] basis-1/4">
                                         <Card className="flex flex-1 flex-row gap-2 p-4 shadow-none">
                                             <Avatar className="w-10 h-10 shadow-md">
-                                                <AvatarImage src={market.profilePicture} alt={market.name} width={100} height={100} className="rounded-full" />
+                                                <AvatarImage src={market.logo} alt={market.name} width={100} height={100} className="rounded-full" />
                                                 <AvatarFallback>{market.name.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex flex-col">
                                                 <span>{market.name}</span>
-                                                <span className="text-sm text-muted-foreground">Total: {formatPrice(market.deliveryFee)}</span>
-                                                <span className="text-sm text-muted-foreground">Distância: {market.distance.toFixed(2)}km</span>
+                                                <span className="text-sm text-muted-foreground">Total: {formatPrice(0)}</span>
+                                                <span className="text-sm text-muted-foreground">Distância: {0}km</span>
 
                                             </div>
                                         </Card>
@@ -65,11 +67,9 @@ export default async function Cart() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 {
                                     products.map((product) => {
-                                        const market = getMarketById(product.marketId);
                                         return (
                                             <ProductCard
                                                 key={product.id}
-                                                market={market!}
                                                 product={product}
                                             />
                                         );
@@ -90,7 +90,7 @@ export default async function Cart() {
                                                         <div key={item.id} className="grid grid-cols-8">
                                                             <div className="flex col-span-2 gap-2">
                                                                 <span className="text-sm">{item.quantity}</span>
-                                                                <span className="text-sm">{item.unit}</span>
+                                                                <span className="text-sm">{}</span>
                                                             </div>
                                                             <span className="text-sm col-span-4 ">{item.name}</span>
                                                             <span className="text-sm col-span-2">{formatPrice(item.price * item.quantity)}</span>
