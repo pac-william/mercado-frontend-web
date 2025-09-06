@@ -1,12 +1,12 @@
 "use server"
 
-import { Market } from "@/app/domain/market"
+import { Market, MarketPaginatedResponse } from "@/app/domain/marketDomain"
 import { baseUrl } from "@/config/server"
 import { MarketDTO } from "@/dtos/marketDTO"
 
 export const getMarkets = async () => {
     const response = await fetch(`${baseUrl}/api/v1/markets`)
-    const data = await response.json() as Market[]
+    const data = await response.json() as MarketPaginatedResponse
     return data
 }
 

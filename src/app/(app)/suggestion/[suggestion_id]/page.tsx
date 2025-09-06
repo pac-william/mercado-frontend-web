@@ -1,6 +1,5 @@
 import { getProducts } from "@/actions/products.actions";
 import ProductCard from "@/app/components/ProductCard";
-import SearchBar from "@/app/components/SearchBar";
 import RouterBack from "@/components/RouterBack";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,22 +16,19 @@ export const metadata: Metadata = {
 
 export default async function AgentPage({ params }: { params: Promise<{ suggestion_id: string }> }) {
     const { suggestion_id } = await params;
-    const products = await getProducts();
+    const { products } = await getProducts();
 
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="container mx-auto my-4">
                 <RouterBack />
             </div>
-            <div className="flex flex-col gap-4 items-center justify-center h-64">
-                <SearchBar />
-            </div>
+            {/* <div className="flex flex-col gap-4 items-center justify-center h-64">
+                <SearchAiBar />
+            </div> */}
             <div className="flex flex-col gap-4 container mx-auto my-4">
                 <h1 className="text-2xl font-bold">Planejando seu churrasco para 5 pessoas</h1>
                 <p>Em um churrasco, geralmente calcula-se cerca de 300 a 400g de carne por pessoa, além de acompanhamentos e bebidas. Para 5 pessoas, isso significa aproximadamente 2kg de carne. Também é importante considerar acompanhamentos clássicos, carvão suficiente para manter a brasa acesa durante toda a refeição, e bebidas para refrescar os convidados.</p>
-
-
-
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 container mx-auto">
                 {

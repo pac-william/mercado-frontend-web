@@ -1,9 +1,9 @@
 "use client"
 
 import { createProduct } from "@/actions/products.actions";
-import { Market } from "@/app/domain/market";
-import CropperZoomSlider from "@/components/CropperZoomSlider";
-import SingleImageUploader from "@/components/SingleImageUploader";
+import { Market } from "@/app/domain/marketDomain";
+import CropperZoomSlider from "@/components/cropper-zoom-slider";
+import SingleImageUploader from "@/components/single-image-uploader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";

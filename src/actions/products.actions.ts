@@ -1,6 +1,6 @@
 "use server"
 
-import { Product } from "@/app/domain/product";
+import { Product, ProductPaginatedResponse } from "@/app/domain/productDomain";
 import { baseUrl } from "@/config/server";
 import { ProductDTO } from "@/dtos/productDTO";
 import { buildSearchParams } from "@/lib/misc";
@@ -8,6 +8,7 @@ import { buildSearchParams } from "@/lib/misc";
 interface GetPaymentsFilters {
     page?: number;
     size?: number;
+    name?: string;
 }
 
 
@@ -15,10 +16,11 @@ export const getProducts = async (filters?: GetPaymentsFilters) => {
     const params = buildSearchParams({
         page: filters?.page,
         size: filters?.size,
+        name: filters?.name,
     });
     
     const response = await fetch(`${baseUrl}/api/v1/products?${params.toString()}`)
-    const data = await response.json() as Product[]
+    const data = await response.json() as ProductPaginatedResponse
     return data
 }
 export const createProduct = async (product: ProductDTO) => {

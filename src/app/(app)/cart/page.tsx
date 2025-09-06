@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 }
 
 export default async function Cart() {
-    const products = await getProducts();
+    const { products } = await getProducts();
 
     const deliveryFee = 10;
     const discountPercentage = 0.05;
@@ -32,8 +32,8 @@ export default async function Cart() {
     const discount = subtotal * discountPercentage;
     const total = subtotal - discount + deliveryFee;
 
-    const markets = await getMarkets();
-    
+    const { markets } = await getMarkets();
+
     return (
         <div className="flex flex-col flex-1">
             <ScrollArea className="flex flex-col flex-grow h-0">

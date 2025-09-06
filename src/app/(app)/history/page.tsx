@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default async function History() {
     const products = await getProducts();
-    
+
     const history = Array.from({ length: 3 }).map(() => ({
         date: new Date(2025, 7, 29),
         products: products

@@ -12,7 +12,7 @@ import { Edit2, ShoppingCart, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { ProductCreateForm } from "../admin/products/create/components/ProductCreateForm";
-import { Product } from "../domain/product";
+import { Product } from "../domain/productDomain";
 import { formatPrice } from "../utils/formatters";
 
 interface ProductCardProps {
@@ -23,7 +23,6 @@ interface ProductCardProps {
 export default function ProductCard({ product, variant = "buy-now" }: ProductCardProps) {
 
     const getImageSrc = () => {
-        console.log(product.image);
 
         if (product.image && isValidUrl(product.image)) {
             return product.image;
@@ -47,6 +46,26 @@ export default function ProductCard({ product, variant = "buy-now" }: ProductCar
                 <p className={`mt-[2px] mr-[2px] ${type === "old" ? "text-muted-foreground line-through text-sm font-normal" : "text-lg font-bold"}`}>{formatPrice(price)}</p>
             </div>
         );
+    };
+
+    // Deterministic function to determine if product should show discount
+    const shouldShowDiscount = (productId: string) => {
+        // Use product ID to create a deterministic "random" value
+        const hash = productId.split('').reduce((a, b) => {
+            a = ((a << 5) - a) + b.charCodeAt(0);
+            return a & a;
+        }, 0);
+        return Math.abs(hash) % 2 === 0;
+    };
+
+    // Deterministic function to calculate discount price
+    const getDiscountPrice = (price: number, productId: string) => {
+        const hash = productId.split('').reduce((a, b) => {
+            a = ((a << 5) - a) + b.charCodeAt(0);
+            return a & a;
+        }, 0);
+        const multiplier = 1.1 + (Math.abs(hash) % 50) / 100; // Between 1.1 and 1.6
+        return price * multiplier;
     };
 
     const addToCart = () => {
@@ -87,11 +106,11 @@ export default function ProductCard({ product, variant = "buy-now" }: ProductCar
                         <p className="text-sm line-clamp-2">{product.name}</p>
                         <div className="grid grid-cols-[auto_1fr] items-center w-full">
                             {
-                                Math.random() < 0.5 ? (
+                                shouldShowDiscount(product.id) ? (
                                     <>
                                         <p>De</p>
                                         <div className="flex flex-row items-center ml-2">
-                                            {mountPriceView(product.price, "old")}
+                                            {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
                                         </div>
                                         <p>Por</p>
                                     </>
@@ -145,11 +164,11 @@ export default function ProductCard({ product, variant = "buy-now" }: ProductCar
                         <div className="flex flex-row w-full justify-between mt-auto">
                             <div className="grid grid-cols-[auto_1fr] items-center w-full">
                                 {
-                                    Math.random() < 0.5 ? (
+                                    shouldShowDiscount(product.id) ? (
                                         <>
                                             <p>De</p>
                                             <div className="flex flex-row items-center ml-2">
-                                                {mountPriceView(product.price * (Math.random() * 0.6 + 1.2), "old")}
+                                                {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
                                             </div>
                                             <p>Por</p>
                                         </>
@@ -249,20 +268,16 @@ export default function ProductCard({ product, variant = "buy-now" }: ProductCar
                         <div className="flex flex-row w-full justify-between mt-auto">
                             <div className="grid grid-cols-[auto_1fr] items-center w-full">
                                 {
-                                    Math.random() < 0.5 ? (
+                                    shouldShowDiscount(product.id) ? (
                                         <>
                                             <p>De</p>
                                             <div className="flex flex-row items-center ml-2">
-                                                {mountPriceView(product.price, "old")}
+                                                {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
                                             </div>
                                             <p>Por</p>
                                         </>
                                     ) : null
                                 }
-                                <div className="flex flex-row items-center ml-2">
-                                    {mountPriceView(product.price, "new")}
-                                </div>
-                                <p>Por</p>
                                 <div className="flex flex-row items-center ml-2">
                                     {mountPriceView(product.price, "new")}
                                 </div>
@@ -284,11 +299,11 @@ export default function ProductCard({ product, variant = "buy-now" }: ProductCar
                         <div className="flex flex-row w-full justify-between mt-auto">
                             <div className="grid grid-cols-[auto_1fr] items-center w-full">
                                 {
-                                    Math.random() < 0.5 ? (
+                                    shouldShowDiscount(product.id) ? (
                                         <>
                                             <p>De</p>
                                             <div className="flex flex-row items-center ml-2">
-                                                {mountPriceView(product.price * (Math.random() * 0.6 + 1.2), "old")}
+                                                {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
                                             </div>
                                             <p>Por</p>
                                         </>

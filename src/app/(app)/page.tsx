@@ -1,4 +1,5 @@
 import { getProducts } from "@/actions/products.actions";
+import Pagination from "@/app/components/Pagination";
 import PriceSlider from "@/components/price-slider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,7 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
 import HeroSection from "../components/HeroSection";
 import ProductCard from "../components/ProductCard";
-import SearchBar from "../components/SearchBar";
+import SearchAiBar from "../components/SearchBar";
+import TopFilters from "./components/TopFilters";
 
 
 export const metadata: Metadata = {
@@ -16,17 +18,18 @@ export const metadata: Metadata = {
     description: 'Compre produtos de qualidade com preços acessíveis',
 }
 
-export default async function Home() {
-    const products = await getProducts({ page: 1, size: 20 });
+export default async function Home({ searchParams }: { searchParams: Promise<{ page: number, size: number, name: string }> }) {
+    const { page, size, name } = await searchParams;
+    const { products, meta } = await getProducts({ page: page || 1, size: size || 100, name: name });
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 items-center my-4">
                 <HeroSection />
                 <div className="flex flex-col gap-4 items-center justify-center h-64">
-                    <SearchBar />
+                    <SearchAiBar />
                 </div>
                 <div className="flex flex-1 gap-4 container mx-auto">
-                    <div className="w-[300px] h-[calc(100vh-113px)] sticky top-4">
+                    <div className="w-[320px] h-[calc(100vh-113px)] sticky top-4">
                         <Card className="flex flex-col h-full">
                             <CardHeader>
                                 <CardTitle>Filtros</CardTitle>
@@ -173,17 +176,33 @@ export default async function Home() {
                             </CardContent>
                         </Card>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 flex-1">
+                    <div className="flex flex-col flex-1 gap-4">
+                        <TopFilters />
                         {
-                            products.map((product) => {
-                                return (
-                                    <ProductCard
-                                        key={product.id}
-                                        product={product}
-                                    />
-                                );
-                            })
+                            products.length > 0 ? (
+                                <>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 flex-1">
+                                        {products.map((product) => {
+                                            return (
+                                                <div key={product.id}>
+                                                    <ProductCard
+                                                        product={product}
+                                                    />
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <Card className="p-4">
+                                        <Pagination meta={meta} />
+                                    </Card>
+                                </>
+                            ) : (
+                                <div className="flex flex-col gap-4 items-center justify-center">
+                                    <h1 className="text-2xl font-bold text-nowrap">Nenhum produto encontrado</h1>
+                                </div>
+                            )
                         }
+
                     </div>
                 </div>
             </div>
