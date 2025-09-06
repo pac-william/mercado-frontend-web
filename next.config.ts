@@ -7,7 +7,20 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "picsum.photos",
       },
+      {
+        protocol: "https",
+        hostname: "http2.mlstatic.com",
+      },
+      {
+        protocol: "https",
+        hostname: "ibassets.com.br",
+      }
     ],
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "5mb",
+    },
   },
 };
 
