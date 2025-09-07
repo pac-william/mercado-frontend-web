@@ -34,6 +34,8 @@ export default async function Cart() {
 
     const { markets } = await getMarkets();
 
+    console.log(markets);
+
     return (
         <div className="flex flex-col flex-1">
             <ScrollArea className="flex flex-col flex-grow h-0">
@@ -42,7 +44,7 @@ export default async function Cart() {
                     <h1 className="text-2xl font-bold">Carrinho</h1>
                     <Carousel className="w-full">
                         <CarouselContent className="flex flex-1">
-                            {markets.map((market) => {
+                            {markets.slice(0, 8).map((market) => {
                                 return (
                                     <CarouselItem key={market.id} className="max-w-[320px] min-w-[320px] basis-1/4">
                                         <Card className="flex flex-1 flex-row gap-2 p-4 shadow-none">
