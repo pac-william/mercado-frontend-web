@@ -17,10 +17,12 @@ import { formatPrice } from "../utils/formatters";
 
 interface ProductCardProps {
     product: Product;
-    variant?: "quantity-select" | "buy-now" | "admin" | "history";
+    variant?: "quantity-select" | "buy-now" | "admin" | "history" | "suggestion";
+    badgeText?: string;
+    badgeVariant?: "default" | "secondary" | "destructive" | "outline";
 }
 
-export default function ProductCard({ product, variant = "buy-now" }: ProductCardProps) {
+export default function ProductCard({ product, variant = "buy-now", badgeText, badgeVariant = "secondary" }: ProductCardProps) {
 
     const getImageSrc = () => {
 
@@ -314,6 +316,66 @@ export default function ProductCard({ product, variant = "buy-now" }: ProductCar
                                 </div>
                             </div>
 
+                        </div>
+                    </CardFooter>
+                </Card>
+            );
+        case "suggestion":
+            return (
+                <Card className="flex flex-col max-w-xs w-full relative">
+                    {badgeText && (
+                        <div className="absolute top-2 right-2 z-10">
+                            <Badge variant={badgeVariant} className="text-xs">
+                                {badgeText}
+                            </Badge>
+                        </div>
+                    )}
+                    <CardHeader className="flex flex-row gap-2">
+                        <Image src={bh_supermercados} alt="Product" width={100} height={100} className="object-cover rounded-full aspect-square w-12 h-12 shadow-md border" />
+                        <div className="bg-white rounded-full flex flex-col gap-2">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold">Market 1</span>
+                                <div className="flex flex-row gap-1">
+                                    <Star size={16} className="text-yellow-500" />
+                                    <Star size={16} className="text-yellow-500" />
+                                    <Star size={16} className="text-yellow-500" />
+                                    <Star size={16} className="text-yellow-500" />
+                                    <Star size={16} className="text-yellow-500" />
+                                </div>
+                            </div>
+                        </div>
+                    </CardHeader>
+
+                    <Separator />
+
+                    <CardContent className="p-0 relative w-full aspect-square">
+                        <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
+                    </CardContent>
+
+                    <CardFooter className="flex flex-col flex-1 gap-2 items-start">
+                        <p className="text-sm line-clamp-2">{product.name}</p>
+                        <div className="flex flex-row w-full justify-between mt-auto">
+                            <div className="grid grid-cols-[auto_1fr] items-center w-full">
+                                {
+                                    shouldShowDiscount(product.id) ? (
+                                        <>
+                                            <p>De</p>
+                                            <div className="flex flex-row items-center ml-2">
+                                                {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
+                                            </div>
+                                            <p>Por</p>
+                                        </>
+                                    ) : null
+                                }
+                                <div className="flex flex-row items-center ml-2">
+                                    {mountPriceView(product.price, "new")}
+                                </div>
+                            </div>
+                            <div className="flex flex-row gap-2 items-end">
+                                <Button variant="outline" size="icon" onClick={() => addToCart()} >
+                                    <ShoppingCart size={16} />
+                                </Button>
+                            </div>
                         </div>
                     </CardFooter>
                 </Card>

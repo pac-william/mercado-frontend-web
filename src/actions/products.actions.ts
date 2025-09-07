@@ -18,11 +18,18 @@ export const getProducts = async (filters?: GetPaymentsFilters) => {
         size: filters?.size,
         name: filters?.name,
     });
-    
+
     const response = await fetch(`${baseUrl}/api/v1/products?${params.toString()}`)
     const data = await response.json() as ProductPaginatedResponse
     return data
 }
+
+export const getProductsById = async (id: string) => {
+    const response = await fetch(`${baseUrl}/api/v1/products/${id}`)
+    const data = await response.json() as Product
+    return data
+}
+
 export const createProduct = async (product: ProductDTO) => {
     const response = await fetch(`${baseUrl}/api/v1/products`, {
         method: "POST",

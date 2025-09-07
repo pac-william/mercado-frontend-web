@@ -1,0 +1,263 @@
+{
+  "occasion": "Churrasco",
+  "people": 4,
+  "items": [
+    {
+      "category": "Carnes",
+      "subcategories": [
+        {
+          "name": "Cortes bovinos",
+          "products": [
+            {
+              "id": "68bc8d7bcbfcf7119193f142",
+              "name": "Picanha FriRocha",
+              "quantity": 1,
+              "unit": "kg",
+              "price": 85.99,
+              "notes": "Corte clássico e acessível, ~250g por pessoa"
+            },
+            {
+              "id": "68bc8d85cbfcf7119193f241",
+              "name": "Picanha Friboi Maturatta",
+              "quantity": 1,
+              "unit": "kg",
+              "price": 119.99,
+              "notes": "Opção premium maturada, ~250g por pessoa"
+            },
+            {
+              "id": "68bc8d60cbfcf7119193efa6",
+              "name": "Picanha Peça",
+              "quantity": 1,
+              "unit": "kg",
+              "price": 59.99,
+              "notes": "Versão econômica para peça inteira, ~250g por pessoa"
+            }
+          ]
+        },
+        {
+          "name": "Linguiças",
+          "products": [
+            {
+              "id": "68bc209b766300f62b71502c",
+              "name": "Linguiça Toscana Perdigão Na Brasa 1kg",
+              "quantity": 1,
+              "unit": "kg",
+              "price": 34.99,
+              "notes": "Marca confiável, ideal para grupo, ~250g por pessoa"
+            },
+            {
+              "id": "68bc8d67cbfcf7119193f00a",
+              "name": "Linguiça Toscana Seara 600g",
+              "quantity": 0.6,
+              "unit": "kg",
+              "price": 15.99,
+              "notes": "Opção mais barata e prática, ~150g por pessoa"
+            },
+            {
+              "id": "68bc2099766300f62b71500c",
+              "name": "Linguiça Toscana com Pimenta-Biquinho Perdigão Na Brasa 600g",
+              "quantity": 0.6,
+              "unit": "kg",
+              "price": 25.99,
+              "notes": "Variação apimentada para sabor extra, ~150g por pessoa"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Essenciais",
+      "subcategories": [
+        {
+          "name": "Carvão",
+          "products": [
+            {
+              "id": "68bc9121cbfcf7119193fdec",
+              "name": "Carvão 100% Eucalipto para Churrasco Fiat Lux Premium Pacote 4kg",
+              "quantity": 4,
+              "unit": "kg",
+              "price": 30.90,
+              "notes": "Bom rendimento e qualidade premium"
+            },
+            {
+              "id": "68bc8d7ecbfcf7119193f189",
+              "name": "Carvão Vegetal Fogo Sertanejo 4kg",
+              "quantity": 4,
+              "unit": "kg",
+              "price": 19.99,
+              "notes": "Opção acessível e confiável"
+            },
+            {
+              "id": "68bc20ef766300f62b71557c",
+              "name": "Carvão Planalto 10kg Eucalipito",
+              "quantity": 10,
+              "unit": "kg",
+              "price": 55.99,
+              "notes": "Ideal para churrascos maiores"
+            }
+          ]
+        },
+        {
+          "name": "Temperos",
+          "products": [
+            {
+              "id": "68bc8d73cbfcf7119193f0c4",
+              "name": "Sal Grosso Iodado para Churrasco Cisne Pacote 1kg",
+              "quantity": 1,
+              "unit": "kg",
+              "price": 4.49,
+              "notes": "Básico e essencial para temperar carnes"
+            },
+            {
+              "id": "68bc8d78cbfcf7119193f113",
+              "name": "Sal Grosso Supra especial 500G",
+              "quantity": 0.5,
+              "unit": "kg",
+              "price": 4.99,
+              "notes": "Versão especial para churrasco"
+            },
+            {
+              "id": "68bc8d7acbfcf7119193f135",
+              "name": "Sal Grosso Supra com Alho 500g",
+              "quantity": 0.5,
+              "unit": "kg",
+              "price": 6.99,
+              "notes": "Temperado para mais sabor"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Acompanhamentos",
+      "subcategories": [
+        {
+          "name": "Pães",
+          "products": [
+            {
+              "id": "68bc9104cbfcf7119193fc25",
+              "name": "Pão Francês Guguy",
+              "quantity": 16,
+              "unit": "unidades",
+              "price": 11.98,
+              "notes": "Clássico para servir com carnes, ~4 por pessoa"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "recommended_but_optional": [
+    {
+      "id": "68bc20ef766300f62b715586",
+      "name": "Espeto Duplo Aço Mor 55cm",
+      "price": 10.99,
+      "notes": "Prático para carnes menores"
+    },
+    {
+      "id": "68bc9120cbfcf7119193fde8",
+      "name": "Espeto Duplo Aço Mor 65cm",
+      "price": 12.50,
+      "notes": "Tamanho versátil para churrasco"
+    },
+    {
+      "id": "68bc20ef766300f62b71557b",
+      "name": "Espeto de Bambu para Churrasco Gina 25cm Pacote 50 Unidades",
+      "price": 6.98,
+      "notes": "Ideal para petiscos ou opções descartáveis"
+    },
+    {
+      "id": "68bc20fb766300f62b715648",
+      "name": "Faca Média TRAMONTINA Cabo de Madeira",
+      "price": 23.49,
+      "notes": "Durável e específica para cortes"
+    },
+    {
+      "id": "68bc91b6cbfcf711919401fb",
+      "name": "FacaTramontina churrasco Ipanema",
+      "price": 3.69,
+      "notes": "Opção barata e funcional"
+    },
+    {
+      "id": "68bc91b6cbfcf711919401fc",
+      "name": "Abridor de Garrafas TUUT",
+      "price": 1.99,
+      "notes": "Simples e essencial para bebidas"
+    },
+    {
+      "id": "68bc20f8766300f62b715618",
+      "name": "Abridor Asa Do Brasil De Lata E Garrafa Ref:691",
+      "price": 5.98,
+      "notes": "Multifuncional para latas e garrafas"
+    }
+  ],
+  "instructions": [
+    {
+      "step": 1,
+      "description": "Prepare a churrasqueira, espalhe o carvão e acenda-o até formar brasas.",
+      "products_used": [
+        "Carvão 100% Eucalipto para Churrasco Fiat Lux Premium Pacote 4kg",
+        "Carvão Vegetal Fogo Sertanejo 4kg",
+        "Carvão Planalto 10kg Eucalipito",
+        "Espeto Duplo Aço Mor 55cm",
+        "Espeto Duplo Aço Mor 65cm"
+      ]
+    },
+    {
+      "step": 2,
+      "description": "Tempere as carnes e linguiças com sal grosso, deixando descansar por alguns minutos.",
+      "products_used": [
+        "Picanha FriRocha",
+        "Picanha Friboi Maturatta",
+        "Picanha Peça",
+        "Linguiça Toscana Perdigão Na Brasa 1kg",
+        "Linguiça Toscana Seara 600g",
+        "Linguiça Toscana com Pimenta-Biquinho Perdigão Na Brasa 600g",
+        "Sal Grosso Iodado para Churrasco Cisne Pacote 1kg",
+        "Sal Grosso Supra especial 500G",
+        "Sal Grosso Supra com Alho 500g"
+      ]
+    },
+    {
+      "step": 3,
+      "description": "Coloque as carnes e linguiças na grelha ou espetos, começando pela picanha, e vire conforme necessário para assar uniformemente.",
+      "products_used": [
+        "Picanha FriRocha",
+        "Picanha Friboi Maturatta",
+        "Picanha Peça",
+        "Linguiça Toscana Perdigão Na Brasa 1kg",
+        "Linguiça Toscana Seara 600g",
+        "Linguiça Toscana com Pimenta-Biquinho Perdigão Na Brasa 600g",
+        "Espeto Duplo Aço Mor 55cm",
+        "Espeto Duplo Aço Mor 65cm",
+        "Espeto de Bambu para Churrasco Gina 25cm Pacote 50 Unidades"
+      ]
+    },
+    {
+      "step": 4,
+      "description": "Enquanto as carnes assam, prepare o pão francês, cortando-o e aquecendo-o na grelha, se desejar.",
+      "products_used": [
+        "Pão Francês Guguy",
+        "Espeto Duplo Aço Mor 55cm",
+        "Espeto Duplo Aço Mor 65cm"
+      ]
+    },
+    {
+      "step": 5,
+      "description": "Fatie as carnes assadas usando uma faca adequada, sirva com pão francês e use abridores para bebidas.",
+      "products_used": [
+        "Picanha FriRocha",
+        "Picanha Friboi Maturatta",
+        "Picanha Peça",
+        "Linguiça Toscana Perdigão Na Brasa 1kg",
+        "Linguiça Toscana Seara 600g",
+        "Linguiça Toscana com Pimenta-Biquinho Perdigão Na Brasa 600g",
+        "Pão Francês Guguy",
+        "Faca Média TRAMONTINA Cabo de Madeira",
+        "FacaTramontina churrasco Ipanema",
+        "Abridor de Garrafas TUUT",
+        "Abridor Asa Do Brasil De Lata E Garrafa Ref:691"
+      ]
+    }
+  ]
+}
