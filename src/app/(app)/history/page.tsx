@@ -1,6 +1,7 @@
 import { getProducts } from "@/actions/products.actions";
 import CartMarketGroup from "@/app/components/CartMarketGroup";
 import RouterBack from "@/components/RouterBack";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import moment from "moment";
 import "moment/locale/pt-br";
@@ -19,7 +20,8 @@ export default async function History() {
         products: products
     }));
     return (
-        <ScrollArea className="flex flex-col flex-grow h-0">
+        <ProtectedRoute>
+            <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 container mx-auto my-4">
                 <RouterBack />
                 <h1 className="text-2xl font-bold">Histórico de compras</h1>
@@ -43,5 +45,6 @@ export default async function History() {
                 }
             </div>
         </ScrollArea>
+        </ProtectedRoute>
     )
 }   

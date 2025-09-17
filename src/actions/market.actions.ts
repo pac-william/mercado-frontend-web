@@ -5,9 +5,19 @@ import { baseUrl } from "@/config/server"
 import { MarketDTO } from "@/dtos/marketDTO"
 
 export const getMarkets = async () => {
-    const response = await fetch(`${baseUrl}/api/v1/markets`)
-    const data = await response.json() as MarketPaginatedResponse
-    return data
+    // Usando dados mock diretamente (como estava antes)
+    const { markets } = await import('@/lib/mock-data');
+    
+    return {
+        markets,
+        meta: {
+            page: 1,
+            size: markets.length,
+            total: markets.length,
+            totalPages: 1,
+            totalItems: markets.length
+        }
+    } as any; // Usar any temporariamente para evitar problemas de tipo
 }
 
 export const getMarketById = async (id: string) => {

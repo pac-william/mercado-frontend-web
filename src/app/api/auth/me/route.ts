@@ -3,7 +3,7 @@ import { CurrentUser } from '@/types/auth';
 import { getAccessTokenFromRequest, parseMockToken } from '../_utils';
 
 export async function GET() {
-    // Temporariamente sempre ativo para teste
+    // Temporariamente sempre ativo para desenvolvimento
     // if (process.env.USE_MOCK !== 'true') {
     //     return NextResponse.json({ message: 'Mock desabilitado' }, { status: 501 });
     // }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAccessTokenFromRequest, parseMockToken, createMockToken, setAccessTokenCookie } from '../_utils';
 
 export async function POST() {
-    // Temporariamente sempre ativo para teste
+    // Temporariamente sempre ativo para desenvolvimento
     // if (process.env.USE_MOCK !== 'true') {
     //     return NextResponse.json({ message: 'Mock desabilitado' }, { status: 501 });
     // }

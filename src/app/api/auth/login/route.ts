@@ -3,9 +3,10 @@ import { AuthResponse, CurrentUser } from '@/types/auth';
 import { createMockToken, setAccessTokenCookie } from '../_utils';
 
 export async function POST(req: Request) {
-    if (process.env.USE_MOCK !== 'true') {
-        return NextResponse.json({ message: 'Mock desabilitado' }, { status: 501 });
-    }
+    // Temporariamente sempre ativo para desenvolvimento
+    // if (process.env.USE_MOCK !== 'true') {
+    //     return NextResponse.json({ message: 'Mock desabilitado' }, { status: 501 });
+    // }
 
     try {
         const { email, password } = await req.json();

@@ -1,4 +1,5 @@
 import RouterBack from "@/components/RouterBack";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +15,8 @@ export const metadata: Metadata = {
 
 export default function Profile() {
     return (
-        <ScrollArea className="flex flex-col flex-grow h-0">
+        <ProtectedRoute>
+            <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 container mx-auto my-4">
                 <RouterBack />
                 <h1 className="text-2xl font-bold">Perfil</h1>
@@ -156,5 +158,6 @@ export default function Profile() {
                 </Card>
             </div>
         </ScrollArea>
+        </ProtectedRoute>
     )
 }   
