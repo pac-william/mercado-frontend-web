@@ -39,7 +39,8 @@ export async function http<TResponse = unknown, TBody = unknown>(
     const fetchOptions: RequestInit = {
         method,
         headers: mergedHeaders,
-        signal
+        signal,
+        credentials: 'include' // Importante para enviar cookies
     };
 
     if (body !== undefined && body !== null) {
@@ -71,7 +72,7 @@ export async function http<TResponse = unknown, TBody = unknown>(
     return payload as TResponse;
 }
 
-export const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+export const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 
 export function buildApiUrl(path: string): string {
     if (!apiBaseUrl) return path; // permite usar rotas internas (/api/*)

@@ -61,7 +61,7 @@ export default function CartMarketGroup({
                     <AccordionContent className="p-4 border-t">
                         <Carousel className="w-full">
                             <CarouselContent className="flex flex-1">
-                                {products.slice(0, 15).map((product) => {
+                                {Array.isArray(products) ? products.slice(0, 15).map((product) => {
                                     return (
                                         <CarouselItem key={product.id} className="max-w-[260px] min-w-[260px] basis-1/4">
                                             <ProductCard
@@ -70,7 +70,11 @@ export default function CartMarketGroup({
                                             />
                                         </CarouselItem>
                                     )
-                                })}
+                                }) : (
+                                    <div className="text-center text-muted-foreground p-4">
+                                        Nenhum produto encontrado
+                                    </div>
+                                )}
                             </CarouselContent>
                             <CarouselPrevious />
                             <CarouselNext />

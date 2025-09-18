@@ -48,9 +48,15 @@ export const getProducts = async (filters?: GetPaymentsFilters) => {
 }
 
 export const getProductsById = async (id: string) => {
-    const response = await fetch(`${baseUrl}/api/v1/products/${id}`)
-    const data = await response.json() as Product
-    return data
+    // Usando dados mock diretamente (como estava antes)
+    const { products } = await import('@/lib/mock-data');
+    const product = products.find(p => p.id === id);
+    
+    if (!product) {
+        throw new Error('Produto não encontrado');
+    }
+    
+    return product as any; // Usar any temporariamente para evitar problemas de tipo
 }
 
 export const createProduct = async (product: ProductDTO) => {

@@ -8,7 +8,8 @@ export interface MockTokenPayload {
     id: string;
     name: string;
     email: string;
-    roles?: string[];
+    role?: string;
+    roles?: string[]; // Mantido para compatibilidade
     exp: number; // epoch seconds
 }
 
@@ -51,7 +52,16 @@ export function clearAccessTokenCookie() {
     });
 }
 
-export function getAccessTokenFromRequest(): string | null {
+export function getAccessTokenFromRequest(req?: Request): string | null {
+    if (req) {
+        // Para requisições do backend real
+        const authHeader = req.headers.get('authorization');
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            return authHeader.substring(7);
+        }
+    }
+    
+    // Para mock, usar cookies
     const cookieStore = cookies();
     const fromCookie = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
     if (fromCookie) return fromCookie;

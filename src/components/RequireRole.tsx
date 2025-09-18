@@ -16,7 +16,15 @@ export default function RequireRole({ roles, children }: RequireRoleProps) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !hasRole(user, roles)) {
+    // Se não está carregando e não tem usuário, redirecionar para login
+    if (!loading && !user) {
+      const currentPath = window.location.pathname;
+      router.push(`/login?next=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+
+    // Se tem usuário mas não tem role, redirecionar para acesso negado
+    if (!loading && user && !hasRole(user, roles)) {
       router.push('/access-denied');
     }
   }, [user, loading, roles, router]);
@@ -29,6 +37,12 @@ export default function RequireRole({ roles, children }: RequireRoleProps) {
     );
   }
 
+  // Se não tem usuário, não renderizar nada
+  if (!user) {
+    return null;
+  }
+
+  // Se não tem role, não renderizar nada
   if (!hasRole(user, roles)) {
     return null;
   }

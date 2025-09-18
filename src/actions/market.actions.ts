@@ -21,9 +21,15 @@ export const getMarkets = async () => {
 }
 
 export const getMarketById = async (id: string) => {
-    const response = await fetch(`${baseUrl}/api/v1/markets/${id}`)
-    const data = await response.json() as Market
-    return data
+    // Usando dados mock diretamente (como estava antes)
+    const { markets } = await import('@/lib/mock-data');
+    const market = markets.find(m => m.id === id);
+    
+    if (!market) {
+        throw new Error('Mercado não encontrado');
+    }
+    
+    return market as any; // Usar any temporariamente para evitar problemas de tipo
 }
 
 export const createMarket = async (market: MarketDTO) => {
