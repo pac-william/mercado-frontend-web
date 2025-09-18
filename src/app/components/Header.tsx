@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/providers/auth-provider";
-import { History, LogOut, ShoppingCart, User } from "lucide-react";
+import { isAdmin } from "@/lib/auth";
+import { History, LogOut, ShoppingCart, User, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -84,6 +85,13 @@ export default function Header() {
                                     <User size={24} />
                                 </Link>
                             </Button>
+                            {isAdmin(user) && (
+                                <Button variant="outline" size="icon_lg" asChild>
+                                    <Link href="/admin">
+                                        <Settings size={24} />
+                                    </Link>
+                                </Button>
+                            )}
                             <Button 
                                 variant="outline" 
                                 size="icon_lg" 
