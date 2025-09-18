@@ -4,6 +4,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { hasRole } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface RequireRoleProps {
   roles: string | string[];
@@ -21,7 +22,11 @@ export default function RequireRole({ roles, children }: RequireRoleProps) {
   }, [user, loading, roles, router]);
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   }
 
   if (!hasRole(user, roles)) {

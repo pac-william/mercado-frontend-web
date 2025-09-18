@@ -16,7 +16,12 @@ export async function POST(req: Request) {
 
         // Regra simples mock: qualquer email/senha >= 6 chars
         if (String(password).length < 6) {
-            return NextResponse.json({ message: 'Credenciais inválidas' }, { status: 401 });
+            return NextResponse.json({ message: 'Senha deve ter pelo menos 6 caracteres' }, { status: 401 });
+        }
+
+        // Simular credenciais inválidas para teste
+        if (email === 'invalid@test.com') {
+            return NextResponse.json({ message: 'Email ou senha inválidos' }, { status: 401 });
         }
 
         const user: CurrentUser = {

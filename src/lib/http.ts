@@ -6,6 +6,7 @@ export interface HttpRequestOptions<TBody = unknown> {
     body?: TBody;
     authToken?: string | null;
     signal?: AbortSignal;
+    showToast?: boolean;
 }
 
 export interface HttpResponseError extends Error {
@@ -24,7 +25,7 @@ export async function http<TResponse = unknown, TBody = unknown>(
     url: string,
     options: HttpRequestOptions<TBody> = {}
 ): Promise<TResponse> {
-    const { method = 'GET', headers, body, authToken, signal } = options;
+    const { method = 'GET', headers, body, authToken, signal, showToast = true } = options;
 
     const mergedHeaders: Record<string, string> = {
         ...DEFAULT_HEADERS,
@@ -57,6 +58,13 @@ export async function http<TResponse = unknown, TBody = unknown>(
             status: res.status,
             payload
         });
+        
+        if (showToast && typeof window !== 'undefined') {
+            const { toast } = await import('sonner');
+            const message = getErrorMessage(res.status, payload);
+            toast.error(message);
+        }
+        
         throw error;
     }
 
@@ -69,5 +77,20 @@ export function buildApiUrl(path: string): string {
     if (!apiBaseUrl) return path; // permite usar rotas internas (/api/*)
     const normalized = path.startsWith('/') ? path : `/${path}`;
     return `${apiBaseUrl}${normalized}`;
+}
+
+function getErrorMessage(status: number, payload?: unknown): string {
+    if (payload && typeof payload === 'object' && 'message' in payload) {
+        return (payload as { message: string }).message;
+    }
+    
+    switch (status) {
+        case 400: return 'Dados inválidos';
+        case 401: return 'Não autorizado';
+        case 403: return 'Acesso negado';
+        case 404: return 'Não encontrado';
+        case 500: return 'Erro interno do servidor';
+        default: return 'Erro na requisição';
+    }
 }
 

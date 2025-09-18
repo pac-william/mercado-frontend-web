@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/providers/auth-provider';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -94,7 +95,14 @@ export default function LoginPage() {
               className="w-full"
               disabled={isSubmitting || loading}
             >
-              {isSubmitting ? 'Entrando...' : 'Entrar'}
+              {isSubmitting || loading ? (
+                <>
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  Entrando...
+                </>
+              ) : (
+                'Entrar'
+              )}
             </Button>
           </form>
 
