@@ -10,6 +10,7 @@ import { Metadata } from "next";
 import HeroSection from "../components/HeroSection";
 import ProductCard from "../components/ProductCard";
 import SearchAiBar from "../components/SearchBar";
+import { Product } from "../domain/productDomain";
 import TopFilters from "./components/TopFilters";
 
 
@@ -182,7 +183,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                             products.length > 0 ? (
                                 <>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 flex-1">
-                                        {products.map((product) => {
+                                        {products.map((product: Product) => {
                                             return (
                                                 <div key={product.id}>
                                                     <ProductCard
