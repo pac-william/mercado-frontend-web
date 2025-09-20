@@ -5,31 +5,15 @@ import { baseUrl } from "@/config/server"
 import { MarketDTO } from "@/dtos/marketDTO"
 
 export const getMarkets = async () => {
-    // Usando dados mock diretamente (como estava antes)
-    const { markets } = await import('@/lib/mock-data');
-    
-    return {
-        markets,
-        meta: {
-            page: 1,
-            size: markets.length,
-            total: markets.length,
-            totalPages: 1,
-            totalItems: markets.length
-        }
-    } as any; // Usar any temporariamente para evitar problemas de tipo
+    const response = await fetch(`${baseUrl}/api/v1/markets`)
+    const data = await response.json() as MarketPaginatedResponse
+    return data
 }
 
 export const getMarketById = async (id: string) => {
-    // Usando dados mock diretamente (como estava antes)
-    const { markets } = await import('@/lib/mock-data');
-    const market = markets.find(m => m.id === id);
-    
-    if (!market) {
-        throw new Error('Mercado não encontrado');
-    }
-    
-    return market as any; // Usar any temporariamente para evitar problemas de tipo
+    const response = await fetch(`${baseUrl}/api/v1/markets/${id}`)
+    const data = await response.json() as Market
+    return data
 }
 
 export const createMarket = async (market: MarketDTO) => {
