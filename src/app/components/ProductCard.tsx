@@ -81,12 +81,12 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
     switch (variant) {
         case "quantity-select":
             return (
-                <Card className="flex flex-col max-w-xs w-full">
+                <Card className="flex flex-col max-w-xs w-full bg-card border-border">
                     <CardHeader className="flex flex-row gap-2">
                         <Image src={bh_supermercados} alt="Product" width={100} height={100} className="object-cover rounded-full aspect-square w-12 h-12 shadow-md border" />
-                        <div className="bg-white rounded-full flex flex-col gap-2">
+                        <div className="rounded-full flex flex-col gap-2">
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold">Market 1</span>
+                                <span className="text-sm font-bold text-card-foreground">Market 1</span>
                                 <div className="flex flex-row gap-1">
                                     <Star size={16} className="text-yellow-500" />
                                     <Star size={16} className="text-yellow-500" />
@@ -105,7 +105,7 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                     </CardContent>
 
                     <CardFooter className="flex flex-col flex-1 gap-2 items-start">
-                        <p className="text-sm line-clamp-2">{product.name}</p>
+                        <p className="text-sm line-clamp-2 text-card-foreground">{product.name}</p>
                         <div className="grid grid-cols-[auto_1fr] items-center w-full">
                             {
                                 shouldShowDiscount(product.id) ? (
@@ -138,12 +138,12 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
             );
         case "buy-now":
             return (
-                <Card className="flex flex-col max-w-xs w-full">
+                <Card className="flex flex-col max-w-xs w-full bg-card border-border">
                     <CardHeader className="flex flex-row gap-2">
                         <Image src={bh_supermercados} alt="Product" width={100} height={100} className="object-cover rounded-full aspect-square w-12 h-12 shadow-md border" />
-                        <div className="bg-white rounded-full flex flex-col gap-2">
+                        <div className="rounded-full flex flex-col gap-2">
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold">Market 1</span>
+                                <span className="text-sm font-bold text-card-foreground">Market 1</span>
                                 <div className="flex flex-row gap-1">
                                     <Star size={16} className="text-yellow-500" />
                                     <Star size={16} className="text-yellow-500" />
@@ -162,17 +162,17 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                     </CardContent>
 
                     <CardFooter className="flex flex-col flex-1 gap-2 items-start">
-                        <p className="text-sm line-clamp-2">{product.name}</p>
+                        <p className="text-sm line-clamp-2 text-card-foreground">{product.name}</p>
                         <div className="flex flex-row w-full justify-between mt-auto">
                             <div className="grid grid-cols-[auto_1fr] items-center w-full">
                                 {
                                     shouldShowDiscount(product.id) ? (
                                         <>
-                                            <p>De</p>
+                                            <p className="text-card-foreground">De</p>
                                             <div className="flex flex-row items-center ml-2">
                                                 {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
                                             </div>
-                                            <p>Por</p>
+                                            <p className="text-card-foreground">Por</p>
                                         </>
                                     ) : null
                                 }
@@ -191,9 +191,9 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
             );
         case "admin":
             return (
-                <Card className="flex flex-col max-w-xs w-full">
+                <Card className="flex flex-col max-w-xs w-full bg-card border-border">
                     <CardHeader className="flex flex-row gap-2 items-center justify-between">
-                        <Badge variant={"outline"} >
+                        <Badge variant={"outline"} className="text-card-foreground border-border">
                             Categoria
                         </Badge>
                         <div className="flex flex-row gap-2 items-center">
@@ -203,10 +203,10 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                                         <Edit2 size={16} />
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="p-0 gap-0 max-w-2xl">
+                                <DialogContent className="p-0 gap-0 max-w-2xl bg-background border-border">
                                     <DialogHeader className="p-4">
-                                        <DialogTitle>Editar produto</DialogTitle>
-                                        <DialogDescription>
+                                        <DialogTitle className="text-foreground">Editar produto</DialogTitle>
+                                        <DialogDescription className="text-muted-foreground">
                                             Aqui você pode editar as informações do produto.
                                         </DialogDescription>
                                     </DialogHeader>
@@ -223,10 +223,10 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                                         <Trash2 size={16} />
                                     </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent className="p-0 gap-0">
+                                <AlertDialogContent className="p-0 gap-0 bg-background border-border">
                                     <AlertDialogHeader className="p-4">
-                                        <AlertDialogTitle>Deletar produto</AlertDialogTitle>
-                                        <AlertDialogDescription>
+                                        <AlertDialogTitle className="text-foreground">Deletar produto</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-muted-foreground">
                                             Aqui você pode deletar o produto.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
@@ -245,9 +245,9 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
 
                     <CardHeader className="flex flex-row gap-2">
                         <Image src={bh_supermercados} alt="Product" width={100} height={100} className="object-cover rounded-full aspect-square w-12 h-12 shadow-md border" />
-                        <div className="bg-white rounded-full flex flex-col gap-2">
+                        <div className="rounded-full flex flex-col gap-2">
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold">Market 1</span>
+                                <span className="text-sm font-bold text-card-foreground">Market 1</span>
                                 <div className="flex flex-row gap-1">
                                     <Star size={16} className="text-yellow-500" />
                                     <Star size={16} className="text-yellow-500" />
@@ -266,17 +266,17 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                     </CardContent>
 
                     <CardFooter className="flex flex-col gap-2 items-start">
-                        <p className="text-sm line-clamp-2">{product.name}</p>
+                        <p className="text-sm line-clamp-2 text-card-foreground">{product.name}</p>
                         <div className="flex flex-row w-full justify-between mt-auto">
                             <div className="grid grid-cols-[auto_1fr] items-center w-full">
                                 {
                                     shouldShowDiscount(product.id) ? (
                                         <>
-                                            <p>De</p>
+                                            <p className="text-card-foreground">De</p>
                                             <div className="flex flex-row items-center ml-2">
                                                 {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
                                             </div>
-                                            <p>Por</p>
+                                            <p className="text-card-foreground">Por</p>
                                         </>
                                     ) : null
                                 }
@@ -291,23 +291,23 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
             );
         case "history":
             return (
-                <Card className="flex h-full flex-col max-w-xs w-full">
+                <Card className="flex h-full flex-col max-w-xs w-full bg-card border-border">
                     <CardContent className="p-0 relative w-full aspect-square">
                         <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
                     </CardContent>
 
                     <CardFooter className="flex flex-col flex-1 gap-2 items-start">
-                        <p className="text-sm line-clamp-2">{product.name}</p>
+                        <p className="text-sm line-clamp-2 text-card-foreground">{product.name}</p>
                         <div className="flex flex-row w-full justify-between mt-auto">
                             <div className="grid grid-cols-[auto_1fr] items-center w-full">
                                 {
                                     shouldShowDiscount(product.id) ? (
                                         <>
-                                            <p>De</p>
+                                            <p className="text-card-foreground">De</p>
                                             <div className="flex flex-row items-center ml-2">
                                                 {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
                                             </div>
-                                            <p>Por</p>
+                                            <p className="text-card-foreground">Por</p>
                                         </>
                                     ) : null
                                 }
@@ -332,9 +332,9 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                     )}
                     <CardHeader className="flex flex-row gap-2">
                         <Image src={bh_supermercados} alt="Product" width={100} height={100} className="object-cover rounded-full aspect-square w-12 h-12 shadow-md border" />
-                        <div className="bg-white rounded-full flex flex-col gap-2">
+                        <div className="rounded-full flex flex-col gap-2">
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold">Market 1</span>
+                                <span className="text-sm font-bold text-card-foreground">Market 1</span>
                                 <div className="flex flex-row gap-1">
                                     <Star size={16} className="text-yellow-500" />
                                     <Star size={16} className="text-yellow-500" />
@@ -353,17 +353,17 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                     </CardContent>
 
                     <CardFooter className="flex flex-col flex-1 gap-2 items-start">
-                        <p className="text-sm line-clamp-2">{product.name}</p>
+                        <p className="text-sm line-clamp-2 text-card-foreground">{product.name}</p>
                         <div className="flex flex-row w-full justify-between mt-auto">
                             <div className="grid grid-cols-[auto_1fr] items-center w-full">
                                 {
                                     shouldShowDiscount(product.id) ? (
                                         <>
-                                            <p>De</p>
+                                            <p className="text-card-foreground">De</p>
                                             <div className="flex flex-row items-center ml-2">
                                                 {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
                                             </div>
-                                            <p>Por</p>
+                                            <p className="text-card-foreground">Por</p>
                                         </>
                                     ) : null
                                 }

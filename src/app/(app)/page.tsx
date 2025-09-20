@@ -30,16 +30,82 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                 </div>
                 <div className="flex flex-1 gap-4 container mx-auto">
                     <div className="w-[320px] h-[calc(100vh-113px)] sticky top-4">
-                        <Card className="flex flex-col h-full">
+                        <Card className="flex flex-col h-full bg-card border-border">
                             <CardHeader>
-                                <CardTitle>Filtros</CardTitle>
-                                <CardDescription>Filtre os produtos por categoria, preço, etc.</CardDescription>
+                                <CardTitle className="text-card-foreground">Filtros</CardTitle>
+                                <CardDescription className="text-muted-foreground">Filtre os produtos por categoria, preço, etc.</CardDescription>
                             </CardHeader>
                             <Separator />
                             <CardContent className="flex flex-1 flex-col">
                                 <ScrollArea className="flex flex-col flex-grow h-0 pr-4">
                                     <div className="flex flex-col flex-1 gap-4">
                                         <PriceSlider />
+                                        <Card className="flex flex-col bg-card border-border">
+                                            <CardHeader>
+                                                <Label className="text-card-foreground">Categoria</Label>
+                                            </CardHeader>
+                                            <Separator />
+                                            <CardContent >
+                                                <ScrollArea className="h-[140px]">
+                                                    <div className="grid grid-cols-[auto_1fr] gap-2">
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Frutas</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Legumes</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Carnes</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Peixes</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Bebidas</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Doces</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Bebidas</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Doces</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Bebidas</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Doces</Label>
+                                                    </div>
+                                                </ScrollArea>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="flex flex-col bg-card border-border">
+                                            <CardHeader>
+                                                <Label className="text-card-foreground">Mercado</Label>
+                                            </CardHeader>
+                                            <Separator />
+                                            <CardContent>
+                                                <ScrollArea className="h-[140px]">
+                                                    <div className="grid grid-cols-[auto_1fr] gap-2">
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 1</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 2</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 3</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 4</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 5</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 6</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 7</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 8</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 9</Label>
+                                                        <Checkbox />
+                                                        <Label className="text-card-foreground">Mercado 10</Label>
+                                                    </div>
+                                                </ScrollArea>
+                                            </CardContent>
+                                        </Card>
+
                                         <Card className="flex flex-col">
                                             <CardHeader>
                                                 <Label>Categoria</Label>
@@ -73,100 +139,34 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                                             </CardContent>
                                         </Card>
 
-                                        <Card className="flex flex-col">
+                                        <Card className="flex flex-col bg-card border-border">
                                             <CardHeader>
-                                                <Label>Mercado</Label>
+                                                <Label className="text-card-foreground">Mercado</Label>
                                             </CardHeader>
                                             <Separator />
                                             <CardContent>
                                                 <ScrollArea className="h-[140px]">
                                                     <div className="grid grid-cols-[auto_1fr] gap-2">
                                                         <Checkbox />
-                                                        <Label>Mercado 1</Label>
+                                                        <Label className="text-card-foreground">Mercado 1</Label>
                                                         <Checkbox />
-                                                        <Label>Mercado 2</Label>
+                                                        <Label className="text-card-foreground">Mercado 2</Label>
                                                         <Checkbox />
-                                                        <Label>Mercado 3</Label>
+                                                        <Label className="text-card-foreground">Mercado 3</Label>
                                                         <Checkbox />
-                                                        <Label>Mercado 4</Label>
+                                                        <Label className="text-card-foreground">Mercado 4</Label>
                                                         <Checkbox />
-                                                        <Label>Mercado 5</Label>
+                                                        <Label className="text-card-foreground">Mercado 5</Label>
                                                         <Checkbox />
-                                                        <Label>Mercado 6</Label>
+                                                        <Label className="text-card-foreground">Mercado 6</Label>
                                                         <Checkbox />
-                                                        <Label>Mercado 7</Label>
+                                                        <Label className="text-card-foreground">Mercado 7</Label>
                                                         <Checkbox />
-                                                        <Label>Mercado 8</Label>
+                                                        <Label className="text-card-foreground">Mercado 8</Label>
                                                         <Checkbox />
-                                                        <Label>Mercado 9</Label>
+                                                        <Label className="text-card-foreground">Mercado 9</Label>
                                                         <Checkbox />
-                                                        <Label>Mercado 10</Label>
-                                                    </div>
-                                                </ScrollArea>
-                                            </CardContent>
-                                        </Card>
-
-                                        <Card className="flex flex-col">
-                                            <CardHeader>
-                                                <Label>Categoria</Label>
-                                            </CardHeader>
-                                            <Separator />
-                                            <CardContent >
-                                                <ScrollArea className="h-[140px]">
-                                                    <div className="grid grid-cols-[auto_1fr] gap-2">
-                                                        <Checkbox />
-                                                        <Label>Frutas</Label>
-                                                        <Checkbox />
-                                                        <Label>Legumes</Label>
-                                                        <Checkbox />
-                                                        <Label>Carnes</Label>
-                                                        <Checkbox />
-                                                        <Label>Peixes</Label>
-                                                        <Checkbox />
-                                                        <Label>Bebidas</Label>
-                                                        <Checkbox />
-                                                        <Label>Doces</Label>
-                                                        <Checkbox />
-                                                        <Label>Bebidas</Label>
-                                                        <Checkbox />
-                                                        <Label>Doces</Label>
-                                                        <Checkbox />
-                                                        <Label>Bebidas</Label>
-                                                        <Checkbox />
-                                                        <Label>Doces</Label>
-                                                    </div>
-                                                </ScrollArea>
-                                            </CardContent>
-                                        </Card>
-
-                                        <Card className="flex flex-col">
-                                            <CardHeader>
-                                                <Label>Mercado</Label>
-                                            </CardHeader>
-                                            <Separator />
-                                            <CardContent>
-                                                <ScrollArea className="h-[140px]">
-                                                    <div className="grid grid-cols-[auto_1fr] gap-2">
-                                                        <Checkbox />
-                                                        <Label>Mercado 1</Label>
-                                                        <Checkbox />
-                                                        <Label>Mercado 2</Label>
-                                                        <Checkbox />
-                                                        <Label>Mercado 3</Label>
-                                                        <Checkbox />
-                                                        <Label>Mercado 4</Label>
-                                                        <Checkbox />
-                                                        <Label>Mercado 5</Label>
-                                                        <Checkbox />
-                                                        <Label>Mercado 6</Label>
-                                                        <Checkbox />
-                                                        <Label>Mercado 7</Label>
-                                                        <Checkbox />
-                                                        <Label>Mercado 8</Label>
-                                                        <Checkbox />
-                                                        <Label>Mercado 9</Label>
-                                                        <Checkbox />
-                                                        <Label>Mercado 10</Label>
+                                                        <Label className="text-card-foreground">Mercado 10</Label>
                                                     </div>
                                                 </ScrollArea>
                                             </CardContent>
@@ -192,13 +192,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                                             );
                                         })}
                                     </div>
-                                    <Card className="p-4">
+                                    <Card className="p-4 bg-card border-border">
                                         <Pagination meta={meta} />
                                     </Card>
                                 </>
                             ) : (
                                 <div className="flex flex-col gap-4 items-center justify-center">
-                                    <h1 className="text-2xl font-bold text-nowrap">Nenhum produto encontrado</h1>
+                                    <h1 className="text-2xl font-bold text-nowrap text-foreground">Nenhum produto encontrado</h1>
                                 </div>
                             )
                         }

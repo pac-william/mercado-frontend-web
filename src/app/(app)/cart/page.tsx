@@ -41,19 +41,19 @@ export default async function Cart() {
             <ScrollArea className="flex flex-col flex-grow h-0">
                 <div className="flex flex-1 flex-col gap-4 container mx-auto my-4">
                     <RouterBack />
-                    <h1 className="text-2xl font-bold">Carrinho</h1>
+                    <h1 className="text-2xl font-bold text-foreground">Carrinho</h1>
                     <Carousel className="w-full">
                         <CarouselContent className="flex flex-1">
                             {markets.slice(0, 8).map((market) => {
                                 return (
                                     <CarouselItem key={market.id} className="max-w-[320px] min-w-[320px] basis-1/4">
-                                        <Card className="flex flex-1 flex-row gap-2 p-4 shadow-none">
+                                        <Card className="flex flex-1 flex-row gap-2 p-4 shadow-none bg-card border-border">
                                             <Avatar className="w-10 h-10 shadow-md">
                                                 <AvatarImage src={market.logo} alt={market.name} width={100} height={100} className="rounded-full" />
-                                                <AvatarFallback>{market.name.charAt(0)}</AvatarFallback>
+                                                <AvatarFallback className="bg-primary text-primary-foreground">{market.name.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex flex-col">
-                                                <span>{market.name}</span>
+                                                <span className="text-card-foreground font-medium">{market.name}</span>
                                                 <span className="text-sm text-muted-foreground">Total: {formatPrice(0)}</span>
                                                 <span className="text-sm text-muted-foreground">Distância: {0}km</span>
 
@@ -83,20 +83,20 @@ export default async function Cart() {
                         <div className="w-[380px] h-[calc(100vh-113px)] sticky top-4">
                             <div className="flex flex-col gap-4 h-full">
                                 <SelectMethod />
-                                <Card className="flex flex-col flex-1">
+                                <Card className="flex flex-col flex-1 bg-card border-border">
                                     <CardContent className="flex flex-1 flex-col gap-2">
                                         <ScrollArea className="flex flex-col flex-grow h-0 pr-4 gap-2">
-                                            <h1 className="text-lg font-bold">Itens:</h1>
+                                            <h1 className="text-lg font-bold text-card-foreground">Itens:</h1>
                                             <div className="flex flex-col">
                                                 {cartItems.map((item) => {
                                                     return (
                                                         <div key={item.id} className="grid grid-cols-8 gap-2">
                                                             <div className="flex col-span-2 gap-2">
-                                                                <span className="text-sm">{item.quantity}</span>
-                                                                <span className="text-sm">un</span>
+                                                                <span className="text-sm text-card-foreground">{item.quantity}</span>
+                                                                <span className="text-sm text-muted-foreground">un</span>
                                                             </div>
-                                                            <span className="text-sm col-span-4 truncate text-nowrap">{item.name}</span>
-                                                            <span className="text-sm col-span-2">{formatPrice(item.price * item.quantity)}</span>
+                                                            <span className="text-sm col-span-4 truncate text-nowrap text-card-foreground">{item.name}</span>
+                                                            <span className="text-sm col-span-2 text-card-foreground font-medium">{formatPrice(item.price * item.quantity)}</span>
                                                         </div>
                                                     )
                                                 })}
@@ -104,19 +104,19 @@ export default async function Cart() {
                                         </ScrollArea>
                                         <Separator />
                                         <div className="flex flex-col">
-                                            <span>Descontos: {formatPrice(discount)} -5%</span>
-                                            <span>Frete: {formatPrice(deliveryFee)}</span>
+                                            <span className="text-card-foreground">Descontos: {formatPrice(discount)} -5%</span>
+                                            <span className="text-card-foreground">Frete: {formatPrice(deliveryFee)}</span>
                                         </div>
                                         <Separator />
                                         <div className="flex flex-col">
-                                            <span>SubTotal: {formatPrice(subtotal)}</span>
+                                            <span className="text-card-foreground">SubTotal: {formatPrice(subtotal)}</span>
                                         </div>
                                     </CardContent>
                                     <Separator />
                                     <CardFooter className="flex flex-row justify-between">
                                         <div className="flex flex-col">
                                             <span className="text-sm text-muted-foreground">Total</span>
-                                            <span className="text-lg font-bold">{formatPrice(total)}</span>
+                                            <span className="text-lg font-bold text-card-foreground">{formatPrice(total)}</span>
                                         </div>
                                         <div>
                                             <Button>

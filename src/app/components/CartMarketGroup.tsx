@@ -23,7 +23,7 @@ export default function CartMarketGroup({
     products,
 }: CartMarketGroupProps) {
     return (
-        <Card className="">
+        <Card className="bg-card border-border">
             <Accordion
                 type="single"
                 collapsible
@@ -36,21 +36,21 @@ export default function CartMarketGroup({
                             <div className="flex flex-row gap-2 items-center">
                                 <Avatar>
                                     <AvatarImage src="https://github.com/shadcn.png" />
-                                    <AvatarFallback>CN</AvatarFallback>
+                                    <AvatarFallback className="bg-primary text-primary-foreground">CN</AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col text-left">
-                                    <span className="font-bold">{marketName}</span>
+                                    <span className="font-bold text-card-foreground">{marketName}</span>
                                     <span className="text-sm text-muted-foreground">{marketAddress}</span>
                                 </div>
                             </div>
                             <div className="flex flex-row gap-2">
                                 <div className="flex flex-row gap-2 items-center">
                                     <span className="text-sm text-muted-foreground">Total</span>
-                                    <span className="text-sm font-bold">R$ 100,00</span>
+                                    <span className="text-sm font-bold text-card-foreground">R$ 100,00</span>
                                 </div>
                                 <div className="flex flex-row gap-2 items-center">
                                     <span className="text-sm text-muted-foreground">Items:</span>
-                                    <span className="text-sm font-bold">10</span>
+                                    <span className="text-sm font-bold text-card-foreground">10</span>
                                 </div>
                             </div>
                         </div>
@@ -58,7 +58,7 @@ export default function CartMarketGroup({
                             <AccordionTrigger />
                         </Button>
                     </div>
-                    <AccordionContent className="p-4 border-t">
+                    <AccordionContent className="p-4 border-t border-border">
                         <Carousel className="w-full">
                             <CarouselContent className="flex flex-1">
                                 {Array.isArray(products) ? products.slice(0, 15).map((product) => {

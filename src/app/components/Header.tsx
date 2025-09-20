@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useAuth } from "@/providers/auth-provider";
 import { isAdmin } from "@/lib/auth";
-import { History, LogOut, ShoppingCart, User, Settings } from "lucide-react";
+import { useAuth } from "@/providers/auth-provider";
+import { History, LogOut, Settings, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -32,10 +32,10 @@ export default function Header() {
     };
 
     return (
-        <header className="flex w-full justify-between items-center p-4 bg-white border-b border-gray-200">
+        <header className="flex w-full justify-between items-center p-4 bg-background border-b border-border">
             <div className="flex flex-row gap-4 container mx-auto">
-                <h1 className="text-2xl font-bold text-black items-center flex">
-                    <Link href="/">
+                <h1 className="text-2xl font-bold text-foreground items-center flex">
+                    <Link href="/" className="text-foreground hover:text-primary">
                         Smart Market
                     </Link>
                 </h1>
@@ -49,10 +49,10 @@ export default function Header() {
                                         <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center">19</Badge>
                                     </Button>
                                 </SheetTrigger>
-                                <SheetContent className="gap-0" side="right">
+                                <SheetContent className="gap-0 bg-background border-border" side="right">
                                     <SheetHeader>
-                                        <SheetTitle>Carrinho</SheetTitle>
-                                        <SheetDescription>
+                                        <SheetTitle className="text-foreground">Carrinho</SheetTitle>
+                                        <SheetDescription className="text-muted-foreground">
                                             Aqui você pode ver os produtos que você adicionou ao carrinho.
                                         </SheetDescription>
                                     </SheetHeader>
@@ -65,12 +65,12 @@ export default function Header() {
                                         </Button>
                                     </div>
                                     <div className="flex flex-col flex-1 gap-4 p-4">
-                                        <h1 className="text-lg font-bold">Itens:</h1>
+                                        <h1 className="text-lg font-bold text-foreground">Itens:</h1>
                                     </div>
                                     <Separator />
                                     <div className="flex flex-row gap-4 p-4 justify-between">
-                                        <h1 className="text-lg font-bold">Total:</h1>
-                                        <p className="text-lg font-bold">R$ 100,00</p>
+                                        <h1 className="text-lg font-bold text-foreground">Total:</h1>
+                                        <p className="text-lg font-bold text-foreground">R$ 100,00</p>
                                     </div>
                                 </SheetContent>
                             </Sheet>

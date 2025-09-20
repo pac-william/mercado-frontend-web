@@ -87,11 +87,11 @@ export default function SearchField({
 
     return (
         <div className={`flex flex-row ${className}`}>
-            <Button variant="outline" size="icon" className="rounded-r-none border-r-0">
-                <SearchIcon size={24} />
+            <Button variant="outline" size="icon" className="rounded-r-none border-r-0 bg-background border-border hover:bg-accent hover:text-accent-foreground">
+                <SearchIcon size={24} className="text-muted-foreground" />
             </Button>
             <Input 
-                className={`${width} bg-background rounded-l-none`}
+                className={`${width} bg-background rounded-l-none border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary`}
                 placeholder={placeholder}
                 value={searchValue}
                 onChange={handleInputChange}

@@ -15,8 +15,8 @@ export default function SelectMethod() {
         <Card className="flex flex-col p-4 gap-2">
             <div
                 className={`flex flex-1 flex-row px-4 py-3 cursor-pointer transition-all duration-200 items-center rounded-lg border ${method === "pickup"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50 hover:bg-muted/50"
+                    ? "border-primary bg-primary/5 text-primary-foreground"
+                    : "border-border hover:border-primary/50 hover:bg-muted/50 text-foreground"
                     }`}
                 onClick={() => handleSelectMethod("pickup")}
             >
@@ -27,8 +27,8 @@ export default function SelectMethod() {
 
             <div
                 className={`flex flex-1 flex-row px-4 py-3 cursor-pointer transition-all duration-200 items-center rounded-lg border ${method === "delivery"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50 hover:bg-muted/50"
+                    ? "border-primary bg-primary/5 text-primary-foreground"
+                    : "border-border hover:border-primary/50 hover:bg-muted/50 text-foreground"
                     }`}
                 onClick={() => handleSelectMethod("delivery")}
             >

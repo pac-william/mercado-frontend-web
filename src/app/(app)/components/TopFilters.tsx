@@ -7,13 +7,13 @@ export default function TopFilters() {
         <div className="flex flex-row gap-4 justify-between">
             <SearchField paramName="name" />
             <Select>
-                <SelectTrigger className="w-[100px] bg-background">
+                <SelectTrigger className="w-[100px] bg-background border-border text-foreground">
                     <SelectValue placeholder="10" />
                 </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="1">10</SelectItem>
-                    <SelectItem value="2">20</SelectItem>
-                    <SelectItem value="3">30</SelectItem>
+                <SelectContent className="bg-popover border-border">
+                    <SelectItem value="1" className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">10</SelectItem>
+                    <SelectItem value="2" className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">20</SelectItem>
+                    <SelectItem value="3" className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">30</SelectItem>
                 </SelectContent>
             </Select>
         </div>

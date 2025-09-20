@@ -74,7 +74,7 @@ export default function HeroSection() {
                     {heroImages.map((_, index) => (
                         <button
                             key={index}
-                            className={`w-2 h-2 rounded-full transition-colors ${index === current ? "bg-white" : "bg-white/50"
+                            className={`w-2 h-2 rounded-full transition-colors ${index === current ? "bg-primary" : "bg-primary/50"
                                 }`}
                             onClick={() => api?.scrollTo(index)}
                         />

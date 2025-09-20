@@ -52,6 +52,7 @@ export default function Pagination({ meta }: PaginationProps) {
                                 variant="link"
                                 onClick={() => handlePageChange(currentPage - 1)}
                                 disabled={isPending}
+                                className="text-foreground hover:text-primary"
                             >
                                 <ChevronLeft size={16} />Anterior
                             </Button>
@@ -62,7 +63,7 @@ export default function Pagination({ meta }: PaginationProps) {
                     {[...Array(3)].map((_, index) => {
                         const pageIndex = currentPage + index - 1;
                         if (!isValidPage(pageIndex)) {
-                            return <Button size="icon" variant="ghost" key={index}><Ellipsis  /></Button>;
+                            return <Button size="icon" variant="ghost" key={index} className="text-muted-foreground"><Ellipsis  /></Button>;
                         }
                         return (
                             <Button
@@ -71,6 +72,7 @@ export default function Pagination({ meta }: PaginationProps) {
                                 key={index}
                                 onClick={() => handlePageChange(pageIndex)}
                                 disabled={isPending}
+                                className={pageIndex === currentPage ? "bg-primary text-primary-foreground" : "text-foreground hover:text-primary"}
                             >
                                 {pageIndex}
                             </Button>
@@ -83,6 +85,7 @@ export default function Pagination({ meta }: PaginationProps) {
                             variant="link"
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={isPending}
+                            className="text-foreground hover:text-primary"
                         >
                             Próximo<ChevronRight size={16} />
                         </Button>

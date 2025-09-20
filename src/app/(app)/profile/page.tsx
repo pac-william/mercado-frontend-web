@@ -1,5 +1,5 @@
-import RouterBack from "@/components/RouterBack";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import RouterBack from "@/components/RouterBack";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,19 +19,19 @@ export default function Profile() {
             <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 container mx-auto my-4">
                 <RouterBack />
-                <h1 className="text-2xl font-bold">Perfil</h1>
+                <h1 className="text-2xl font-bold text-foreground">Perfil</h1>
 
                 {/* Informações Pessoais */}
-                <Card>
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle>Informações Pessoais</CardTitle>
-                        <CardDescription>Gerencie suas informações básicas</CardDescription>
+                        <CardTitle className="text-card-foreground">Informações Pessoais</CardTitle>
+                        <CardDescription className="text-muted-foreground">Gerencie suas informações básicas</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center gap-4">
                             <Avatar className="h-20 w-20">
                                 <AvatarImage src="/placeholder-avatar.jpg" alt="Foto de perfil" />
-                                <AvatarFallback>FP</AvatarFallback>
+                                <AvatarFallback className="bg-primary text-primary-foreground">FP</AvatarFallback>
                             </Avatar>
                             <div className="space-y-2">
                                 <Button variant="outline">Alterar foto</Button>
@@ -43,20 +43,20 @@ export default function Profile() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label htmlFor="name" className="text-sm font-medium">Nome completo</label>
-                                <Input id="name" placeholder="Digite seu nome completo" defaultValue="João Silva" />
+                                <label htmlFor="name" className="text-sm font-medium text-card-foreground">Nome completo</label>
+                                <Input id="name" placeholder="Digite seu nome completo" defaultValue="João Silva" className="bg-background border-border text-foreground" />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="email" className="text-sm font-medium">E-mail</label>
-                                <Input id="email" type="email" placeholder="seu@email.com" defaultValue="joao.silva@email.com" />
+                                <label htmlFor="email" className="text-sm font-medium text-card-foreground">E-mail</label>
+                                <Input id="email" type="email" placeholder="seu@email.com" defaultValue="joao.silva@email.com" className="bg-background border-border text-foreground" />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="phone" className="text-sm font-medium">Telefone</label>
-                                <Input id="phone" placeholder="(11) 99999-9999" defaultValue="(11) 99999-9999" />
+                                <label htmlFor="phone" className="text-sm font-medium text-card-foreground">Telefone</label>
+                                <Input id="phone" placeholder="(11) 99999-9999" defaultValue="(11) 99999-9999" className="bg-background border-border text-foreground" />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="cpf" className="text-sm font-medium">CPF</label>
-                                <Input id="cpf" placeholder="000.000.000-00" defaultValue="123.456.789-00" />
+                                <label htmlFor="cpf" className="text-sm font-medium text-card-foreground">CPF</label>
+                                <Input id="cpf" placeholder="000.000.000-00" defaultValue="123.456.789-00" className="bg-background border-border text-foreground" />
                             </div>
                         </div>
 
@@ -67,17 +67,17 @@ export default function Profile() {
                 </Card>
 
                 {/* Endereços */}
-                <Card>
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle>Endereços</CardTitle>
-                        <CardDescription>Gerencie seus endereços de entrega</CardDescription>
+                        <CardTitle className="text-card-foreground">Endereços</CardTitle>
+                        <CardDescription className="text-muted-foreground">Gerencie seus endereços de entrega</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-4">
-                            <div className="border rounded-lg p-4 space-y-3">
+                            <div className="border border-border rounded-lg p-4 space-y-3 bg-background">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="font-medium">Casa</p>
+                                        <p className="font-medium text-foreground">Casa</p>
                                         <p className="text-sm text-muted-foreground">Rua das Flores, 123 - Apto 45</p>
                                         <p className="text-sm text-muted-foreground">Vila Madalena - São Paulo, SP</p>
                                         <p className="text-sm text-muted-foreground">CEP: 01234-567</p>
@@ -89,10 +89,10 @@ export default function Profile() {
                                 </div>
                             </div>
 
-                            <div className="border rounded-lg p-4 space-y-3">
+                            <div className="border border-border rounded-lg p-4 space-y-3 bg-background">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="font-medium">Trabalho</p>
+                                        <p className="font-medium text-foreground">Trabalho</p>
                                         <p className="text-sm text-muted-foreground">Av. Paulista, 1000 - Sala 101</p>
                                         <p className="text-sm text-muted-foreground">Bela Vista - São Paulo, SP</p>
                                         <p className="text-sm text-muted-foreground">CEP: 01310-100</p>
@@ -110,20 +110,20 @@ export default function Profile() {
                 </Card>
 
                 {/* Preferências */}
-                <Card>
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle>Preferências</CardTitle>
-                        <CardDescription>Configure suas preferências de compra</CardDescription>
+                        <CardTitle className="text-card-foreground">Preferências</CardTitle>
+                        <CardDescription className="text-muted-foreground">Configure suas preferências de compra</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label htmlFor="market" className="text-sm font-medium">Mercado preferido</label>
-                                <Input id="market" placeholder="Digite o nome do mercado" defaultValue="Mercado Central" />
+                                <label htmlFor="market" className="text-sm font-medium text-card-foreground">Mercado preferido</label>
+                                <Input id="market" placeholder="Digite o nome do mercado" defaultValue="Mercado Central" className="bg-background border-border text-foreground" />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="payment" className="text-sm font-medium">Forma de pagamento preferida</label>
-                                <Input id="payment" placeholder="Ex: Cartão de crédito" defaultValue="Cartão de crédito" />
+                                <label htmlFor="payment" className="text-sm font-medium text-card-foreground">Forma de pagamento preferida</label>
+                                <Input id="payment" placeholder="Ex: Cartão de crédito" defaultValue="Cartão de crédito" className="bg-background border-border text-foreground" />
                             </div>
                         </div>
 
@@ -134,20 +134,20 @@ export default function Profile() {
                 </Card>
 
                 {/* Segurança */}
-                <Card>
+                <Card className="bg-card border-border">
                     <CardHeader>
-                        <CardTitle>Segurança</CardTitle>
-                        <CardDescription>Gerencie sua senha e configurações de segurança</CardDescription>
+                        <CardTitle className="text-card-foreground">Segurança</CardTitle>
+                        <CardDescription className="text-muted-foreground">Gerencie sua senha e configurações de segurança</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label htmlFor="current-password" className="text-sm font-medium">Senha atual</label>
-                                <Input id="current-password" type="password" placeholder="Digite sua senha atual" />
+                                <label htmlFor="current-password" className="text-sm font-medium text-card-foreground">Senha atual</label>
+                                <Input id="current-password" type="password" placeholder="Digite sua senha atual" className="bg-background border-border text-foreground" />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="new-password" className="text-sm font-medium">Nova senha</label>
-                                <Input id="new-password" type="password" placeholder="Digite a nova senha" />
+                                <label htmlFor="new-password" className="text-sm font-medium text-card-foreground">Nova senha</label>
+                                <Input id="new-password" type="password" placeholder="Digite a nova senha" className="bg-background border-border text-foreground" />
                             </div>
                         </div>
 
