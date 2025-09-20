@@ -1,16 +1,15 @@
 import { getProductsById } from "@/actions/products.actions";
 import ProductCard from "@/app/components/ProductCard";
+import SearchAiBar from "@/app/components/SearchBar";
 import { Product } from "@/app/domain/productDomain";
 import RouterBack from "@/components/RouterBack";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import suggestionData from "@/suggestion-mock.json";
-import { ChefHat, Clock, ShoppingCart, Users } from "lucide-react";
+import { ChefHat, Clock, Users } from "lucide-react";
 import "moment/locale/pt-br";
 import { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
     title: 'Smart Market - Sugestão de Churrasco',
@@ -73,152 +72,141 @@ export default async function SuggestionPage() {
     const total = calculateTotal();
 
     return (
-        <ScrollArea className="flex flex-col flex-grow h-0">
+        <div className="flex flex-col flex-1">
             <div className="container mx-auto my-4">
                 <RouterBack />
             </div>
+            <div className="flex flex-col flex-1 justify-center items-center">
+                <div className="flex flex-col flex-1 max-w-[50%] relative">
+                    <ScrollArea className="flex flex-col flex-grow h-0">
+                        {/* Header da sugestão */}
+                        <div className="flex flex-col gap-4 p-4 mb-32">
+                            <div className="flex items-center gap-4">
+                                <ChefHat className="h-8 w-8 text-orange-600" />
+                                <div>
+                                    <h1 className="text-3xl font-bold">Sugestão de {suggestionData.occasion}</h1>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <Users className="h-4 w-4 text-gray-500" />
+                                        <span className="text-gray-600">Para {suggestionData.people} pessoas</span>
+                                    </div>
+                                </div>
+                            </div>
 
-            {/* Header da sugestão */}
-            <div className="flex flex-col gap-4 container mx-auto my-4">
-                <div className="flex items-center gap-4">
-                    <ChefHat className="h-8 w-8 text-orange-600" />
-                    <div>
-                        <h1 className="text-3xl font-bold">Sugestão de {suggestionData.occasion}</h1>
-                        <div className="flex items-center gap-2 mt-2">
-                            <Users className="h-4 w-4 text-gray-500" />
-                            <span className="text-gray-600">Para {suggestionData.people} pessoas</span>
+                            <p className="text-gray-700 leading-relaxed">
+                                Em um churrasco, geralmente calcula-se cerca de 300 a 400g de carne por pessoa, além de acompanhamentos e bebidas.
+                                Para {suggestionData.people} pessoas, isso significa aproximadamente {Math.ceil(suggestionData.people * 0.35)}kg de carne.
+                                Também é importante considerar acompanhamentos clássicos, carvão suficiente para manter a brasa acesa durante toda a refeição,
+                                e bebidas para refrescar os convidados.
+                            </p>
+
+                            {/* Categorias de produtos */}
+                            {suggestionData.items.map((category, categoryIndex) => (
+                                <Card key={categoryIndex}>
+                                    <CardHeader>
+                                        <CardTitle className="text-xl font-semibold text-orange-600">
+                                            {category.category}
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {category.subcategories.map((subcategory, subIndex) => (
+                                            <div key={subIndex} className="mb-6">
+                                                <h3 className="text-lg font-medium mb-4 text-gray-800">
+                                                    {subcategory.name}
+                                                </h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                                                    {subcategory.products.map((mockProduct) => {
+                                                        const realProduct = productMap.get(mockProduct.id);
+
+                                                        if (!realProduct) {
+                                                            return null; // Não renderiza produtos não encontrados
+                                                        }
+
+                                                        return (
+                                                            <ProductCard
+                                                                key={mockProduct.id}
+                                                                product={realProduct}
+                                                                variant="suggestion"
+                                                                badgeText={`${mockProduct.quantity} ${mockProduct.unit}`}
+                                                                badgeVariant="secondary"
+                                                            />
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </CardContent>
+                                </Card>
+                            ))}
+
+                            {/* Produtos recomendados opcionais */}
+                            {suggestionData.recommended_but_optional.length > 0 && (
+                                <Card key={suggestionData.recommended_but_optional.length}>
+                                    <CardHeader>
+                                        <CardTitle className="text-xl font-semibold text-blue-600">
+                                            Produtos Recomendados (Opcionais)
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                                            {suggestionData.recommended_but_optional.map((mockProduct) => {
+                                                const realProduct = productMap.get(mockProduct.id);
+
+                                                if (!realProduct) {
+                                                    return null; // Não renderiza produtos não encontrados
+                                                }
+
+                                                return (
+                                                    <ProductCard
+                                                        key={mockProduct.id}
+                                                        product={realProduct}
+                                                        variant="suggestion"
+                                                        badgeText="Opcional"
+                                                        badgeVariant="outline"
+                                                    />
+                                                );
+                                            })}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {/* Instruções */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-xl font-semibold text-green-600 flex items-center gap-2">
+                                        <Clock className="h-5 w-5" />
+                                        Instruções Passo a Passo
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        {suggestionData.instructions.map((instruction, index) => (
+                                            <div key={index} className="flex gap-4">
+                                                <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold text-sm">
+                                                    {instruction.step}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-gray-700 mb-2">{instruction.description}</p>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {instruction.products_used.map((productName, productIndex) => (
+                                                            <Badge key={productIndex} variant="outline" className="text-xs">
+                                                                {productName}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
+                    </ScrollArea>
+                    <div className="flex flex-col flex-1 w-full justify-center items-center px-4 py-8 absolute bottom-0 bg-slate-50/50 backdrop-blur-sm border-t">
+                        <SearchAiBar className="w-full" />
                     </div>
                 </div>
-                <p className="text-gray-700 leading-relaxed">
-                    Em um churrasco, geralmente calcula-se cerca de 300 a 400g de carne por pessoa, além de acompanhamentos e bebidas.
-                    Para {suggestionData.people} pessoas, isso significa aproximadamente {Math.ceil(suggestionData.people * 0.35)}kg de carne.
-                    Também é importante considerar acompanhamentos clássicos, carvão suficiente para manter a brasa acesa durante toda a refeição,
-                    e bebidas para refrescar os convidados.
-                </p>
             </div>
-
-            {/* Categorias de produtos */}
-            {suggestionData.items.map((category, categoryIndex) => (
-                <div key={categoryIndex} className="container mx-auto my-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-xl font-semibold text-orange-600">
-                                {category.category}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {category.subcategories.map((subcategory, subIndex) => (
-                                <div key={subIndex} className="mb-6">
-                                    <h3 className="text-lg font-medium mb-4 text-gray-800">
-                                        {subcategory.name}
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                                        {subcategory.products.map((mockProduct) => {
-                                            const realProduct = productMap.get(mockProduct.id);
-
-                                            if (!realProduct) {
-                                                return null; // Não renderiza produtos não encontrados
-                                            }
-
-                                            return (
-                                                <ProductCard
-                                                    key={mockProduct.id}
-                                                    product={realProduct}
-                                                    variant="suggestion"
-                                                    badgeText={`${mockProduct.quantity} ${mockProduct.unit}`}
-                                                    badgeVariant="secondary"
-                                                />
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </div>
-            ))}
-
-            {/* Produtos recomendados opcionais */}
-            {suggestionData.recommended_but_optional.length > 0 && (
-                <div className="container mx-auto my-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-xl font-semibold text-blue-600">
-                                Produtos Recomendados (Opcionais)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                                {suggestionData.recommended_but_optional.map((mockProduct) => {
-                                    const realProduct = productMap.get(mockProduct.id);
-
-                                    if (!realProduct) {
-                                        return null; // Não renderiza produtos não encontrados
-                                    }
-
-                                    return (
-                                        <ProductCard
-                                            key={mockProduct.id}
-                                            product={realProduct}
-                                            variant="suggestion"
-                                            badgeText="Opcional"
-                                            badgeVariant="outline"
-                                        />
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
-
-            {/* Instruções */}
-            <div className="container mx-auto my-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl font-semibold text-green-600 flex items-center gap-2">
-                            <Clock className="h-5 w-5" />
-                            Instruções Passo a Passo
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {suggestionData.instructions.map((instruction, index) => (
-                                <div key={index} className="flex gap-4">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold text-sm">
-                                        {instruction.step}
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-gray-700 mb-2">{instruction.description}</p>
-                                        <div className="flex flex-wrap gap-1">
-                                            {instruction.products_used.map((productName, productIndex) => (
-                                                <Badge key={productIndex} variant="outline" className="text-xs">
-                                                    {productName}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Footer com total e botão */}
-            <footer className="flex w-full justify-between items-center p-4 bg-white border-b border-gray-200 shadow-lg border-t">
-                <div className="flex flex-col">
-                    <h1 className="text-2xl font-bold">Total</h1>
-                    <p className="text-sm text-gray-500">R$ {total.toFixed(2)}</p>
-                </div>
-                <Button asChild size="lg">
-                    <Link href="/cart">
-                        <ShoppingCart size={24} />
-                        <span className="text-sm font-bold">Ir para carrinho</span>
-                    </Link>
-                </Button>
-            </footer>
-        </ScrollArea>
+        </div>
     )
 }

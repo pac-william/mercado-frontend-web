@@ -8,7 +8,7 @@ import { Mic, SearchIcon, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent } from "react";
 
-export default function SearchAiBar() {
+export default function SearchAiBar({ className }: { className?: string }) {
 
     const router = useRouter();
 
@@ -18,8 +18,8 @@ export default function SearchAiBar() {
     }
 
     return (
-        <form onSubmit={handleSubmitSearch}>
-            <Card className="flex flex-row items-center w-[500px] shadow-md">
+        <form onSubmit={handleSubmitSearch} className={className}>
+            <Card className="flex flex-row items-center shadow-md">
                 <Button variant="ghost" size="icon_lg" className="rounded-none" type="button">
                     <Sparkles size={24} />
                 </Button>
