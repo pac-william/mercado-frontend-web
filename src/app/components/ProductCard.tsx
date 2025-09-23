@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Separator } from "@/components/ui/separator";
 import { Edit2, ShoppingCart, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { toast } from "sonner";
 import { ProductCreateForm } from "../admin/products/create/components/ProductCreateForm";
 import { Product } from "../domain/productDomain";
@@ -158,7 +159,9 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                     <Separator />
 
                     <CardContent className="p-0 relative w-full aspect-square">
-                        <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
+                        <Link href={`/product/${product.id}`}>
+                            <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
+                        </Link>
                     </CardContent>
 
                     <CardFooter className="flex flex-col flex-1 gap-2 items-start">

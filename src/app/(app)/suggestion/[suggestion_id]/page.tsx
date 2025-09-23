@@ -113,7 +113,7 @@ export default async function SuggestionPage() {
                                                 <h3 className="text-lg font-medium mb-4 text-card-foreground">
                                                     {subcategory.name}
                                                 </h3>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                                     {subcategory.products.map((mockProduct) => {
                                                         const realProduct = productMap.get(mockProduct.id);
 
@@ -147,7 +147,7 @@ export default async function SuggestionPage() {
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                             {suggestionData.recommended_but_optional.map((mockProduct) => {
                                                 const realProduct = productMap.get(mockProduct.id);
 
@@ -202,7 +202,7 @@ export default async function SuggestionPage() {
                             </Card>
                         </div>
                     </ScrollArea>
-                    <div className="flex flex-col flex-1 w-full justify-center items-center px-4 py-8 absolute bottom-0 bg-background/50 backdrop-blur-sm border-t border-border">
+                    <div className="flex flex-col flex-1 w-full justify-center items-center px-4 py-8 absolute bottom-0 bg-background/50 backdrop-blur-sm border-t border-border z-50">
                         <SearchAiBar className="w-full" />
                     </div>
                 </div>
