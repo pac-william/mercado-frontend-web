@@ -1,3 +1,4 @@
+import { getMarkets } from "@/actions/market.actions";
 import { getProducts } from "@/actions/products.actions";
 import Pagination from "@/app/components/Pagination";
 import PriceSlider from "@/components/price-slider";
@@ -8,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
 import HeroSection from "../components/HeroSection";
+import { MarqueeDemo } from "../components/Marquee";
 import ProductCard from "../components/ProductCard";
 import SearchAiBar from "../components/SearchBar";
 import { Product } from "../domain/productDomain";
@@ -22,6 +24,8 @@ export const metadata: Metadata = {
 export default async function Home({ searchParams }: { searchParams: Promise<{ page: number, size: number, name: string }> }) {
     const { page, size, name } = await searchParams;
     const { products, meta } = await getProducts({ page: page || 1, size: size || 100, name: name });
+    const { markets } = await getMarkets();
+
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 items-center my-4">
@@ -29,7 +33,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                 <div className="flex flex-col gap-4 items-center justify-center h-64">
                     <SearchAiBar particles />
                 </div>
-                <div className="flex flex-1 gap-4 container mx-auto">
+
+                <MarqueeDemo reviews={markets.map((market) => ({
+                    name: market.name,
+                    username: market.address,
+                    body: market.logo || '',
+                    img: market.logo || '',
+                }))} />
+
+                <div className="flex flex-1 gap-4 container mx-auto mt-20">
                     <div className="w-[320px] h-[calc(100vh-113px)] sticky top-4">
                         <Card className="flex flex-col h-full bg-card border-border">
                             <CardHeader>
