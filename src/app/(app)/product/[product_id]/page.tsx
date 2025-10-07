@@ -7,6 +7,7 @@ import { formatPrice } from "@/app/utils/formatters";
 import RouterBack from "@/components/RouterBack";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Lens } from "@/components/ui/lens";
 import { Separator } from "@/components/ui/separator";
 import { RotateCcw, Shield, ShoppingCart, Star, Truck } from "lucide-react";
 import Image from "next/image";
@@ -17,6 +18,7 @@ export default function ProductPage({ params }: { params: Promise<{ product_id: 
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
+    const [hovering, setHovering] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -110,7 +112,7 @@ export default function ProductPage({ params }: { params: Promise<{ product_id: 
             </div>
         );
     }
-    1
+
     if (!product) {
         return (
             <div className="flex flex-col flex-1">
@@ -135,15 +137,23 @@ export default function ProductPage({ params }: { params: Promise<{ product_id: 
             </div>
 
             <div className="flex flex-col flex-1 container mx-auto pb-8">
-                <div className="grid grid-cols-2">
+                <div className="grid grid-cols-2 gap-4">
                     {/* Imagem do produto */}
                     <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden">
-                        <Image
-                            src={getImageSrc()}
-                            alt={product.name}
-                            className="object-cover"
-                            fill
-                        />
+                        <Lens 
+                            hovering={hovering} 
+                            setHovering={setHovering} 
+                            zoomFactor={1.5} 
+                            lensSize={170}
+                        >
+                            <Image
+                                src={getImageSrc()}
+                                alt={product.name}
+                                className="object-cover"
+                                fill
+                                quality={100}
+                            />
+                        </Lens>
                     </div>
 
                     {/* Informações do produto */}

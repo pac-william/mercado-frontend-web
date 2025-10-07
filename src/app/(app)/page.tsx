@@ -27,7 +27,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
             <div className="flex flex-col gap-4 items-center my-4">
                 <HeroSection />
                 <div className="flex flex-col gap-4 items-center justify-center h-64">
-                    <SearchAiBar />
+                    <SearchAiBar particles />
                 </div>
                 <div className="flex flex-1 gap-4 container mx-auto">
                     <div className="w-[320px] h-[calc(100vh-113px)] sticky top-4">
