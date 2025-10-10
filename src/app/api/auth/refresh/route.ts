@@ -3,11 +3,10 @@ import { getAccessTokenFromRequest, parseMockToken, createMockToken, setAccessTo
 import { buildApiUrl } from '@/lib/http';
 
 export async function POST(req: Request) {
-    const useMock = process.env.USE_MOCK === 'true';
+    const useMock = process.env.USE_MOCK !== 'false';
     
     if (useMock) {
-        // Lógica mock (mantida para desenvolvimento)
-        const token = getAccessTokenFromRequest(req);
+        const token = await getAccessTokenFromRequest(req);
         const payload = parseMockToken(token);
         if (!payload) {
             return NextResponse.json({ message: 'Não autenticado' }, { status: 401 });
@@ -20,11 +19,10 @@ export async function POST(req: Request) {
             role: payload.role
         }, 60 * 60);
 
-        setAccessTokenCookie(newToken, 60 * 60);
+        await setAccessTokenCookie(newToken, 60 * 60);
         return NextResponse.json({ accessToken: newToken }, { status: 200 });
     }
 
-    // Proxy para backend real
     try {
         const body = await req.json();
         const backendUrl = buildApiUrl('/api/v1/auth/refresh-token');
@@ -35,7 +33,7 @@ export async function POST(req: Request) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(body),
-            credentials: 'include', // Importante para enviar cookies
+            credentials: 'include',
         });
 
         const data = await response.json();
@@ -44,7 +42,6 @@ export async function POST(req: Request) {
             return NextResponse.json(data, { status: response.status });
         }
 
-        // Backend gerencia cookies automaticamente
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
         return NextResponse.json({ message: 'Erro interno' }, { status: 500 });

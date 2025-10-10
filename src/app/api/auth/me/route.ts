@@ -4,11 +4,10 @@ import { getAccessTokenFromRequest, parseMockToken } from '../_utils';
 import { buildApiUrl } from '@/lib/http';
 
 export async function GET(req: Request) {
-    const useMock = process.env.USE_MOCK === 'true';
+    const useMock = process.env.USE_MOCK !== 'false';
     
     if (useMock) {
-        // Lógica mock (mantida para desenvolvimento)
-        const token = getAccessTokenFromRequest(req);
+        const token = await getAccessTokenFromRequest(req);
         const payload = parseMockToken(token);
         if (!payload) {
             return NextResponse.json({ message: 'Não autenticado' }, { status: 401 });
@@ -18,20 +17,18 @@ export async function GET(req: Request) {
             id: payload.id,
             name: payload.name,
             email: payload.email,
-            role: payload.role
+            role: payload.role || 'CUSTOMER'
         };
 
         return NextResponse.json({ user }, { status: 200 });
     }
 
-    // Para backend real, vamos usar o token JWT diretamente
     try {
-        const token = getAccessTokenFromRequest(req);
+        const token = await getAccessTokenFromRequest(req);
         if (!token) {
             return NextResponse.json({ message: 'Token não encontrado' }, { status: 401 });
         }
 
-        // Decodificar o token JWT para obter informações do usuário
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             

@@ -9,8 +9,8 @@ export interface MockTokenPayload {
     name: string;
     email: string;
     role?: string;
-    roles?: string[]; // Mantido para compatibilidade
-    exp: number; // epoch seconds
+    roles?: string[];
+    exp: number;
 }
 
 export function createMockToken(payload: Omit<MockTokenPayload, 'exp'>, ttlSeconds = 60 * 60): string {
@@ -27,13 +27,13 @@ export function parseMockToken(token: string | undefined | null): MockTokenPaylo
         const obj = JSON.parse(json) as MockTokenPayload;
         if (!obj.exp || obj.exp < Math.floor(Date.now() / 1000)) return null;
         return obj;
-    } catch (_e) {
+    } catch {
         return null;
     }
 }
 
-export function setAccessTokenCookie(token: string, maxAgeSec = 60 * 60) {
-    cookies().set(ACCESS_TOKEN_COOKIE, token, {
+export async function setAccessTokenCookie(token: string, maxAgeSec = 60 * 60) {
+    (await cookies()).set(ACCESS_TOKEN_COOKIE, token, {
         httpOnly: true,
         sameSite: 'lax',
         secure: isProd,
@@ -42,8 +42,8 @@ export function setAccessTokenCookie(token: string, maxAgeSec = 60 * 60) {
     });
 }
 
-export function clearAccessTokenCookie() {
-    cookies().set(ACCESS_TOKEN_COOKIE, '', {
+export async function clearAccessTokenCookie() {
+    (await cookies()).set(ACCESS_TOKEN_COOKIE, '', {
         httpOnly: true,
         sameSite: 'lax',
         secure: isProd,
@@ -52,17 +52,15 @@ export function clearAccessTokenCookie() {
     });
 }
 
-export function getAccessTokenFromRequest(req?: Request): string | null {
+export async function getAccessTokenFromRequest(req?: Request): Promise<string | null> {
     if (req) {
-        // Para requisições do backend real
         const authHeader = req.headers.get('authorization');
         if (authHeader && authHeader.startsWith('Bearer ')) {
             return authHeader.substring(7);
         }
     }
     
-    // Para mock, usar cookies
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const fromCookie = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
     if (fromCookie) return fromCookie;
     return null;

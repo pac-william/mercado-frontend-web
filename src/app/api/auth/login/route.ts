@@ -4,10 +4,9 @@ import { createMockToken, setAccessTokenCookie } from '../_utils';
 import { buildApiUrl } from '@/lib/http';
 
 export async function POST(req: Request) {
-    const useMock = process.env.USE_MOCK === 'true';
+    const useMock = process.env.USE_MOCK !== 'false';
     
     if (useMock) {
-        // Lógica mock (mantida para desenvolvimento)
         try {
             const { email, password } = await req.json();
             if (!email || !password) {
@@ -36,7 +35,7 @@ export async function POST(req: Request) {
                 role: user.role
             }, 60 * 60);
 
-            setAccessTokenCookie(accessToken, 60 * 60);
+            await setAccessTokenCookie(accessToken, 60 * 60);
 
             const body: AuthResponse = { 
                 message: 'Login realizado com sucesso',
@@ -46,12 +45,11 @@ export async function POST(req: Request) {
                 refreshToken: 'mock_refresh_token'
             };
             return NextResponse.json(body, { status: 200 });
-        } catch (_e) {
+        } catch {
             return NextResponse.json({ message: 'Erro interno' }, { status: 500 });
         }
     }
 
-    // Proxy para backend real
     try {
         const body = await req.json();
         const backendUrl = buildApiUrl('/api/v1/auth/login');
@@ -62,7 +60,7 @@ export async function POST(req: Request) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(body),
-            credentials: 'include', // Importante para enviar cookies
+            credentials: 'include',
         });
 
         const data = await response.json();
@@ -71,7 +69,6 @@ export async function POST(req: Request) {
             return NextResponse.json(data, { status: response.status });
         }
 
-        // Backend gerencia cookies automaticamente, apenas retornamos a resposta
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
         return NextResponse.json({ message: 'Erro interno' }, { status: 500 });
