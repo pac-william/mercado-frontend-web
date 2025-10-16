@@ -52,3 +52,36 @@ export async function getSuggestionById(id: string): Promise<Suggestion> {
     throw error;
   }
 }
+
+export async function getUserSuggestions(page: number = 1, size: number = 10): Promise<{
+  suggestions: { id: string }[];
+  meta: {
+    page: number;
+    size: number;
+    total: number;
+    totalPages: number;
+    totalItems: number;
+  };
+}> {
+  try {
+    const url = `${baseUrl}/api/v1/suggestions?page=${page}&size=${size}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao buscar histórico de sugestões: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar histórico de sugestões:', error);
+    throw error;
+  }
+}

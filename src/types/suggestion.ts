@@ -60,3 +60,18 @@ export interface Suggestion {
   updatedAt: string;
 }
 
+export interface SuggestionListItem {
+  id: string;
+}
+
+export interface SuggestionPaginatedResponse {
+  suggestions: SuggestionListItem[];
+  meta: {
+    page: number;
+    size: number;
+    total: number;
+    totalPages: number;
+    totalItems: number;
+  };
+}
+
