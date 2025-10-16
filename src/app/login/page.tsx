@@ -72,7 +72,7 @@ export default function LoginPage() {
             <Input
               type="email"
               placeholder="Email"
-              className="pl-11 h-14 bg-white border-[#e0e0e0] focus-visible:ring-[#FF4500] focus-visible:border-[#FF4500] rounded-xl"
+              className="pl-11 h-14 bg-white border-[#e0e0e0] focus-visible:ring-[#2E7D32] focus-visible:border-[#2E7D32] rounded-xl"
               {...register('email')}
               disabled={isSubmitting || loading}
             />
@@ -86,7 +86,7 @@ export default function LoginPage() {
             <Input
               type={showPassword ? "text" : "password"}
               placeholder="Senha"
-              className="pl-11 pr-11 h-14 bg-white border-[#e0e0e0] focus-visible:ring-[#FF4500] focus-visible:border-[#FF4500] rounded-xl"
+              className="pl-11 pr-11 h-14 bg-white border-[#e0e0e0] focus-visible:ring-[#2E7D32] focus-visible:border-[#2E7D32] rounded-xl"
               {...register('password')}
               disabled={isSubmitting || loading}
             />
@@ -110,7 +110,7 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            className="w-full h-14 bg-[#FF4500] hover:bg-[#FF4500]/90 text-white font-bold text-base rounded-xl shadow-lg shadow-[#FF4500]/30"
+            className="w-full h-14 bg-[#2E7D32] hover:bg-[#2E7D32]/90 text-white font-bold text-base rounded-xl shadow-lg shadow-[#2E7D32]/30"
             disabled={isSubmitting || loading}
           >
             {isSubmitting || loading ? (
@@ -135,7 +135,7 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-[#666]">
           Não tem uma conta?{' '}
-          <Link href="/register" className="text-[#FF4500] font-bold hover:underline">
+          <Link href="/register" className="text-[#2E7D32] font-bold hover:underline">
             Cadastre-se
           </Link>
         </p>
