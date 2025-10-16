@@ -1,6 +1,6 @@
 "use client";
 import { generateLoadingStates } from "@/actions/loadingState.actions";
-import { searchSuggestions } from "@/actions/suggestion.actions";
+import { createSuggestion } from "@/actions/suggestion.actions";
 import { SearchIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -64,14 +64,14 @@ export function MultiStepLoaderSearch({ inputValue }: MultiStepLoaderSearchProps
           await new Promise(resolve => setTimeout(resolve, 200));
         }
 
-        // Executar busca de sugestões (que demora 5 segundos)
-        const suggestionResult = await searchSuggestions(inputValue);
+        // Criar sugestão via POST
+        const suggestionResult = await createSuggestion(inputValue);
 
         // Redirecionar para a página de sugestão com o ID retornado
         router.push(`/suggestion/${suggestionResult.id}`);
 
       } catch (error) {
-        console.error('Erro ao buscar sugestões:', error);
+        console.error('Erro ao criar sugestão:', error);
         // Em caso de erro, redirecionar para uma sugestão padrão
         router.push(`/suggestion/1`);
       }
