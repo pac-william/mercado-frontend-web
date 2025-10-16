@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProductCreateForm } from "./components/ProductCreateForm";
 
 export default async function CreateProduct() {
-    const markets = await getMarkets();
+    const { markets } = await getMarkets();
     return (
         <div className="flex flex-col flex-1">
             <ScrollArea className="flex flex-col flex-grow h-0">
