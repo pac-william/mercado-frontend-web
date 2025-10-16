@@ -245,7 +245,7 @@ export default function Cart() {
                                         <div>
                                             <Button asChild>
                                                 <Link href="/checkout">
-                                                    Continuar para o Checkout
+                                                Continuar para o Checkout
                                                 </Link>
                                             </Button>
                                         </div>
