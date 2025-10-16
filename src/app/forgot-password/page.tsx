@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
             <Input
               type="email"
               placeholder="Email"
-              className="pl-11 h-14 bg-white border-[#e0e0e0] focus-visible:ring-[#FF4500] focus-visible:border-[#FF4500] rounded-xl"
+              className="pl-11 h-14 bg-white border-[#e0e0e0] focus-visible:ring-[#2E7D32] focus-visible:border-[#2E7D32] rounded-xl"
               {...register('email')}
               disabled={isSubmitting}
             />
@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
           <div className="pt-2">
             <Button
               type="submit"
-              className="w-full h-14 bg-[#FF4500] hover:bg-[#FF4500]/90 text-white font-bold text-base rounded-xl shadow-lg shadow-[#FF4500]/30"
+              className="w-full h-14 bg-[#2E7D32] hover:bg-[#2E7D32]/90 text-white font-bold text-base rounded-xl shadow-lg shadow-[#2E7D32]/30"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
 
         <p className="text-center text-sm text-[#666]">
           Lembrou sua senha?{' '}
-          <Link href="/login" className="text-[#FF4500] font-bold hover:underline">
+          <Link href="/login" className="text-[#2E7D32] font-bold hover:underline">
             Entrar
           </Link>
         </p>
