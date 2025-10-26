@@ -1,16 +1,16 @@
 'use client';
 
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import LoadingSpinner from '@/components/LoadingSpinner';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Key, Mail } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import Link from 'next/link';
-import { Mail, Key } from 'lucide-react';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Email deve ter um formato válido'),
@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
+  const onSubmit = async () => {
     try {
       setIsSubmitting(true);
       
@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
       setTimeout(() => {
         router.push('/login');
       }, 2000);
-    } catch (error) {
+    } catch {
       toast.error('Erro ao enviar email de recuperação');
     } finally {
       setIsSubmitting(false);
