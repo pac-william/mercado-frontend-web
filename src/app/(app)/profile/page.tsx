@@ -1,19 +1,19 @@
 'use client';
 
+import LoadingSpinner from "@/components/LoadingSpinner";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RouterBack from "@/components/RouterBack";
-import { useAuth } from "@/providers/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import { useAuth } from "@/providers/auth-provider";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Profile() {
     const { user, loading, logout } = useAuth();
@@ -26,7 +26,7 @@ export default function Profile() {
             await logout();
             toast.success("Logout realizado com sucesso!");
             router.push("/login");
-        } catch (error) {
+        } catch {
             toast.error("Erro ao fazer logout");
         } finally {
             setLoggingOut(false);

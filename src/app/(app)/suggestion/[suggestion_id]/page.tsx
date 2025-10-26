@@ -16,18 +16,13 @@ export const metadata: Metadata = {
     description: 'Sugestão personalizada de produtos',
 }
 
-interface PageProps {
-    params: {
-        suggestion_id: string;
-    };
-}
-
-export default async function SuggestionPage({ params }: PageProps) {
-    // Buscar dados da sugestão pelo ID
+export default async function SuggestionPage({ params }: { params: Promise<{ suggestion_id: string }> }) {
+    const suggestion_id = (await params).suggestion_id;
+    
     let suggestionData = null;
     
     try {
-        suggestionData = await getSuggestionById(params.suggestion_id);
+        suggestionData = await getSuggestionById(suggestion_id);
     } catch (error) {
         console.error('Erro ao buscar sugestão:', error);
     }

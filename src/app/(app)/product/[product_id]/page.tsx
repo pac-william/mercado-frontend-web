@@ -78,23 +78,6 @@ export default function ProductPage({ params }: { params: Promise<{ product_id: 
         toast.success("Redirecionando para o checkout...");
     };
 
-    const addToWishlist = () => {
-        toast.success("Produto adicionado aos favoritos");
-    };
-
-    const shareProduct = () => {
-        if (navigator.share) {
-            navigator.share({
-                title: product?.name,
-                text: `Confira este produto: ${product?.name}`,
-                url: window.location.href,
-            });
-        } else {
-            navigator.clipboard.writeText(window.location.href);
-            toast.success("Link copiado para a área de transferência");
-        }
-    };
-
     if (loading) {
         return (
             <div className="flex flex-col flex-1">
