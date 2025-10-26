@@ -1,10 +1,10 @@
 'use client';
 
 import { createOrder } from "@/actions/order.actions";
-import { OrderItemDTO } from "@/dtos/orderDTO";
-import { useAuth } from "@/providers/auth-provider";
 import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { OrderItemDTO } from "@/dtos/orderDTO";
+import { useAuth } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -89,8 +89,6 @@ export default function CheckoutPage() {
                 quantity: item.quantity,
                 price: item.price
             }));
-
-            const marketId = cartItems[0].marketId;
 
             await createOrder({
                 deliveryAddress: fullAddress,

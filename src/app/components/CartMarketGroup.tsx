@@ -1,4 +1,4 @@
-import { Product } from "@/app/domain/product";
+import { Product } from "@/app/domain/productDomain";
 import {
     Accordion,
     AccordionContent,

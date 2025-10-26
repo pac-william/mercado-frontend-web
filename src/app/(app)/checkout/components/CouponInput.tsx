@@ -37,7 +37,7 @@ export default function CouponInput({ onApply, onRemove, orderTotal, appliedCode
             } else {
                 toast.error(result.message || "Cupom inválido");
             }
-        } catch (error) {
+        } catch {
             toast.error("Erro ao validar cupom");
         } finally {
             setValidating(false);

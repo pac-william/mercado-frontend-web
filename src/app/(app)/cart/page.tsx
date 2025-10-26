@@ -4,9 +4,11 @@ import { validateCoupon } from "@/actions/coupon.actions";
 import { getMarkets } from "@/actions/market.actions";
 import { getProducts } from "@/actions/products.actions";
 import ProductCard from "@/app/components/ProductCard";
+import { Market } from "@/app/domain/marketDomain";
+import { Product } from "@/app/domain/productDomain";
 import { formatPrice } from "@/app/utils/formatters";
-import RouterBack from "@/components/RouterBack";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import RouterBack from "@/components/RouterBack";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -21,8 +23,8 @@ import { toast } from "sonner";
 import SelectMethod from "./components/SelectMethod";
 
 export default function Cart() {
-    const [products, setProducts] = useState<any[]>([]);
-    const [markets, setMarkets] = useState<any[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [markets, setMarkets] = useState<Market[]>([]);
     const [loading, setLoading] = useState(true);
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>();
@@ -43,7 +45,7 @@ export default function Cart() {
             ]);
             setProducts(productsData.products || []);
             setMarkets(marketsData.markets || []);
-        } catch (error) {
+        } catch {
             toast.error("Erro ao carregar dados");
         } finally {
             setLoading(false);
@@ -76,7 +78,7 @@ export default function Cart() {
             } else {
                 toast.error(result.message || "Cupom inválido");
             }
-        } catch (error) {
+        } catch {
             toast.error("Erro ao validar cupom");
         } finally {
             setValidating(false);
