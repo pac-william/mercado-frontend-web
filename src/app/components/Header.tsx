@@ -8,28 +8,15 @@ import { isAdmin } from "@/lib/auth";
 import { useAuth } from "@/providers/auth-provider";
 import { History, Settings, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export default function Header() {
-    const { user, logout, loading } = useAuth();
-    const router = useRouter();
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
 
     const handleCloseSheet = () => {
         setIsOpen(false);
     }
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-            toast.success('Logout realizado com sucesso!');
-            router.push('/');
-        } catch (error) {
-            toast.error('Erro ao fazer logout');
-        }
-    };
 
     return (
         <header className="flex w-full justify-between items-center p-4 bg-background border-b border-border">

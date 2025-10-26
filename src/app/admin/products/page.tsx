@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 
 export default async function Products() {
-    const products = await getProducts({ page: 1, size: 100 });
+    const { products } = await getProducts({ page: 1, size: 100 });
     return (
         <div className="flex flex-col flex-1">
             <ScrollArea className="flex flex-col flex-grow h-0">
