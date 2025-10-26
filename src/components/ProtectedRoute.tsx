@@ -1,9 +1,9 @@
 'use client';
 
-import { useAuth } from '@/providers/auth-provider';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useAuth } from '@/providers/auth-provider';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,7 +12,6 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!loading && !user) {

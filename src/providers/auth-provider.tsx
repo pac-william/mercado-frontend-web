@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { CurrentUser, AuthResponse } from '@/types/auth';
 import { http } from '@/lib/http';
+import { AuthResponse, CurrentUser } from '@/types/auth';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
   user: CurrentUser | null;
@@ -45,13 +45,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return () => clearInterval(interval);
     }
   }, [user, loading]);
-
-  // Evitar revalidações desnecessárias
-  const loadUserIfNeeded = async () => {
-    if (!user && !loading) {
-      await loadUser();
-    }
-  };
 
   const loadUser = async () => {
     try {
@@ -108,7 +101,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = async () => {
     try {
       await http('/api/auth/logout', { method: 'POST' });
-    } catch (error) {
+    } catch {
       // Ignorar erros de logout
     } finally {
       setUser(null);
@@ -117,7 +110,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const refresh = async () => {
     try {
-      const response = await http<{ accessToken: string }>('/api/auth/refresh', {
+      await http<{ accessToken: string }>('/api/auth/refresh', {
         method: 'POST'
       });
       // Token renovado, recarregar usuário
