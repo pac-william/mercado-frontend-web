@@ -2,13 +2,13 @@
 
 import { getOrders } from "@/actions/order.actions";
 import { Order } from "@/app/domain/orderDomain";
-import { useAuth } from "@/providers/auth-provider";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import { useAuth } from "@/providers/auth-provider";
 import { Package } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import OrderCard from "./components/OrderCard";
 import StatusFilters from "./components/StatusFilters";
@@ -22,17 +22,7 @@ export default function MyOrdersPage() {
     const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState<FilterStatus>("ALL");
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            toast.error("Você precisa estar logado para ver seus pedidos");
-            router.push("/login?next=/my-orders");
-            return;
-        }
-
-        loadOrders();
-    }, [isAuthenticated, router]);
-
-    const loadOrders = async () => {
+    const loadOrders = useCallback(async () => {
         if (!user?.id) return;
 
         setLoading(true);
@@ -48,7 +38,17 @@ export default function MyOrdersPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user?.id]);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            toast.error("Você precisa estar logado para ver seus pedidos");
+            router.push("/login?next=/my-orders");
+            return;
+        }
+
+        loadOrders();
+    }, [isAuthenticated, router, loadOrders]);
 
     const filteredOrders = activeFilter === "ALL" 
         ? orders 

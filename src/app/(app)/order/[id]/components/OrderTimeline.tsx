@@ -1,13 +1,4 @@
-import { CheckCircle2, Circle, Clock, Loader2, Package, Truck, XCircle } from "lucide-react";
-
-type OrderStatus = 
-    | "PENDING" 
-    | "CONFIRMED" 
-    | "PREPARING" 
-    | "READY_FOR_DELIVERY" 
-    | "OUT_FOR_DELIVERY" 
-    | "DELIVERED" 
-    | "CANCELLED";
+import { CheckCircle2, Clock, Loader2, Package, Truck, XCircle } from "lucide-react";
 
 interface OrderTimelineProps {
     currentStatus: string;

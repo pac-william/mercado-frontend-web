@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Suggestion } from "@/types/suggestion";
-import { ChefHat, ChevronLeft, ChevronRight, Clock, Package, ShoppingBag } from "lucide-react";
+import { ChefHat, ChevronLeft, ChevronRight, Clock, Package, ShoppingBag, SquareArrowOutUpRight } from "lucide-react";
 import moment from "moment";
 import "moment/locale/pt-br";
 import { Metadata } from "next";
@@ -18,16 +18,14 @@ export const metadata: Metadata = {
 }
 
 interface PageProps {
-    searchParams: {
-        page?: string;
-        size?: string;
-    };
+    searchParams: Promise<{ page?: string; size?: string }>;
 }
 
 export default async function History({ searchParams }: PageProps) {
-    const currentPage = parseInt(searchParams.page || '1', 10);
-    const pageSize = parseInt(searchParams.size || '10', 10);
-    
+    const { page, size } = await searchParams;
+    const currentPage = parseInt(page || '1', 10);
+    const pageSize = parseInt(size || '10', 10);
+
     let suggestions: Suggestion[] = [];
     let meta = {
         total: 0,
@@ -36,17 +34,17 @@ export default async function History({ searchParams }: PageProps) {
         totalPages: 0,
         totalItems: 0
     };
-    
+
     try {
         // Buscar lista de IDs das sugestões
         const response = await getUserSuggestions(currentPage, pageSize);
         meta = response.meta;
-        
+
         // Buscar detalhes de cada sugestão individualmente
-        const suggestionPromises = response.suggestions.map(suggestion => 
+        const suggestionPromises = response.suggestions.map(suggestion =>
             getSuggestionById(suggestion.id).catch(() => null)
         );
-        
+
         const fetchedSuggestions = await Promise.all(suggestionPromises);
         suggestions = fetchedSuggestions.filter((s): s is Suggestion => s !== null);
     } catch (error) {
@@ -58,7 +56,7 @@ export default async function History({ searchParams }: PageProps) {
             <ScrollArea className="flex flex-col flex-grow h-0">
                 <div className="flex flex-col gap-6 container mx-auto my-4">
                     <div className="flex items-center gap-4">
-                <RouterBack />
+                        <RouterBack />
                         <div className="flex items-center gap-3">
                             <ChefHat className="h-8 w-8 text-primary" />
                             <div>
@@ -96,13 +94,13 @@ export default async function History({ searchParams }: PageProps) {
                                             <span className="text-xs text-muted-foreground">
                                                 {moment(suggestion.createdAt).format('HH:mm')}
                                             </span>
-                                </div>
-                                <div className="flex flex-col flex-1 items-center relative">
-                                            <span 
+                                        </div>
+                                        <div className="flex flex-col flex-1 items-center relative">
+                                            <span
                                                 className={`h-4 w-[2px] bg-primary absolute -top-4 ${index === 0 ? "hidden" : ""}`}
                                             />
                                             <span className="min-h-4 min-w-4 border-2 border-primary bg-background rounded-full" />
-                                            <span 
+                                            <span
                                                 className={`h-full w-[2px] bg-primary absolute -bottom-4 ${index === suggestions.length - 1 ? "hidden" : ""}`}
                                             />
                                         </div>
@@ -178,14 +176,15 @@ export default async function History({ searchParams }: PageProps) {
                                                 )}
 
                                                 {/* Botão para ver sugestão completa */}
-                                                <div className="pt-2">
+                                                <div className="flex flex-1 items-center gap-2 pt-2">
                                                     <Link href={`/suggestion/${suggestion.id}`}>
-                                                        <Button variant="default" className="w-full">
-                                                            Ver Sugestão Completa
+                                                        <Button variant="link">
+                                                            <span>Ver Sugestão Completa</span>
+                                                            <SquareArrowOutUpRight size={16} />
                                                         </Button>
                                                     </Link>
-                                </div>
-                            </div>
+                                                </div>
+                                            </div>
                                         </CardContent>
                                     </Card>
                                 </div>
@@ -201,11 +200,11 @@ export default async function History({ searchParams }: PageProps) {
                                     <span className="text-sm text-muted-foreground">
                                         Mostrando {((meta.page - 1) * meta.size) + 1} a {Math.min(meta.page * meta.size, meta.totalItems)} de {meta.totalItems}
                                     </span>
-                        </div>
+                                </div>
                                 <div className="flex items-center gap-2">
                                     <Link href={`/history?page=${Math.max(1, meta.page - 1)}&size=${pageSize}`}>
-                                        <Button 
-                                            variant="outline" 
+                                        <Button
+                                            variant="outline"
                                             size="sm"
                                             disabled={meta.page === 1}
                                             className="gap-1"
@@ -226,10 +225,10 @@ export default async function History({ searchParams }: PageProps) {
                                             } else {
                                                 pageNum = meta.page - 2 + i;
                                             }
-                                            
+
                                             return (
                                                 <Link key={pageNum} href={`/history?page=${pageNum}&size=${pageSize}`}>
-                                                    <Button 
+                                                    <Button
                                                         variant={pageNum === meta.page ? "default" : "outline"}
                                                         size="sm"
                                                         className="min-w-[40px]"
@@ -241,8 +240,8 @@ export default async function History({ searchParams }: PageProps) {
                                         })}
                                     </div>
                                     <Link href={`/history?page=${Math.min(meta.totalPages, meta.page + 1)}&size=${pageSize}`}>
-                                        <Button 
-                                            variant="outline" 
+                                        <Button
+                                            variant="outline"
                                             size="sm"
                                             disabled={meta.page === meta.totalPages}
                                             className="gap-1"
@@ -255,8 +254,8 @@ export default async function History({ searchParams }: PageProps) {
                             </CardContent>
                         </Card>
                     )}
-            </div>
-        </ScrollArea>
+                </div>
+            </ScrollArea>
         </ProtectedRoute>
     );
 }   

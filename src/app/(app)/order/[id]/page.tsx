@@ -1,16 +1,16 @@
 'use client';
 
 import { getOrderById } from "@/actions/order.actions";
-import { OrderResponseDTO } from "@/dtos/orderDTO";
-import { useAuth } from "@/providers/auth-provider";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import StatusBadge from "../../my-orders/components/StatusBadge";
+import { OrderResponseDTO } from "@/dtos/orderDTO";
+import { useAuth } from "@/providers/auth-provider";
 import { CalendarDays } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import StatusBadge from "../../my-orders/components/StatusBadge";
 import DeliveryInfo from "./components/DeliveryInfo";
 import OrderProducts from "./components/OrderProducts";
 import OrderSummary from "./components/OrderSummary";
@@ -25,17 +25,7 @@ export default function OrderDetailsPage() {
 
     const orderId = params.id as string;
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            toast.error("Você precisa estar logado para ver este pedido");
-            router.push("/login?next=/order/" + orderId);
-            return;
-        }
-
-        loadOrder();
-    }, [isAuthenticated, orderId, router]);
-
-    const loadOrder = async () => {
+    const loadOrder = useCallback(async () => {
         setLoading(true);
         try {
             const orderData = await getOrderById(orderId);
@@ -47,7 +37,17 @@ export default function OrderDetailsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [orderId, router]);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            toast.error("Você precisa estar logado para ver este pedido");
+            router.push("/login?next=/order/" + orderId);
+            return;
+        }
+
+        loadOrder();
+    }, [isAuthenticated, orderId, router, loadOrder]);
 
     if (!isAuthenticated) {
         return null;
