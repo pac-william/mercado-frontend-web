@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { getAccessTokenFromRequest, parseMockToken, createMockToken, setAccessTokenCookie } from '../_utils';
 import { buildApiUrl } from '@/lib/http';
+import { NextResponse } from 'next/server';
+import { createMockToken, getAccessTokenFromRequest, parseMockToken, setAccessTokenCookie } from '../_utils';
 
 export async function POST(req: Request) {
     const useMock = process.env.USE_MOCK !== 'false';
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.json(data, { status: response.status });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ message: 'Erro interno' }, { status: 500 });
     }
 }

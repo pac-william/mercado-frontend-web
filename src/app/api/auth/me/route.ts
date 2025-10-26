@@ -1,7 +1,6 @@
-import { NextResponse } from 'next/server';
 import { CurrentUser } from '@/types/auth';
+import { NextResponse } from 'next/server';
 import { getAccessTokenFromRequest, parseMockToken } from '../_utils';
-import { buildApiUrl } from '@/lib/http';
 
 export async function GET(req: Request) {
     const useMock = process.env.USE_MOCK !== 'false';
@@ -42,10 +41,10 @@ export async function GET(req: Request) {
             };
 
             return NextResponse.json({ user }, { status: 200 });
-        } catch (jwtError) {
+        } catch {
             return NextResponse.json({ message: 'Token inválido' }, { status: 401 });
         }
-    } catch (error) {
+    } catch {
         return NextResponse.json({ message: 'Erro interno' }, { status: 500 });
     }
 }
