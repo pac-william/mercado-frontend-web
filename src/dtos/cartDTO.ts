@@ -1,53 +1,60 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-// Schema para criar um item do carrinho
-export const CreateCartItemDTO = z.object({
-    productId: z.string({ message: "ID do produto é obrigatório" }),
-    quantity: z.number().min(1, { message: "Quantidade deve ser maior que zero" }),
+// Schema para criar um item no carrinho
+export const createCartItemSchema = z.object({
+  productId: z.string().min(1, 'ID do produto é obrigatório'),
+  quantity: z.number().int().min(1, 'Quantidade deve ser pelo menos 1'),
 });
 
-export type CreateCartItemDTO = z.infer<typeof CreateCartItemDTO>;
-
-// Schema para adicionar múltiplos itens
-export const AddMultipleItemsDTO = z.object({
-    items: z.array(CreateCartItemDTO).min(1, { message: "Deve adicionar pelo menos um item" }),
+// Schema para atualizar um item no carrinho
+export const updateCartItemSchema = z.object({
+  quantity: z.number().int().min(1, 'Quantidade deve ser pelo menos 1'),
 });
 
-export type AddMultipleItemsDTO = z.infer<typeof AddMultipleItemsDTO>;
-
-// Schema para atualizar quantidade de um item
-export const UpdateCartItemQuantityDTO = z.object({
-    quantity: z.number().min(1, { message: "Quantidade deve ser maior que zero" }),
+// Schema para adicionar múltiplos itens ao carrinho
+export const addMultipleItemsSchema = z.object({
+  items: z.array(createCartItemSchema).min(1, 'Pelo menos um item deve ser fornecido'),
 });
 
-export type UpdateCartItemQuantityDTO = z.infer<typeof UpdateCartItemQuantityDTO>;
+// Schema de resposta para CartItem
+export const cartItemResponseSchema = z.object({
+  id: z.string(),
+  productId: z.string(),
+  quantity: z.number(),
+  product: z.object({
+    id: z.string(),
+    name: z.string(),
+    price: z.number(),
+    unit: z.string(),
+    image: z.string().nullable(),
+    marketId: z.string(),
+  }),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
 
-// Interfaces de resposta
-export interface CartProduct {
-    id: string;
-    name: string;
-    price: number;
-    unit: string;
-    image: string;
-    marketId: string;
-}
+// Schema de resposta para Cart
+export const cartResponseSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  items: z.array(cartItemResponseSchema),
+  totalItems: z.number(),
+  totalValue: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
 
-export interface CartItemResponse {
-    id: string;
-    productId: string;
-    quantity: number;
-    product: CartProduct;
-    createdAt: string;
-    updatedAt: string;
-}
+// Tipos TypeScript
+export type CreateCartItemDTO = z.infer<typeof createCartItemSchema>;
+export type UpdateCartItemDTO = z.infer<typeof updateCartItemSchema>;
+export type AddMultipleItemsDTO = z.infer<typeof addMultipleItemsSchema>;
+export type CartItemResponseDTO = z.infer<typeof cartItemResponseSchema>;
+export type CartResponseDTO = z.infer<typeof cartResponseSchema>;
 
-export interface CartResponse {
-    id: string;
-    userId: string;
-    items: CartItemResponse[];
-    totalItems: number;
-    totalValue: number;
-    createdAt: string;
-    updatedAt: string;
-}
+// Aliases para compatibilidade com código existente (schemas)
+export const CreateCartItemDTOSchema = createCartItemSchema;
+export const UpdateCartItemQuantityDTOSchema = updateCartItemSchema;
+export const AddMultipleItemsDTOSchema = addMultipleItemsSchema;
 
+// Aliases de tipos para compatibilidade
+export type CartResponse = CartResponseDTO;
