@@ -14,7 +14,7 @@ export default async function CreateProduct() {
                     <h1 className="text-2xl font-bold">Cadastro de Produto</h1>
                     <div className="grid grid-cols-2 gap-4">
                         <ProductCreateForm markets={markets} />
-                        <ProductCard product={{ name: "Produto 1", price: 100, marketId: "1", id: "1" }} />
+                        <ProductCard product={{ name: "Produto 1", price: 100, marketId: "1", id: "1", unit: "kg" }} />
                     </div>
 
                 </div>
