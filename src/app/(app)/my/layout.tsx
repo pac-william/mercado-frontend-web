@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 export default async function MyLayout({ children }: { children: React.ReactNode }) {
     const session = await auth0.getSession();
+    console.log(session);
     if (!session) {
         redirect('/auth/login');
     }
