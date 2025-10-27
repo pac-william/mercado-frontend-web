@@ -4,9 +4,8 @@ import { createOrder } from "@/actions/order.actions";
 import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { OrderItemDTO } from "@/dtos/orderDTO";
-import { useAuth } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import CouponInput from "./components/CouponInput";
 import DeliveryForm, { DeliveryFormData } from "./components/DeliveryForm";
@@ -22,39 +21,12 @@ interface CartItem {
 
 export default function CheckoutPage() {
     const router = useRouter();
-    const { user, isAuthenticated } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>();
     const [discount, setDiscount] = useState(0);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            toast.error("Você precisa estar logado para finalizar a compra");
-            router.push("/login?next=/checkout");
-            return;
-        }
-
-        const storedCart = localStorage.getItem("cart");
-        if (storedCart) {
-            try {
-                const items = JSON.parse(storedCart);
-                setCartItems(items);
-            } catch {
-                setCartItems([]);
-            }
-        }
-
-        if (!storedCart || JSON.parse(storedCart).length === 0) {
-            const mockItems = [
-                { id: "1", name: "Arroz Branco 5kg", price: 25.90, quantity: 2, marketId: "1" },
-                { id: "2", name: "Feijão Preto 1kg", price: 8.50, quantity: 1, marketId: "1" },
-                { id: "3", name: "Café Pilão 500g", price: 15.90, quantity: 3, marketId: "1" },
-                { id: "4", name: "Açúcar Refinado 1kg", price: 4.20, quantity: 2, marketId: "1" },
-            ];
-            setCartItems(mockItems);
-        }
-    }, [isAuthenticated, router]);
+    
 
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
@@ -69,11 +41,6 @@ export default function CheckoutPage() {
     };
 
     const handleSubmitOrder = async (data: DeliveryFormData) => {
-        if (!user) {
-            toast.error("Usuário não autenticado");
-            return;
-        }
-
         if (cartItems.length === 0) {
             toast.error("Carrinho vazio");
             return;
@@ -107,10 +74,6 @@ export default function CheckoutPage() {
             setIsLoading(false);
         }
     };
-
-    if (!isAuthenticated) {
-        return null;
-    }
 
     if (cartItems.length === 0) {
         return (

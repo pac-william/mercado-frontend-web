@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "ibassets.com.br",
+      },
+      {
+        protocol: "https",
+        hostname: "placehold.co",
       }
     ],
   },

@@ -37,8 +37,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                 <MarqueeDemo reviews={markets.map((market) => ({
                     name: market.name,
                     username: market.address,
-                    body: market.logo || '',
-                    img: market.logo || '',
+                    body: market.logo || "",
+                    img: market.logo || "https://placehold.co/150",
                 }))} />
 
                 <div className="flex flex-1 gap-4 container mx-auto mt-20">

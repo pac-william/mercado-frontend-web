@@ -1,21 +1,30 @@
 "use server";
 
 import { baseUrl } from "@/config/server";
+import { auth0 } from "@/lib/auth0";
 import type { Suggestion, SuggestionCreateResponse } from "@/types/suggestion";
 
 export async function createSuggestion(task: string): Promise<SuggestionCreateResponse> {
   try {
+    const session = await auth0.getSession();
+    if (!session) {
+      throw new Error('Usuário não autenticado');
+    }
+
     const url = `${baseUrl}/api/v1/suggestions`;
-    
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'accept': 'application/json',
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.tokenSet.idToken}`,
       },
       body: JSON.stringify({ task }),
       cache: 'no-store',
     });
+
+    console.log(response);
 
     if (!response.ok) {
       throw new Error(`Erro ao criar sugestão: ${response.status}`);
@@ -31,12 +40,17 @@ export async function createSuggestion(task: string): Promise<SuggestionCreateRe
 
 export async function getSuggestionById(id: string): Promise<Suggestion> {
   try {
+    const session = await auth0.getSession();
+    if (!session) {
+      throw new Error('Usuário não autenticado');
+    }
     const url = `${baseUrl}/api/v1/suggestions/${id}`;
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
+        'Authorization': `Bearer ${session.tokenSet.idToken}`,
       },
       cache: 'no-store',
     });
@@ -64,12 +78,17 @@ export async function getUserSuggestions(page: number = 1, size: number = 10): P
   };
 }> {
   try {
+    const session = await auth0.getSession();
+    if (!session) {
+      throw new Error('Usuário não autenticado');
+    }
     const url = `${baseUrl}/api/v1/suggestions?page=${page}&size=${size}`;
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
+        'Authorization': `Bearer ${session.tokenSet.idToken}`,
       },
       cache: 'no-store',
     });

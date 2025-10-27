@@ -1,7 +1,3 @@
-'use client';
-
-import LoadingSpinner from "@/components/LoadingSpinner";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import RouterBack from "@/components/RouterBack";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -9,52 +5,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/providers/auth-provider";
+import { auth0 } from "@/lib/auth0";
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 
-export default function Profile() {
-    const { user, loading, logout } = useAuth();
-    const router = useRouter();
-    const [loggingOut, setLoggingOut] = useState(false);
+export default async function Profile() {
+    const session = await auth0.getSession();
 
-    const handleLogout = async () => {
-        try {
-            setLoggingOut(true);
-            await logout();
-            toast.success("Logout realizado com sucesso!");
-            router.push("/login");
-        } catch {
-            toast.error("Erro ao fazer logout");
-        } finally {
-            setLoggingOut(false);
-        }
-    };
+    // Extrair dados do usuário da sessão
+    const user = session?.user;
+    const name = user?.name || 'Usuário';
+    const email = user?.email || '';
+    const picture = user?.picture || '';
+    const userId = user?.sub || '';
+    const role = user?.role || 'Cliente';
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <LoadingSpinner size="lg" />
-            </div>
-        );
-    }
-
-    if (!user) {
-        return null;
-    }
-
-    const initials = user.name
-        ?.split(' ')
+    // Obter iniciais do nome para o avatar
+    const initials = name
+        .split(' ')
         .map(n => n[0])
         .join('')
         .toUpperCase()
-        .slice(0, 2) || 'U';
+        .slice(0, 2);
 
     return (
-        <ProtectedRoute>
-            <ScrollArea className="flex flex-col flex-grow h-0">
+        <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 container mx-auto my-4">
                 <RouterBack />
                 <h1 className="text-2xl font-bold text-foreground">Perfil</h1>
@@ -68,7 +42,7 @@ export default function Profile() {
                     <CardContent className="space-y-4">
                         <div className="flex items-center gap-4">
                             <Avatar className="h-20 w-20">
-                                <AvatarImage src="/placeholder-avatar.jpg" alt="Foto de perfil" />
+                                <AvatarImage src={picture} alt="Foto de perfil" />
                                 <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
                                     {initials}
                                 </AvatarFallback>
@@ -84,41 +58,41 @@ export default function Profile() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label htmlFor="name" className="text-sm font-medium text-card-foreground">Nome completo</label>
-                                <Input 
-                                    id="name" 
-                                    placeholder="Digite seu nome completo" 
-                                    value={user.name || ''} 
+                                <Input
+                                    id="name"
+                                    placeholder="Digite seu nome completo"
+                                    value={name}
                                     readOnly
-                                    className="bg-background border-border text-foreground" 
+                                    className="bg-background border-border text-foreground"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <label htmlFor="email" className="text-sm font-medium text-card-foreground">E-mail</label>
-                                <Input 
-                                    id="email" 
-                                    type="email" 
-                                    placeholder="seu@email.com" 
-                                    value={user.email || ''} 
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="seu@email.com"
+                                    value={email}
                                     readOnly
-                                    className="bg-background border-border text-foreground" 
+                                    className="bg-background border-border text-foreground"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <label htmlFor="role" className="text-sm font-medium text-card-foreground">Tipo de conta</label>
-                                <Input 
-                                    id="role" 
-                                    value={user.role === 'CUSTOMER' ? 'Cliente' : user.role === 'MARKET_ADMIN' ? 'Administrador' : user.role || ''} 
+                                <Input
+                                    id="role"
+                                    value={role}
                                     readOnly
-                                    className="bg-background border-border text-foreground" 
+                                    className="bg-background border-border text-foreground"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <label htmlFor="id" className="text-sm font-medium text-card-foreground">ID do usuário</label>
-                                <Input 
-                                    id="id" 
-                                    value={user.id || ''} 
+                                <Input
+                                    id="id"
+                                    value={userId}
                                     readOnly
-                                    className="bg-background border-border text-foreground font-mono text-xs" 
+                                    className="bg-background border-border text-foreground font-mono text-xs"
                                 />
                             </div>
                         </div>
@@ -168,25 +142,25 @@ export default function Profile() {
                 </Card>
 
                 {/* Sair da conta */}
-                <Card className="bg-card border-border border-destructive/50">
+                <Card className="bg-card border border-destructive/50">
                     <CardHeader>
                         <CardTitle className="text-card-foreground">Sair da conta</CardTitle>
                         <CardDescription className="text-muted-foreground">Encerre sua sessão atual</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Button 
-                            variant="destructive" 
-                            className="w-full"
-                            onClick={handleLogout}
-                            disabled={loggingOut}
-                        >
-                            <LogOut className="w-4 h-4 mr-2" />
-                            {loggingOut ? "Saindo..." : "Sair da conta"}
-                        </Button>
+                        <form action="/api/auth/logout" method="post">
+                            <Button
+                                type="submit"
+                                variant="destructive"
+                                className="w-full"
+                            >
+                                <LogOut className="w-4 h-4 mr-2" />
+                                Sair da conta
+                            </Button>
+                        </form>
                     </CardContent>
                 </Card>
             </div>
         </ScrollArea>
-        </ProtectedRoute>
     )
 }   
