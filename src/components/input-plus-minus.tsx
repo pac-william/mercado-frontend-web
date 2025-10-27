@@ -1,11 +1,22 @@
 "use client"
 
-import { MinusIcon, PlusIcon } from "lucide-react"
-import { Button, Group, Input, NumberField } from "react-aria-components"
+import { MinusIcon, PlusIcon } from "lucide-react";
+import { Button, Group, Input, NumberField } from "react-aria-components";
 
-export default function InputPlusMinus() {
+interface InputPlusMinusProps {
+  value?: number;
+  onChange?: (value: number) => void;
+}
+
+export default function InputPlusMinus({ value, onChange }: InputPlusMinusProps) {
   return (
-    <NumberField defaultValue={1} minValue={0} maxValue={100}>
+    <NumberField 
+      value={value} 
+      onChange={onChange} 
+      defaultValue={value ?? 1} 
+      minValue={0} 
+      maxValue={100}
+    >
       <div className="*:not-first:mt-2">
         <Group className="border-input data-focus-within:border-ring data-focus-within:ring-ring/50 data-focus-within:has-aria-invalid:ring-destructive/20 dark:data-focus-within:has-aria-invalid:ring-destructive/40 data-focus-within:has-aria-invalid:border-destructive relative inline-flex h-9 w-full items-center overflow-hidden rounded-md border text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none data-disabled:opacity-50 data-focus-within:ring-[3px]">
           <Button
