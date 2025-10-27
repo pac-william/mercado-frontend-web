@@ -1,11 +1,10 @@
 'use client';
 
+import { getCart as getCartAction, removeCartItem, updateCartItemQuantity } from "@/actions/cart.actions";
 import { validateCoupon } from "@/actions/coupon.actions";
 import { getMarkets } from "@/actions/market.actions";
-import { getProducts } from "@/actions/products.actions";
 import ProductCard from "@/app/components/ProductCard";
 import { Market } from "@/app/domain/marketDomain";
-import { Product } from "@/app/domain/productDomain";
 import { formatPrice } from "@/app/utils/formatters";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import RouterBack from "@/components/RouterBack";
@@ -16,14 +15,16 @@ import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carouse
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CartResponse } from "@/dtos/cartDTO";
+import { CheckCircle2, Trash2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import AddressInput from "./components/AddressInput";
 import SelectMethod from "./components/SelectMethod";
 
 export default function Cart() {
-    const [products, setProducts] = useState<Product[]>([]);
+    const [cart, setCart] = useState<CartResponse | null>(null);
     const [markets, setMarkets] = useState<Market[]>([]);
     const [loading, setLoading] = useState(true);
     const [couponCode, setCouponCode] = useState("");
@@ -39,35 +40,33 @@ export default function Cart() {
 
     const loadData = async () => {
         try {
-            const [productsData, marketsData] = await Promise.all([
-                getProducts(),
+            const [cartData, marketsData] = await Promise.all([
+                getCartAction(),
                 getMarkets()
             ]);
-            setProducts(productsData.products || []);
+            setCart(cartData);
             setMarkets(marketsData.markets || []);
-        } catch {
-            toast.error("Erro ao carregar dados");
+        } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+            toast.error("Erro ao carregar carrinho");
         } finally {
             setLoading(false);
         }
     };
 
-    const cartItems = products.slice(0, 8).map(product => ({
-        ...product,
-        quantity: Math.floor(Math.random() * 3) + 1
-    }));
+    const cartItems = cart?.items || [];
 
-    const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const subtotal = cart?.totalValue || 0;
     const total = subtotal - couponDiscount + deliveryFee;
 
     const handleApplyCoupon = async () => {
-        if (!couponCode.trim()) return;
+        if (!couponCode.trim() || !cart) return;
 
         setValidating(true);
         try {
             const result = await validateCoupon({
                 code: couponCode.trim().toUpperCase(),
-                orderTotal: subtotal
+                orderTotal: cart.totalValue
             });
 
             if (result.isValid && result.discount) {
@@ -91,6 +90,34 @@ export default function Cart() {
         toast.info("Cupom removido");
     };
 
+    const handleQuantityChange = async (productId: string, quantity: number) => {
+        const cartItem = cartItems.find(item => item.product.id === productId);
+        if (!cartItem) return;
+
+        try {
+            const updatedCart = await updateCartItemQuantity(cartItem.id, { quantity });
+            setCart(updatedCart);
+            toast.success("Quantidade atualizada");
+        } catch (error) {
+            console.error("Erro ao atualizar quantidade:", error);
+            toast.error("Erro ao atualizar quantidade");
+        }
+    };
+
+    const handleRemoveItem = async (productId: string) => {
+        const cartItem = cartItems.find(item => item.product.id === productId);
+        if (!cartItem) return;
+
+        try {
+            await removeCartItem(cartItem.id);
+            await loadData(); // Reload cart to reflect changes
+            toast.success("Item removido do carrinho");
+        } catch (error) {
+            console.error("Erro ao remover item:", error);
+            toast.error("Erro ao remover item");
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -105,61 +132,89 @@ export default function Cart() {
                 <div className="flex flex-1 flex-col gap-4 container mx-auto my-4">
                     <RouterBack />
                     <h1 className="text-2xl font-bold text-foreground">Carrinho</h1>
-                    <Carousel className="w-full">
-                        <CarouselContent className="flex flex-1">
-                            {markets.slice(0, 8).map((market) => {
-                                return (
-                                    <CarouselItem key={market.id} className="max-w-[320px] min-w-[320px] basis-1/4">
-                                        <Card className="flex flex-1 flex-row gap-2 p-4 shadow-none bg-card border-border">
-                                            <Avatar className="w-10 h-10 shadow-md">
-                                                <AvatarImage src={market.logo} alt={market.name} width={100} height={100} className="rounded-full" />
-                                                <AvatarFallback className="bg-primary text-primary-foreground">{market.name.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex flex-col">
-                                                <span className="text-card-foreground font-medium">{market.name}</span>
-                                                <span className="text-sm text-muted-foreground">Total: {formatPrice(0)}</span>
-                                                <span className="text-sm text-muted-foreground">Distância: {0}km</span>
-
-                                            </div>
-                                        </Card>
-                                    </CarouselItem>
-                                )
-                            })}
-                        </CarouselContent>
-                    </Carousel>
+                    {markets.length > 0 && (
+                        <Carousel className="w-full">
+                            <CarouselContent className="flex flex-1">
+                                {markets.slice(0, 8).map((market) => {
+                                    return (
+                                        <CarouselItem key={market.id} className="max-w-[320px] min-w-[320px] basis-1/4">
+                                            <Card className="flex flex-1 flex-row gap-2 p-4 shadow-none bg-card border-border">
+                                                <Avatar className="w-10 h-10 shadow-md">
+                                                    <AvatarImage src={market.logo} alt={market.name} width={100} height={100} className="rounded-full" />
+                                                    <AvatarFallback className="bg-primary text-primary-foreground">{market.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex flex-col">
+                                                    <span className="text-card-foreground font-medium">{market.name}</span>
+                                                    <span className="text-sm text-muted-foreground">Total: {formatPrice(0)}</span>
+                                                    <span className="text-sm text-muted-foreground">Distância: {0}km</span>
+                                                </div>
+                                            </Card>
+                                        </CarouselItem>
+                                    )
+                                })}
+                            </CarouselContent>
+                        </Carousel>
+                    )}
                     <div className="flex flex-1 flex-row gap-4">
                         <div className="flex flex-1 flex-col gap-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                                {
-                                    products.map((product) => {
+                            {cartItems.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-12">
+                                    <p className="text-lg text-muted-foreground mb-4">Seu carrinho está vazio</p>
+                                    <Button asChild>
+                                        <Link href="/">Continuar comprando</Link>
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                                    {cartItems.map((item) => {
                                         return (
                                             <ProductCard
-                                                key={product.id}
-                                                product={product}
+                                                key={item.id}
+                                                product={{
+                                                    id: item.product.id,
+                                                    name: item.product.name,
+                                                    price: item.product.price,
+                                                    unit: item.product.unit,
+                                                    marketId: item.product.marketId,
+                                                    image: item.product.image || undefined,
+                                                }}
                                                 variant="quantity-select"
+                                                initialQuantity={item.quantity}
+                                                onQuantityChange={handleQuantityChange}
                                             />
                                         );
-                                    })
-                                }
-                            </div>
+                                    })}
+                                </div>
+                            )}
                         </div>
                         <div className="w-[380px] h-[calc(100vh-113px)] sticky top-4">
                             <div className="flex flex-col gap-4 h-full">
+                                <AddressInput />
                                 <SelectMethod />
                                 <Card className="flex flex-col flex-1 bg-card border-border">
                                     <CardContent className="flex flex-1 flex-col gap-2">
                                         <ScrollArea className="flex flex-col flex-grow h-0 pr-4 gap-2">
                                             <h1 className="text-lg font-bold text-card-foreground">Itens:</h1>
-                                            <div className="flex flex-col">
+                                            <div className="flex flex-col gap-2">
                                                 {cartItems.map((item) => {
                                                     return (
-                                                        <div key={item.id} className="grid grid-cols-8 gap-2">
-                                                            <div className="flex col-span-2 gap-2">
-                                                                <span className="text-sm text-card-foreground">{item.quantity}</span>
-                                                                <span className="text-sm text-muted-foreground">un</span>
+                                                        <div key={item.id} className="flex items-center justify-between gap-2 group">
+                                                            <div className="flex gap-4 flex-1 min-w-0">
+                                                                <div className="flex gap-2 shrink-0">
+                                                                    <span className="text-sm text-card-foreground">{item.quantity}</span>
+                                                                    <span className="text-sm text-muted-foreground">{item.product.unit}</span>
+                                                                </div>
+                                                                <span className="text-sm truncate text-card-foreground flex-1">{item.product.name}</span>
+                                                                <span className="text-sm text-card-foreground font-medium shrink-0">{formatPrice(item.product.price * item.quantity)}</span>
                                                             </div>
-                                                            <span className="text-sm col-span-4 truncate text-nowrap text-card-foreground">{item.name}</span>
-                                                            <span className="text-sm col-span-2 text-card-foreground font-medium">{formatPrice(item.price * item.quantity)}</span>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => handleRemoveItem(item.product.id)}
+                                                                className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                                            >
+                                                                <Trash2 className="w-4 h-4 text-destructive" />
+                                                            </Button>
                                                         </div>
                                                     )
                                                 })}
@@ -167,7 +222,7 @@ export default function Cart() {
                                         </ScrollArea>
                                         <Separator />
                                         
-                                        <div className="flex flex-col gap-2 p-3 bg-muted/50 rounded-lg">
+                                        <div className="flex flex-col gap-2 p-3 bg-muted/50 rounded-lg border">
                                             <span className="text-sm font-medium text-card-foreground">
                                                 Cupom de Desconto
                                             </span>
@@ -207,7 +262,6 @@ export default function Cart() {
                                                         onClick={handleApplyCoupon} 
                                                         disabled={!couponCode.trim() || validating}
                                                         variant="outline"
-                                                        size="sm"
                                                     >
                                                         {validating ? "..." : "Aplicar"}
                                                     </Button>
@@ -245,8 +299,8 @@ export default function Cart() {
                                             <span className="text-lg font-bold text-card-foreground">{formatPrice(total)}</span>
                                         </div>
                                         <div>
-                                            <Button asChild>
-                                                <Link href="/checkout">
+                                            <Button asChild disabled={cartItems.length === 0}>
+                                                <Link href="/my/checkout">
                                                 Continuar para o Checkout
                                                 </Link>
                                             </Button>
