@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { auth0 } from "@/lib/auth0";
 import { LogOut } from "lucide-react";
+import AddressList from "./components/AddressList";
 
 export default async function Profile() {
     const session = await auth0.getSession();
@@ -110,10 +111,7 @@ export default async function Profile() {
                         <CardDescription className="text-muted-foreground">Gerencie seus endereços de entrega</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="text-center py-8 text-muted-foreground">
-                            <p>Funcionalidade em desenvolvimento</p>
-                            <p className="text-sm mt-2">Em breve você poderá gerenciar seus endereços</p>
-                        </div>
+                        <AddressList />
                     </CardContent>
                 </Card>
 
