@@ -12,30 +12,31 @@ export default function SelectMethod() {
     }
 
     return (
-        <Card className="flex flex-col p-4 gap-2">
+        <Card className="flex flex-col p-4 gap-2 bg-card border-border">
             <div
-                className={`flex flex-1 flex-row px-4 py-3 cursor-pointer transition-all duration-200 items-center rounded-lg border ${method === "pickup"
-                    ? "border-primary bg-primary/5 text-primary-foreground"
-                    : "border-border hover:border-primary/50 hover:bg-muted/50 text-foreground"
-                    }`}
+                className={`flex flex-1 flex-row px-4 py-3 cursor-pointer transition-all duration-200 items-center rounded-lg border-2 ${
+                    method === "pickup"
+                        ? "border-primary bg-primary/10 dark:bg-primary/20 text-foreground"
+                        : "border-border bg-background hover:border-primary/50 hover:bg-muted/50 text-foreground"
+                }`}
                 onClick={() => handleSelectMethod("pickup")}
             >
-                <Pin size={16} />
-                <span className="ml-3 font-medium">Retirada no estabelecimento</span>
-                {method === "pickup" && <Check size={16} className="ml-auto" />}
+                <Pin size={16} className="text-foreground" />
+                <span className="ml-3 font-medium text-foreground">Retirada no estabelecimento</span>
+                {method === "pickup" && <Check size={16} className="ml-auto text-primary" />}
             </div>
 
             <div
-                className={`flex flex-1 flex-row px-4 py-3 cursor-pointer transition-all duration-200 items-center rounded-lg border ${method === "delivery"
-                    ? "border-primary bg-primary/5 text-primary-foreground"
-                    : "border-border hover:border-primary/50 hover:bg-muted/50 text-foreground"
-                    }`}
+                className={`flex flex-1 flex-row px-4 py-3 cursor-pointer transition-all duration-200 items-center rounded-lg border-2 ${
+                    method === "delivery"
+                        ? "border-primary bg-primary/10 dark:bg-primary/20 text-foreground"
+                        : "border-border bg-background hover:border-primary/50 hover:bg-muted/50 text-foreground"
+                }`}
                 onClick={() => handleSelectMethod("delivery")}
             >
-
-                <Truck size={16} />
-                <span className="ml-3 font-medium">Entrega a domicílio</span>
-                {method === "delivery" && <Check size={16} className="ml-auto" />}
+                <Truck size={16} className="text-foreground" />
+                <span className="ml-3 font-medium text-foreground">Entrega a domicílio</span>
+                {method === "delivery" && <Check size={16} className="ml-auto text-primary" />}
             </div>
         </Card>
     )
