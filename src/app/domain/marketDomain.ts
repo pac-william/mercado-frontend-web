@@ -1,4 +1,4 @@
-import { Meta } from "./metaDomain";
+import { Meta } from "@/app/domain/metaDomain";
 
 export class Market {
     constructor(
