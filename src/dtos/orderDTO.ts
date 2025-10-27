@@ -9,6 +9,8 @@ export const OrderItemDTO = z.object({
 export type OrderItemDTO = z.infer<typeof OrderItemDTO>;
 
 export const OrderCreateDTO = z.object({
+    userId: z.string({ message: "ID do usuário é obrigatório" }),
+    marketId: z.string({ message: "ID do mercado é obrigatório" }),
     deliveryAddress: z.string().min(10, { message: "Endereço de entrega é obrigatório" }),
     items: z.array(OrderItemDTO).min(1, { message: "Pedido deve ter pelo menos um item" }),
     couponCode: z.string().optional(),
