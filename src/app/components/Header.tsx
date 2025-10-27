@@ -1,5 +1,7 @@
+import { getCart } from "@/actions/cart.actions";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CartItemResponseDTO } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
 import { CurrentUser } from "@/types/auth";
 import { LogIn } from "lucide-react";
@@ -9,6 +11,14 @@ import { ProfileMenuDropDown } from "./ProfileMenuDropDown";
 
 export default async function Header() {
     const session = await auth0.getSession();
+
+    let items: CartItemResponseDTO[] = [];
+    try {
+        const cart = await getCart();
+        items = cart.items || [];
+    } catch (error) {
+        console.error("Erro ao carregar carrinho:", error);
+    }
 
     return (
         <header className="flex w-full justify-between items-center p-4 bg-background border-b border-border">
@@ -20,7 +30,7 @@ export default async function Header() {
                 </h1>
                 <div className="ml-auto flex flex-row gap-8">
                     <div className="flex flex-row gap-2">
-                        <CartSheet />
+                        <CartSheet cartItems={items} />
 
                         <Separator orientation="vertical" />
 
