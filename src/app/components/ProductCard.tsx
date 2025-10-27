@@ -1,6 +1,7 @@
 "use client"
 
 import bh_supermercados from "@/../public/markets/bh_supermercados.png";
+import { addItemToCart } from "@/actions/cart.actions";
 import InputPlusMinus from "@/components/input-plus-minus";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Edit2, ShoppingCart, Star, Trash2 } from "lucide-react";
+import { Edit2, Loader2, ShoppingCart, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ProductCreateForm } from "../admin/products/create/components/ProductCreateForm";
 import { Product } from "../domain/productDomain";
@@ -21,9 +23,13 @@ interface ProductCardProps {
     variant?: "quantity-select" | "buy-now" | "admin" | "history" | "suggestion";
     badgeText?: string;
     badgeVariant?: "default" | "secondary" | "destructive" | "outline";
+    initialQuantity?: number;
+    onQuantityChange?: (productId: string, quantity: number) => void;
 }
 
-export default function ProductCard({ product, variant = "buy-now", badgeText, badgeVariant = "secondary" }: ProductCardProps) {
+export default function ProductCard({ product, variant = "buy-now", badgeText, badgeVariant = "secondary", initialQuantity, onQuantityChange }: ProductCardProps) {
+    const [addingToCart, setAddingToCart] = useState(false);
+    const [quantity, setQuantity] = useState(initialQuantity || 1);
 
     const getImageSrc = () => {
 
@@ -71,8 +77,20 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
         return price * multiplier;
     };
 
-    const addToCart = () => {
-        toast.success("Produto adicionado ao carrinho");
+    const handleAddToCart = async () => {
+        setAddingToCart(true);
+        try {
+            await addItemToCart({
+                productId: product.id,
+                quantity: quantity
+            });
+            toast.success("Produto adicionado ao carrinho");
+        } catch (error) {
+            console.error("Erro ao adicionar ao carrinho:", error);
+            toast.error("Erro ao adicionar produto ao carrinho");
+        } finally {
+            setAddingToCart(false);
+        }
     }
 
     const deleteProduct = () => {
@@ -128,10 +146,26 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                     <Separator />
 
                     <CardFooter className="flex flex-row justify-between gap-2">
-                        <InputPlusMinus />
+                        <InputPlusMinus 
+                            value={quantity} 
+                            onChange={(value) => {
+                                const newQuantity = value ?? 1;
+                                setQuantity(newQuantity);
+                                onQuantityChange?.(product.id, newQuantity);
+                            }} 
+                        />
                         <div className="flex flex-row gap-2 items-end">
-                            <Button variant="outline" size="icon">
-                                <ShoppingCart size={16} />
+                            <Button 
+                                variant="outline" 
+                                size="icon" 
+                                onClick={handleAddToCart}
+                                disabled={addingToCart}
+                            >
+                                {addingToCart ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <ShoppingCart size={16} />
+                                )}
                             </Button>
                         </div>
                     </CardFooter>
@@ -184,8 +218,17 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                                 </div>
                             </div>
                             <div className="flex flex-row gap-2 items-end">
-                                <Button variant="outline" size="icon" onClick={() => addToCart()} >
-                                    <ShoppingCart size={16} />
+                                <Button 
+                                    variant="outline" 
+                                    size="icon" 
+                                    onClick={handleAddToCart}
+                                    disabled={addingToCart}
+                                >
+                                    {addingToCart ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <ShoppingCart size={16} />
+                                    )}
                                 </Button>
                             </div>
                         </div>
@@ -375,8 +418,17 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                                 </div>
                             </div>
                             <div className="flex flex-row gap-2 items-end">
-                                <Button variant="outline" size="icon" onClick={() => addToCart()} >
-                                    <ShoppingCart size={16} />
+                                <Button 
+                                    variant="outline" 
+                                    size="icon" 
+                                    onClick={handleAddToCart}
+                                    disabled={addingToCart}
+                                >
+                                    {addingToCart ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <ShoppingCart size={16} />
+                                    )}
                                 </Button>
                             </div>
                         </div>
