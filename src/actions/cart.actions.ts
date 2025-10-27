@@ -1,7 +1,7 @@
 "use server"
 
 import { baseUrl } from "@/config/server";
-import { AddMultipleItemsDTO, CartResponse, CreateCartItemDTO, UpdateCartItemQuantityDTO } from "@/dtos/cartDTO";
+import { AddMultipleItemsDTO, CartResponse, CreateCartItemDTO, UpdateCartItemDTO } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
 
 export const getCart = async (): Promise<CartResponse> => {
@@ -71,6 +71,7 @@ export const clearCart = async (): Promise<boolean> => {
 export const addItemToCart = async (data: CreateCartItemDTO): Promise<CartResponse> => {
     try {
         const session = await auth0.getSession();
+
         if (!session) {
             throw new Error('Usuário não autenticado');
         }
@@ -149,7 +150,7 @@ export const addMultipleItemsToCart = async (data: AddMultipleItemsDTO): Promise
 
 export const updateCartItemQuantity = async (
     cartItemId: string,
-    data: UpdateCartItemQuantityDTO
+    data: UpdateCartItemDTO
 ): Promise<CartResponse> => {
     try {
         const session = await auth0.getSession();
