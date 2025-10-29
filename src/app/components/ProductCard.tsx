@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import { Edit2, Loader2, ShoppingCart, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ProductCreateForm } from "../admin/products/create/components/ProductCreateForm";
@@ -30,6 +32,8 @@ interface ProductCardProps {
 export default function ProductCard({ product, variant = "buy-now", badgeText, badgeVariant = "secondary", initialQuantity, onQuantityChange }: ProductCardProps) {
     const [addingToCart, setAddingToCart] = useState(false);
     const [quantity, setQuantity] = useState(initialQuantity || 1);
+    const { user, isLoading } = useUser();
+    const router = useRouter();
 
     const getImageSrc = () => {
 
@@ -78,6 +82,14 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
     };
 
     const handleAddToCart = async () => {
+        // Verificar se o usuário está autenticado
+        if (!user && !isLoading) {
+            // Redirecionar para login com parâmetro redirect
+            const currentPath = window.location.pathname;
+            router.push(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
+            return;
+        }
+
         setAddingToCart(true);
         try {
             await addItemToCart({
