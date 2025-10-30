@@ -1,9 +1,9 @@
 "use client";
-import { generateLoadingStates } from "@/actions/loadingState.actions";
+import { getAllLoadingMessages } from "@/actions/loadingState.actions";
 import { createSuggestion } from "@/actions/suggestion.actions";
-import { SearchIcon, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { Button } from "./ui/button";
 import { MultiStepLoader as Loader } from "./ui/multi-step-loader";
 
@@ -15,7 +15,13 @@ interface MultiStepLoaderSearchProps {
   inputValue: string;
 }
 
-export function MultiStepLoaderSearch({ inputValue }: MultiStepLoaderSearchProps) {
+export interface MultiStepLoaderSearchRef {
+  triggerSearch: () => void;
+  cancelSearch: () => void;
+}
+
+export const MultiStepLoaderSearch = forwardRef<MultiStepLoaderSearchRef, MultiStepLoaderSearchProps>(
+  ({ inputValue }, ref) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [loadingStates, setLoadingStates] = useState<LoadingState[]>([
@@ -25,7 +31,6 @@ export function MultiStepLoaderSearch({ inputValue }: MultiStepLoaderSearchProps
   ]);
 
   const handleSubmitSearch = async (state: boolean) => {
-
     if (inputValue.trim() === "") {
       return;
     }
@@ -49,14 +54,18 @@ export function MultiStepLoaderSearch({ inputValue }: MultiStepLoaderSearchProps
       ]);
 
       try {
-        // Obter loadingStates estáticos
-        const staticStates = await generateLoadingStates();
+        // Obter todos os loadingStates estáticos
+        const allStates = await getAllLoadingMessages();
 
         // Atualizar os estados progressivamente
-        for (let i = 0; i < staticStates.length; i++) {
+        for (let i = 0; i < allStates.length; i++) {
           setLoadingStates(prev => {
             const newStates = [...prev];
-            newStates[i] = staticStates[i];
+            // Garantir que o array tenha o tamanho suficiente
+            while (newStates.length <= i) {
+              newStates.push({ text: "" });
+            }
+            newStates[i] = allStates[i];
             return newStates;
           });
 
@@ -68,30 +77,26 @@ export function MultiStepLoaderSearch({ inputValue }: MultiStepLoaderSearchProps
         const suggestionResult = await createSuggestion(inputValue);
 
         // Redirecionar para a página de sugestão com o ID retornado
-        router.push(`/suggestion/${suggestionResult.id}`);
+        router.push(`/my/suggestion/${suggestionResult.id}`);
 
       } catch (error) {
         console.error('Erro ao criar sugestão:', error);
-        // Em caso de erro, redirecionar para uma sugestão padrão
-        router.push(`/suggestion/1`);
+        // Em caso de erro, não redirecionar, apenas parar o loading
+        setLoading(false);
       }
     }
   }
+
+  // Expor métodos para o componente pai
+  useImperativeHandle(ref, () => ({
+    triggerSearch: () => handleSubmitSearch(true),
+    cancelSearch: () => handleSubmitSearch(false),
+  }));
 
   return (
     <>
       {/* Core Loader Modal */}
       <Loader loadingStates={loadingStates} loading={loading} duration={2000} loop={false} />
-
-      {/* The buttons are for demo only, remove it in your actual code ⬇️ */}
-      <Button
-        onClick={() => handleSubmitSearch(true)}
-        variant="ghost"
-        size="icon_lg"
-        className="rounded-none hover:bg-accent hover:text-accent-foreground"
-      >
-        <SearchIcon size={24} className="text-muted-foreground" />
-      </Button>
 
       {loading && (
         <Button
@@ -103,4 +108,6 @@ export function MultiStepLoaderSearch({ inputValue }: MultiStepLoaderSearchProps
       )}
     </>
   );
-}
+});
+
+MultiStepLoaderSearch.displayName = "MultiStepLoaderSearch";

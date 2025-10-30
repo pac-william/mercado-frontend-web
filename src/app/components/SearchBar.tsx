@@ -1,13 +1,13 @@
 "use client";
 
 import { createTrascribe } from "@/actions/trascribe.actions";
-import { MultiStepLoaderSearch } from "@/components/MultiStepLoader";
+import { MultiStepLoaderSearch, MultiStepLoaderSearchRef } from "@/components/MultiStepLoader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useTypewriter } from "@/hooks/use-typewriter";
-import { Loader2, Mic, Pause, Play, Send, Sparkles, X } from "lucide-react";
+import { Loader2, Mic, Pause, Play, SearchIcon, Send, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface SearchAiBarProps {
@@ -24,6 +24,7 @@ export default function SearchAiBar({ className, particles }: SearchAiBarProps) 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const multiStepLoaderRef = useRef<MultiStepLoaderSearchRef>(null);
 
     // Array de frases para o placeholder
     const placeholderPhrases = [
@@ -149,6 +150,19 @@ export default function SearchAiBar({ className, particles }: SearchAiBarProps) 
         }
     };
 
+    const handleSearch = () => {
+        if (searchText.trim() && multiStepLoaderRef.current) {
+            multiStepLoaderRef.current.triggerSearch();
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSearch();
+        }
+    };
+
     return (
         <div className="flex flex-col space-y-2">
             {particles && <h1 className="text-2xl font-bold text-card-foreground">O que você gostaria de fazer hoje?</h1>}
@@ -162,6 +176,7 @@ export default function SearchAiBar({ className, particles }: SearchAiBarProps) 
                         placeholder={particles ? typewriterText : "Pergunte alguma coisa"}
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="h-12 rounded-none border border-y-0 bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
                     />
                     <Button
@@ -174,7 +189,17 @@ export default function SearchAiBar({ className, particles }: SearchAiBarProps) 
                         <Mic size={24} className={isRecording ? "text-red-600" : "text-muted-foreground"} />
                     </Button>
                     <Separator orientation="vertical" className="bg-border" />
-                    <MultiStepLoaderSearch inputValue={searchText} />
+                    <Button
+                        onClick={handleSearch}
+                        variant="ghost"
+                        size="icon_lg"
+                        className="rounded-none hover:bg-accent hover:text-accent-foreground"
+                        type="button"
+                        disabled={!searchText.trim()}
+                    >
+                        <SearchIcon size={24} className="text-muted-foreground" />
+                    </Button>
+                    <MultiStepLoaderSearch ref={multiStepLoaderRef} inputValue={searchText} />
                 </Card>
 
                 <div className="w-[40rem] absolute">
