@@ -8,17 +8,50 @@ import { Separator } from "@/components/ui/separator";
 import { auth0 } from "@/lib/auth0";
 import { LogOut } from "lucide-react";
 import AddressList from "./components/AddressList";
+import { getUserByAuth0Id } from "@/actions/user.actions";
+import { updateUser } from "@/actions/user.actions";
+import SubmitButton from "./components/SubmitButton";
+import ToastOnMount from "./components/ToastOnMount";
+import { redirect } from "next/navigation";
 
-export default async function Profile() {
+export default async function Profile({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const session = await auth0.getSession();
 
-    // Extrair dados do usuário da sessão
     const user = session?.user;
-    const name = user?.name || 'Usuário';
-    const email = user?.email || '';
+    let name = user?.name || 'Usuário';
+    let email = user?.email || '';
     const picture = user?.picture || '';
-    const userId = user?.sub || '';
+    const auth0Id = user?.sub || '';
     const role = user?.role || 'Cliente';
+
+    // Buscar usuário no backend para obter o id interno
+    let internalUserId = '';
+    try {
+        if (auth0Id) {
+            const backendUser = await getUserByAuth0Id(auth0Id);
+            internalUserId = backendUser.id;
+            // Preferir dados do backend para refletir alterações
+            name = backendUser.name || name;
+            email = backendUser.email || email;
+        }
+    } catch {
+        internalUserId = '';
+    }
+
+    async function saveProfile(formData: FormData) {
+        "use server";
+        const id = String(formData.get("id"));
+        const newName = String(formData.get("name") || "");
+        const newEmail = String(formData.get("email") || "");
+
+        try {
+            await updateUser(id, { name: newName, email: newEmail });
+        } catch (err: any) {
+            const message = err?.message || "Erro ao atualizar perfil";
+            return redirect(`/my/profile?error=${encodeURIComponent(message)}`);
+        }
+        return redirect("/my/profile?success=Perfil atualizado com sucesso");
+    }
 
     // Obter iniciais do nome para o avatar
     const initials = name
@@ -28,9 +61,14 @@ export default async function Profile() {
         .toUpperCase()
         .slice(0, 2);
 
+    const params = await searchParams;
+    const successMsg = typeof params?.success === 'string' ? params.success : undefined;
+    const errorMsg = typeof params?.error === 'string' ? params.error : undefined;
+
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 container mx-auto my-4">
+                <ToastOnMount success={successMsg} error={errorMsg} />
                 <RouterBack />
                 <h1 className="text-2xl font-bold text-foreground">Perfil</h1>
 
@@ -56,14 +94,15 @@ export default async function Profile() {
 
                         <Separator />
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <form action={saveProfile} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="hidden" name="id" value={internalUserId} />
                             <div className="space-y-2">
                                 <label htmlFor="name" className="text-sm font-medium text-card-foreground">Nome completo</label>
                                 <Input
                                     id="name"
+                                    name="name"
                                     placeholder="Digite seu nome completo"
-                                    value={name}
-                                    readOnly
+                                    defaultValue={name}
                                     className="bg-background border-border text-foreground"
                                 />
                             </div>
@@ -71,10 +110,10 @@ export default async function Profile() {
                                 <label htmlFor="email" className="text-sm font-medium text-card-foreground">E-mail</label>
                                 <Input
                                     id="email"
+                                    name="email"
                                     type="email"
                                     placeholder="seu@email.com"
-                                    value={email}
-                                    readOnly
+                                    defaultValue={email}
                                     className="bg-background border-border text-foreground"
                                 />
                             </div>
@@ -88,19 +127,18 @@ export default async function Profile() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="id" className="text-sm font-medium text-card-foreground">ID do usuário</label>
+                                <label htmlFor="id" className="text-sm font-medium text-card-foreground">ID interno do usuário</label>
                                 <Input
                                     id="id"
-                                    value={userId}
+                                value={internalUserId || '—'}
                                     readOnly
                                     className="bg-background border-border text-foreground font-mono text-xs"
                                 />
                             </div>
-                        </div>
-
-                        <div className="flex justify-end">
-                            <Button disabled>Edição em breve</Button>
-                        </div>
+                            <div className="md:col-span-2 flex justify-end">
+                                <SubmitButton />
+                            </div>
+                        </form>
                     </CardContent>
                 </Card>
 
@@ -134,7 +172,7 @@ export default async function Profile() {
                         </div>
 
                         <div className="flex justify-end">
-                            <Button disabled>Alterar senha em breve</Button>
+                            <Button disabled className="bg-[#2E7D32] text-white">Alterar senha em breve</Button>
                         </div>
                     </CardContent>
                 </Card>

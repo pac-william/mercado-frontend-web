@@ -155,9 +155,9 @@ export default function AddressList() {
         <div className="space-y-4">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                    <Button className="w-full">
+                    <Button className="w-full bg-[#2E7D32] hover:bg-[#27672A] text-white">
                         <Plus className="w-4 h-4 mr-2" />
-                        Adicionar endereço
+                        + Adicionar endereços
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
