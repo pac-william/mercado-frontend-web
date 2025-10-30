@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CurrentUser } from "@/types/auth"
-import { History, LogOut, Moon, Package, Sun, User } from "lucide-react"
+import { History, LogOut, Package, User } from "lucide-react"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 
@@ -46,15 +46,6 @@ export function ProfileMenuDropDown({ currentUser }: { currentUser: CurrentUser 
                         <Package className="mr-2 h-4 w-4" />
                         <span>Meus Pedidos</span>
                     </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem asChild className="cursor-pointer">
-                    <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
-                        {theme === "light" ? <Moon className="mr-2 h-4 w-4" /> : <Sun className="mr-2 h-4 w-4" />}
-                        <span>{theme === "light" ? "Tema Escuro" : "Tema Claro"}</span>
-                    </Button>
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />

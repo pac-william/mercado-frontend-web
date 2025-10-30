@@ -1,4 +1,5 @@
 import { getCart } from "@/actions/cart.actions";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CartItemResponseDTO } from "@/dtos/cartDTO";
@@ -52,6 +53,7 @@ export default async function Header() {
                     </div>
 
                     <div className="flex flex-row gap-2">
+                        <AnimatedThemeToggler />
                         {session ? (
                             <ProfileMenuDropDown currentUser={session.user as unknown as CurrentUser} />
                         ) : (
