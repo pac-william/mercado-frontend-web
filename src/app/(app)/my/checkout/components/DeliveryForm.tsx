@@ -1,17 +1,16 @@
 'use client';
 
 import { getAddresses } from "@/actions/address.actions";
-import { AddressResponseDTO } from "@/dtos/addressDTO";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { AddressResponseDTO } from "@/dtos/addressDTO";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, MapPin, Plus, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -55,11 +54,25 @@ export default function DeliveryForm({ onSubmit, isLoading }: DeliveryFormProps)
         },
     });
 
-    useEffect(() => {
-        loadAddresses();
-    }, []);
+    const handleSelectAddress = useCallback((addressId: string) => {
+        setSelectedAddressId(addressId);
+        const address = addresses.find(a => a.id === addressId);
+        
+        if (address) {
+            form.setValue("addressId", addressId);
+            form.setValue("street", address.street);
+            form.setValue("number", address.number);
+            form.setValue("complement", address.complement || "");
+            form.setValue("neighborhood", address.neighborhood);
+            form.setValue("city", address.city);
+            form.setValue("state", address.state);
+            form.setValue("zipCode", address.zipCode);
+        }
+        
+        setShowNewAddressForm(false);
+    }, [addresses, form]);
 
-    const loadAddresses = async () => {
+    const loadAddresses = useCallback(async () => {
         setIsLoadingAddresses(true);
         try {
             const data = await getAddresses();
@@ -77,25 +90,13 @@ export default function DeliveryForm({ onSubmit, isLoading }: DeliveryFormProps)
         } finally {
             setIsLoadingAddresses(false);
         }
-    };
+    }, [handleSelectAddress]);
 
-    const handleSelectAddress = (addressId: string) => {
-        setSelectedAddressId(addressId);
-        const address = addresses.find(a => a.id === addressId);
-        
-        if (address) {
-            form.setValue("addressId", addressId);
-            form.setValue("street", address.street);
-            form.setValue("number", address.number);
-            form.setValue("complement", address.complement || "");
-            form.setValue("neighborhood", address.neighborhood);
-            form.setValue("city", address.city);
-            form.setValue("state", address.state);
-            form.setValue("zipCode", address.zipCode);
-        }
-        
-        setShowNewAddressForm(false);
-    };
+    useEffect(() => {
+        loadAddresses();
+    }, [loadAddresses]);
+
+    
 
     const handleUseNewAddress = () => {
         setSelectedAddressId("");

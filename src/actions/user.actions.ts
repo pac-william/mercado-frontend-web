@@ -57,11 +57,15 @@ export const updateUser = async (id: string, data: UserUpdateDTO): Promise<UserR
             throw new Error("Usuário não encontrado");
         }
         if (response.status === 409) {
-            const err = await response.json().catch(() => ({} as any));
+            const err = (await response.json().catch(() => ({} as { message?: string }))) as {
+                message?: string;
+            };
             throw new Error(err?.message || "Email já está em uso");
         }
         if (response.status === 400) {
-            const err = await response.json().catch(() => ({} as any));
+            const err = (await response.json().catch(() => ({} as { message?: string }))) as {
+                message?: string;
+            };
             throw new Error(err?.message || "Erro de validação");
         }
         throw new Error("Erro ao atualizar usuário");

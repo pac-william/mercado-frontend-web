@@ -5,7 +5,6 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Package } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import OrderCard from "./components/OrderCard";
 import StatusFilters from "./components/StatusFilters";
@@ -13,9 +12,8 @@ import StatusFilters from "./components/StatusFilters";
 type FilterStatus = "ALL" | "PENDING" | "CONFIRMED" | "PREPARING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
 
 export default function MyOrdersPage() {
-    const router = useRouter();
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [orders] = useState<Order[]>([]);
+    const [loading] = useState(true);
     const [activeFilter, setActiveFilter] = useState<FilterStatus>("ALL");
 
 

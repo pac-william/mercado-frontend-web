@@ -63,7 +63,6 @@ export default function CheckoutPage() {
     const userId = cart?.userId || "";
 
     const subtotal = cart?.totalValue || 0;
-    const total = subtotal - discount + deliveryFee;
 
     const handleCouponApply = (code: string, discountValue: number) => {
         setAppliedCoupon(code);

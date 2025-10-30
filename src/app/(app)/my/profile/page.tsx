@@ -1,3 +1,4 @@
+import { getUserByAuth0Id, updateUser } from "@/actions/user.actions";
 import RouterBack from "@/components/RouterBack";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -7,12 +8,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { auth0 } from "@/lib/auth0";
 import { LogOut } from "lucide-react";
+import { redirect } from "next/navigation";
 import AddressList from "./components/AddressList";
-import { getUserByAuth0Id } from "@/actions/user.actions";
-import { updateUser } from "@/actions/user.actions";
 import SubmitButton from "./components/SubmitButton";
 import ToastOnMount from "./components/ToastOnMount";
-import { redirect } from "next/navigation";
 
 export default async function Profile({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const session = await auth0.getSession();
@@ -46,8 +45,8 @@ export default async function Profile({ searchParams }: { searchParams: Promise<
 
         try {
             await updateUser(id, { name: newName, email: newEmail });
-        } catch (err: any) {
-            const message = err?.message || "Erro ao atualizar perfil";
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Erro ao atualizar perfil";
             return redirect(`/my/profile?error=${encodeURIComponent(message)}`);
         }
         return redirect("/my/profile?success=Perfil atualizado com sucesso");
