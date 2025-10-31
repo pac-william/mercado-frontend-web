@@ -1,5 +1,6 @@
 "use client"
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -9,18 +10,24 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { CurrentUser } from "@/types/auth"
-import { History, LogOut, Package, User } from "lucide-react"
+import { User } from "@auth0/nextjs-auth0/types"
+import { History, LogOut, Package, User as UserIcon } from "lucide-react"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 
-export function ProfileMenuDropDown({ currentUser }: { currentUser: CurrentUser }) {
+export function ProfileMenuDropDown({ currentUser }: { currentUser: User }) {
     const { setTheme, theme } = useTheme()
+    const profilePicture = currentUser.picture || '/images/profile-placeholder.png';
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                    <User className="h-4 w-4" />
+                <Button variant="outline" size="icon" className="rounded-full">
+                    <Avatar>
+                        <AvatarImage src={profilePicture} />
+                        <AvatarFallback>
+                            {currentUser.name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                    </Avatar>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
@@ -29,7 +36,7 @@ export function ProfileMenuDropDown({ currentUser }: { currentUser: CurrentUser 
 
                 <DropdownMenuItem asChild>
                     <Link href="/my/profile" className="flex items-center cursor-pointer">
-                        <User className="mr-2 h-4 w-4" />
+                        <UserIcon className="mr-2 h-4 w-4" />
                         <span>Perfil</span>
                     </Link>
                 </DropdownMenuItem>
