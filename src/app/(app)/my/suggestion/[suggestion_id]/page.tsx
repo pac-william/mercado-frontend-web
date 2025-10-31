@@ -1,7 +1,6 @@
 import { getProducts } from "@/actions/products.actions";
 import { getSuggestionById } from "@/actions/suggestion.actions";
 import ProductCard from "@/app/components/ProductCard";
-import SearchAiBar from "@/app/components/SearchBar";
 import { Product, ProductPaginatedResponse } from "@/app/domain/productDomain";
 import RouterBack from "@/components/RouterBack";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,9 +84,9 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
                             ))}
                         </div>
                     </ScrollArea>
-                    <div className="flex flex-col flex-1 w-full justify-center items-center px-4 py-8 absolute bottom-0 bg-background/50 backdrop-blur-sm border-t border-border z-50">
+                    {/* <div className="flex flex-col flex-1 w-full justify-center items-center px-4 py-8 absolute bottom-0 bg-background/50 backdrop-blur-sm border-t border-border z-50">
                         <SearchAiBar className="w-full" />
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>
