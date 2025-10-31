@@ -27,7 +27,7 @@ export default async function History({ searchParams }: PageProps) {
     if (!session) {
         redirect('/auth/login');
     }
-    
+
     const { page, size } = await searchParams;
     const currentPage = parseInt(page || '1', 10);
     const pageSize = parseInt(size || '10', 10);
@@ -122,11 +122,11 @@ export default async function History({ searchParams }: PageProps) {
                                                 <div className="flex flex-wrap gap-2">
                                                     <Badge variant="default" className="gap-1">
                                                         <Package className="h-3 w-3" />
-                                                        {suggestion.data.essential_products.length} essenciais
+                                                        {suggestion.data.items.filter(item => item.type === "essential").length} essenciais
                                                     </Badge>
                                                     <Badge variant="secondary" className="gap-1">
                                                         <ShoppingBag className="h-3 w-3" />
-                                                        {suggestion.data.searchResults.statistics.totalProductsFound} produtos
+                                                        {suggestion.data.items.length} produtos
                                                     </Badge>
                                                     <Badge variant="outline" className="gap-1">
                                                         <Clock className="h-3 w-3" />
@@ -139,46 +139,52 @@ export default async function History({ searchParams }: PageProps) {
                                     <CardContent>
                                         <div className="space-y-3">
                                             {/* Produtos Essenciais Preview */}
-                                            {suggestion.data.essential_products.length > 0 && (
-                                                <div>
-                                                    <p className="text-xs font-medium text-muted-foreground mb-2">
-                                                        Produtos Essenciais:
-                                                    </p>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {suggestion.data.essential_products.slice(0, 5).map((product, idx) => (
-                                                            <Badge key={idx} variant="outline" className="text-xs">
-                                                                {product.name}
-                                                            </Badge>
-                                                        ))}
-                                                        {suggestion.data.essential_products.length > 5 && (
-                                                            <Badge variant="outline" className="text-xs">
-                                                                +{suggestion.data.essential_products.length - 5} mais
-                                                            </Badge>
-                                                        )}
+                                            {(() => {
+                                                const essentialProducts = suggestion.data.items.filter(item => item.type === "essential");
+                                                return essentialProducts.length > 0 && (
+                                                    <div>
+                                                        <p className="text-xs font-medium text-muted-foreground mb-2">
+                                                            Produtos Essenciais:
+                                                        </p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {essentialProducts.slice(0, 5).map((product, idx) => (
+                                                                <Badge key={idx} variant="outline" className="text-xs">
+                                                                    {product.name}
+                                                                </Badge>
+                                                            ))}
+                                                            {essentialProducts.length > 5 && (
+                                                                <Badge variant="outline" className="text-xs">
+                                                                    +{essentialProducts.length - 5} mais
+                                                                </Badge>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
+                                                );
+                                            })()}
 
                                             {/* Utensílios Preview */}
-                                            {suggestion.data.utensils.length > 0 && (
-                                                <div>
-                                                    <p className="text-xs font-medium text-muted-foreground mb-2">
-                                                        Utensílios:
-                                                    </p>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {suggestion.data.utensils.slice(0, 3).map((utensil, idx) => (
-                                                            <Badge key={idx} variant="secondary" className="text-xs">
-                                                                {utensil.name}
-                                                            </Badge>
-                                                        ))}
-                                                        {suggestion.data.utensils.length > 3 && (
-                                                            <Badge variant="secondary" className="text-xs">
-                                                                +{suggestion.data.utensils.length - 3} mais
-                                                            </Badge>
-                                                        )}
+                                            {(() => {
+                                                const utensils = suggestion.data.items.filter(item => item.type === "utensil");
+                                                return utensils.length > 0 && (
+                                                    <div>
+                                                        <p className="text-xs font-medium text-muted-foreground mb-2">
+                                                            Utensílios:
+                                                        </p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {utensils.slice(0, 3).map((utensil, idx) => (
+                                                                <Badge key={idx} variant="secondary" className="text-xs">
+                                                                    {utensil.name}
+                                                                </Badge>
+                                                            ))}
+                                                            {utensils.length > 3 && (
+                                                                <Badge variant="secondary" className="text-xs">
+                                                                    +{utensils.length - 3} mais
+                                                                </Badge>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
+                                                );
+                                            })()}
 
                                             {/* Botão para ver sugestão completa */}
                                             <div className="flex flex-1 items-center gap-2 pt-2">

@@ -1,51 +1,12 @@
-export interface Product {
+export interface SuggestionItem {
   name: string;
   categoryId: string;
   categoryName: string;
-}
-
-export interface ProductDetail {
-  id: string;
-  name: string;
-  price: number;
-  unit: string;
-  marketId: string;
-  image: string;
-  categoryId: string;
-  categoryName: string;
-  categorySlug: string;
-  categoryDescription: string;
-}
-
-export interface SearchMeta {
-  total: number;
-  page: number;
-  size: number;
-}
-
-export interface ProductSearchResult {
-  searchTerm: string;
-  categoryName: string;
-  products: ProductDetail[];
-  meta: SearchMeta;
-}
-
-export interface SearchStatistics {
-  totalSearches: number;
-  totalProductsFound: number;
-  searchTerms: string[];
-}
-
-export interface SearchResults {
-  productsBySearchTerm: ProductSearchResult[];
-  statistics: SearchStatistics;
+  type: "essential" | "common" | "utensil";
 }
 
 export interface SuggestionData {
-  essential_products: Product[];
-  common_products: Product[];
-  utensils: Product[];
-  searchResults: SearchResults;
+  items: SuggestionItem[];
 }
 
 export interface SuggestionCreateResponse {
@@ -54,6 +15,7 @@ export interface SuggestionCreateResponse {
 
 export interface Suggestion {
   id: string;
+  userId: string;
   task: string;
   data: SuggestionData;
   createdAt: string;
