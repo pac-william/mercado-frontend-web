@@ -28,7 +28,18 @@ export const getProducts = async (filters?: GetPaymentsFilters) => {
         });
 
         if (!response.ok) {
-            throw new Error('Erro ao buscar produtos');
+            if (response.status === 404) {
+                throw new Error('Produtos não encontrados');
+            }
+            if (response.status >= 500) {
+                throw new Error('Erro no servidor ao buscar produtos');
+            }
+            try {
+                const error = await response.json();
+                throw new Error(error.message || 'Erro ao buscar produtos');
+            } catch {
+                throw new Error(`Erro ao buscar produtos (status: ${response.status})`);
+            }
         }
 
         const data = await response.json() as ProductPaginatedResponse;

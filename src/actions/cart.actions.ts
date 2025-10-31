@@ -24,7 +24,21 @@ export const getCart = async (): Promise<CartResponse> => {
             if (response.status === 401) {
                 throw new Error('Usuário não autenticado');
             }
-            throw new Error('Erro ao buscar carrinho');
+            if (response.status === 404) {
+                throw new Error('Carrinho não encontrado');
+            }
+            if (response.status === 403) {
+                throw new Error('Acesso negado');
+            }
+            if (response.status >= 500) {
+                throw new Error('Erro no servidor ao buscar carrinho');
+            }
+            try {
+                const error = await response.json();
+                throw new Error(error.message || 'Erro ao buscar carrinho');
+            } catch {
+                throw new Error(`Erro ao buscar carrinho (status: ${response.status})`);
+            }
         }
 
         const data = await response.json() as CartResponse;

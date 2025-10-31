@@ -192,10 +192,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                     <div className="flex flex-col flex-1 gap-4">
                         <TopFilters />
                         {
-                            products.length > 0 ? (
+                            products?.length > 0 ? (
                                 <>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 flex-1">
-                                        {products.map((product: Product) => {
+                                        {products?.map((product: Product) => {
                                             return (
                                                 <div key={product.id}>
                                                     <ProductCard

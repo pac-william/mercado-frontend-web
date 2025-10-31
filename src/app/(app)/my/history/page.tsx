@@ -182,7 +182,7 @@ export default async function History({ searchParams }: PageProps) {
 
                                             {/* Botão para ver sugestão completa */}
                                             <div className="flex flex-1 items-center gap-2 pt-2">
-                                                <Link href={`/suggestion/${suggestion.id}`}>
+                                                <Link href={`/my/suggestion/${suggestion.id}`}>
                                                     <Button variant="link">
                                                         <span>Ver Sugestão Completa</span>
                                                         <SquareArrowOutUpRight size={16} />
@@ -207,7 +207,7 @@ export default async function History({ searchParams }: PageProps) {
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Link href={`/history?page=${Math.max(1, meta.page - 1)}&size=${pageSize}`}>
+                                <Link href={`/my/history?page=${Math.max(1, meta.page - 1)}&size=${pageSize}`}>
                                     <Button
                                         variant="outline"
                                         size="sm"
@@ -232,7 +232,7 @@ export default async function History({ searchParams }: PageProps) {
                                         }
 
                                         return (
-                                            <Link key={pageNum} href={`/history?page=${pageNum}&size=${pageSize}`}>
+                                            <Link key={pageNum} href={`/my/history?page=${pageNum}&size=${pageSize}`}>
                                                 <Button
                                                     variant={pageNum === meta.page ? "default" : "outline"}
                                                     size="sm"
@@ -244,7 +244,7 @@ export default async function History({ searchParams }: PageProps) {
                                         );
                                     })}
                                 </div>
-                                <Link href={`/history?page=${Math.min(meta.totalPages, meta.page + 1)}&size=${pageSize}`}>
+                                <Link href={`/my/history?page=${Math.min(meta.totalPages, meta.page + 1)}&size=${pageSize}`}>
                                     <Button
                                         variant="outline"
                                         size="sm"

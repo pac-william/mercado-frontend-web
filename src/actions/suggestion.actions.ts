@@ -24,8 +24,6 @@ export async function createSuggestion(task: string): Promise<SuggestionCreateRe
       cache: 'no-store',
     });
 
-    console.log(response);
-
     if (!response.ok) {
       throw new Error(`Erro ao criar sugestão: ${response.status}`);
     }
