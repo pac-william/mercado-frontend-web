@@ -85,6 +85,16 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
                                 em {Object.keys(itemsByCategory).length} categorias diferentes.
                             </p>
 
+                            {/* Lista dos produtos necessários */}
+                            <div className="flex flex-col gap-2">
+                                {essentialItems.map(item => (
+                                    <Badge key={item.name} variant="outline" className="text-xs">
+                                        {item.name}
+                                    </Badge>
+                                ))}
+                            </div>
+
+
                             {/* Produtos por Categoria */}
                             {Object.entries(itemsByCategory).map(([categoryName, items]) => (
                                 <Card key={categoryName} className="bg-card border-border">
@@ -102,9 +112,6 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
                             ))}
                         </div>
                     </ScrollArea>
-                    {/* <div className="flex flex-col flex-1 w-full justify-center items-center px-4 py-8 absolute bottom-0 bg-background/50 backdrop-blur-sm border-t border-border z-50">
-                        <SearchAiBar className="w-full" />
-                    </div> */}
                 </div>
             </div>
         </div>
@@ -123,10 +130,6 @@ async function ProductSuggestion({ productName, categoryId }: { productName: str
             {products.map((product: Product) => (
                 <ProductCard key={product.id} product={product} variant="suggestion" badgeText={product.unit} badgeVariant="secondary" />
             ))}
-            {/* Mostrar nomes que não foram encontrados como badges */}
-            <Badge key={productName} variant="outline" className="w-fit">
-                {productName}
-            </Badge>
         </div>
     );
 }
