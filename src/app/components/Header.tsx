@@ -5,10 +5,11 @@ import { Separator } from "@/components/ui/separator";
 import { CartItemResponseDTO } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
 import { CurrentUser } from "@/types/auth";
-import { LogIn } from "lucide-react";
+import { LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
 import CartSheet from "./CartSheet";
 import { ProfileMenuDropDown } from "./ProfileMenuDropDown";
+import AuthButtons from "./AuthButtons";
 
 export default async function Header() {
     const session = await auth0.getSession();
@@ -57,12 +58,7 @@ export default async function Header() {
                         {session ? (
                             <ProfileMenuDropDown currentUser={session.user as unknown as CurrentUser} />
                         ) : (
-                            <Button variant="outline" size="sm" asChild>
-                                <Link href="/auth/login">
-                                    Entrar
-                                    <LogIn size={24} />
-                                </Link>
-                            </Button>
+                            <AuthButtons />
                         )}
                     </div>
                 </div>
