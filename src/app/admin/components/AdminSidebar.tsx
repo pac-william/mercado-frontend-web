@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { 
     LayoutDashboard, 
     Package, 
     Truck, 
     Users, 
     FileText,
-    ShoppingCart
+    ShoppingCart,
+    LogOut
 } from "lucide-react";
 
 const menuItems = [
@@ -72,6 +74,19 @@ export default function AdminSidebar() {
                     );
                 })}
             </nav>
+            <div className="p-4 border-t border-border">
+                <Button
+                    variant="ghost"
+                    className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent"
+                    asChild
+                >
+                    {/* TODO: NAO TA FUNFANDO */}
+                    <a href="/auth/logout" className="flex items-center gap-3 w-full">
+                        <LogOut className="h-5 w-5" />
+                        <span>Sair</span>
+                    </a>
+                </Button>
+            </div>
         </aside>
     );
 }
