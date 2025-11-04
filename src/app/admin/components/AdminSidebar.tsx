@@ -81,10 +81,16 @@ export default function AdminSidebar() {
                     asChild
                 >
                     {/* TODO: NAO TA FUNFANDO */}
-                    <a href="/auth/logout" className="flex items-center gap-3 w-full">
-                        <LogOut className="h-5 w-5" />
-                        <span>Sair</span>
-                    </a>
+                    <form action="/api/auth/logout" method="post">
+                            <Button
+                                type="submit"
+                                variant="destructive"
+                                className="w-full"
+                            >
+                                <LogOut className="w-4 h-4 mr-2" />
+                                Sair da conta
+                            </Button>
+                        </form>
                 </Button>
             </div>
         </aside>

@@ -13,12 +13,18 @@ export default async function Layout({ children }: { children: React.ReactNode }
             const roleFromToken = user?.app_metadata?.role || user?.user_metadata?.role;
             
             if (roleFromToken) {
-                isAdmin = roleFromToken === 'MARKET_ADMIN'
+                isAdmin = roleFromToken === 'MARKET_ADMIN' || roleFromToken === 'ADMIN';
             } else {
-                const profile = await getUserByAuth0Id(session.user.sub);
-                isAdmin = profile.role === 'MARKET_ADMIN'
+                try {
+                    const profile = await getUserByAuth0Id(session.user.sub);
+                    isAdmin = profile.role === 'MARKET_ADMIN' || profile.role === 'ADMIN';
+                } catch (error) {
+                    console.error('Erro ao buscar role do backend:', error);
+                    isAdmin = false;
+                }
             }
-        } catch (_) {
+        } catch (error) {
+            console.error('Erro ao verificar role:', error);
             isAdmin = false;
         }
     }
