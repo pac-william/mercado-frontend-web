@@ -58,7 +58,6 @@ export default function RegisterMarketPage() {
                     password: formData.password,
                     name: formData.userName || formData.marketName,
                     connection: 'Username-Password-Authentication',
-                    // Metadata para identificar como mercado
                     user_metadata: {
                         type: 'market',
                         marketName: formData.marketName,
@@ -86,7 +85,6 @@ export default function RegisterMarketPage() {
                 throw new Error('Erro ao obter ID do usuário criado');
             }
 
-            // 2. Criar mercado no backend e vincular ao usuário
             await createMarketForUser({
                 auth0Id: auth0Id,
                 marketName: formData.marketName,
