@@ -65,7 +65,6 @@ export const getProductsByMarket = async (marketId: string, filters?: GetPayment
             },
         });
 
-        console.log('opa', response);
 
         if (!response.ok) {
             if (response.status === 404) {

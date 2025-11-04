@@ -74,5 +74,3 @@ export const updateUser = async (id: string, data: UserUpdateDTO): Promise<UserR
     const user = await response.json() as UserResponseDTO;
     return user;
 };
-
-
