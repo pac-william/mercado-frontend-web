@@ -7,6 +7,9 @@ export default async function MyLayout({ children }: { children: React.ReactNode
         redirect('/auth/login');
     }
 
+    console.log(session.tokenSet);
+
+    
     return (
         <div className="flex flex-col flex-grow h-0">
             {children}

@@ -14,7 +14,7 @@ interface AnimatedThemeTogglerProps
 
 export const AnimatedThemeToggler = ({
   className,
-  duration = 400,
+  duration = 600,
   ...props
 }: AnimatedThemeTogglerProps) => {
   const [isDark, setIsDark] = useState(false)
@@ -78,7 +78,7 @@ export const AnimatedThemeToggler = ({
       size="icon"
       ref={buttonRef}
       onClick={toggleTheme}
-      className={cn(className)}
+      className={cn("rounded-full", className)}
       {...props}
     >
       {isDark ? <Sun /> : <Moon />}

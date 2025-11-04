@@ -4,15 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CartItemResponseDTO } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
-import { CurrentUser } from "@/types/auth";
-import { LogIn, UserPlus } from "lucide-react";
+import { SessionData, User } from "@auth0/nextjs-auth0/types";
 import Link from "next/link";
 import CartSheet from "./CartSheet";
 import { ProfileMenuDropDown } from "./ProfileMenuDropDown";
 import AuthButtons from "./AuthButtons";
 
 export default async function Header() {
-    const session = await auth0.getSession();
+    const session = await auth0.getSession() as SessionData;
 
     let items: CartItemResponseDTO[] = [];
     try {
@@ -56,7 +55,7 @@ export default async function Header() {
                     <div className="flex flex-row gap-2">
                         <AnimatedThemeToggler />
                         {session ? (
-                            <ProfileMenuDropDown currentUser={session.user as unknown as CurrentUser} />
+                            <ProfileMenuDropDown currentUser={session.user as User} />
                         ) : (
                             <AuthButtons />
                         )}

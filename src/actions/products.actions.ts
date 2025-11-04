@@ -6,21 +6,30 @@ import { ProductDTO } from "@/dtos/productDTO";
 import { auth0 } from "@/lib/auth0";
 import { buildSearchParams } from "@/lib/misc";
 
-interface GetPaymentsFilters {
+interface GetProductsFilters {
     page?: number;
     size?: number;
     name?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    marketId?: string;
+    categoryId?: string;
 }
 
-export const getProducts = async (filters?: GetPaymentsFilters) => {
+export const getProducts = async (filters?: GetProductsFilters): Promise<ProductPaginatedResponse> => {
     try {
         const params = buildSearchParams({
-            page: filters?.page,
-            size: filters?.size,
+            page: filters?.page ?? 1,
+            size: filters?.size ?? 10,
             name: filters?.name,
+            minPrice: filters?.minPrice,
+            maxPrice: filters?.maxPrice,
+            marketId: filters?.marketId,
+            categoryId: filters?.categoryId,
         });
 
         const response = await fetch(`${baseUrl}/api/v1/products?${params.toString()}`, {
+            method: "GET",
             cache: 'no-store',
             headers: {
                 "Content-Type": "application/json",
