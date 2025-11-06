@@ -36,14 +36,6 @@ export default async function Header() {
                         <Separator orientation="vertical" />
 
                         <Button variant="link" size="sm" asChild>
-                            <Link href="/my/history">
-                                Histórico
-                            </Link>
-                        </Button>
-
-                        <Separator orientation="vertical" />
-
-                        <Button variant="link" size="sm" asChild>
                             <Link href="/my/shopping">
                                 Compras
                             </Link>

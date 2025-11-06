@@ -34,13 +34,13 @@ export default function CartSheet({ cartItems }: CartSheetProps) {
         <Sheet open={isOpen} onOpenChange={setIsOpen} defaultOpen={false}>
             <SheetTrigger asChild>
                 <Button variant="link" size="sm" className="relative">
-                    <ShoppingCart className="w-5 h-5" />
+                    Carrinho
                     {totalItems > 0 && (
                         <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                             {totalItems}
                         </span>
                     )}
-                    Carrinho
+                    <ShoppingCart className="w-5 h-5" />
                 </Button>
             </SheetTrigger>
             <SheetContent className="flex flex-1 flex-col gap-0 bg-background border-border" side="right">
