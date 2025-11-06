@@ -80,17 +80,11 @@ export default function AdminSidebar() {
                     className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent"
                     asChild
                 >
-                    {/* TODO: NAO TA FUNFANDO */}
-                    <form action="/api/auth/logout" method="post">
-                            <Button
-                                type="submit"
-                                variant="destructive"
-                                className="w-full"
-                            >
-                                <LogOut className="w-4 h-4 mr-2" />
-                                Sair da conta
-                            </Button>
-                        </form>
+                    {/* TODONAO TA FUNFANDO */}
+                    <a href="/auth/logout" className="flex items-center gap-3 w-full">
+                        <LogOut className="h-5 w-5" />
+                        <span>Sair</span>
+                    </a>
                 </Button>
             </div>
         </aside>
