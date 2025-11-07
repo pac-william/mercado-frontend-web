@@ -10,7 +10,7 @@ interface OrderCardProps {
     id: string;
     status: string;
     total: number;
-    deliveryAddress: string;
+    deliveryAddress?: string | null;
     createdAt?: Date;
     marketId?: string;
 }
@@ -33,9 +33,9 @@ export default function OrderCard({
         })
         : "Data não disponível";
 
-    const shortAddress = deliveryAddress.length > 60 
+    const shortAddress = deliveryAddress && deliveryAddress.length > 60 
         ? deliveryAddress.substring(0, 60) + "..." 
-        : deliveryAddress;
+        : deliveryAddress ?? "Endereço não disponível";
 
     return (
         <Card className="bg-card border-border hover:shadow-md transition-shadow">

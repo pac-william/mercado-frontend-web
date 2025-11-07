@@ -1,9 +1,10 @@
+import { AddressDomain } from "@/app/domain/addressDomain";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, User } from "lucide-react";
 
 interface DeliveryInfoProps {
-    address: string;
+    address: AddressDomain;
     delivererId?: string | null;
 }
 
@@ -23,7 +24,9 @@ export default function DeliveryInfo({ address, delivererId }: DeliveryInfoProps
                         Endereço de Entrega
                     </label>
                     <p className="mt-1 text-card-foreground">
-                        {address}
+                        {address.street} {address.number} {address.complement && ` - ${address.complement}`}
+                        {address.neighborhood && ` - ${address.neighborhood}`}
+                        {address.city && ` - ${address.city} - ${address.state} - ${address.zipCode}`}
                     </p>
                 </div>
 
