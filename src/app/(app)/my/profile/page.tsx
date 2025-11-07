@@ -46,13 +46,15 @@ export default async function Profile() {
                         </nav>
                     </CardContent>
                 </Card>
-                <div className="flex flex-col flex-1 pr-2">
-                    <ScrollArea className="flex flex-col flex-grow h-0">
-                        <RouterBack />
-                        <div className="flex flex-col gap-4 p-4 mb-32">
-                            <PersonalInfoSection />
-                            <AddressesSection addresses={addresses} />
-                            <LogoutSection />
+                <div className="flex flex-col flex-1 gap-4">
+                    <RouterBack />
+                    <ScrollArea className="flex flex-col flex-grow h-0 pr-4">
+                        <div className="flex flex-col flex-1 gap-4">
+                            <div className="flex flex-col flex-1 gap-4">
+                                <PersonalInfoSection />
+                                <AddressesSection addresses={addresses} />
+                                <LogoutSection />
+                            </div>
                         </div>
                     </ScrollArea>
                 </div>

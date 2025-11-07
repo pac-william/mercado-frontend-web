@@ -10,7 +10,7 @@ interface AddressesSectionProps {
 
 export default function AddressesSection({ addresses }: AddressesSectionProps) {
     return (
-        <Card className="bg-card border-border">
+        <Card className="flex flex-col flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                     <CardTitle className="text-card-foreground">Endereços</CardTitle>
@@ -19,16 +19,14 @@ export default function AddressesSection({ addresses }: AddressesSectionProps) {
                 <CreateAddressDialog />
             </CardHeader>
             <Separator />
-            <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                    {addresses.length > 0 ? addresses.map((address) => (
-                        <AddressCard key={address.id} address={address} />
-                    )) : (
-                        <div className="flex flex-col items-center justify-center h-full">
-                            <p className="text-muted-foreground">Nenhum endereço cadastrado</p>
-                        </div>
-                    )}
-                </div>
+            <CardContent className="flex flex-col flex-1 gap-4">
+                {addresses.length > 0 ? addresses.map((address) => (
+                    <AddressCard key={address.id} address={address} />
+                )) : (
+                    <div className="flex flex-col items-center justify-center h-full">
+                        <p className="text-muted-foreground">Nenhum endereço cadastrado</p>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { updateAddress } from "@/actions/address.actions"
+import { AddressDomain } from "@/app/domain/addressDomain"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -27,7 +28,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { AddressDTO as addressSchema, type AddressDTO as AddressFormValues } from "@/dtos/addressDTO"
-import { AddressDomain } from "@/app/domain/addressDomain"
 import { Pencil } from "lucide-react"
 
 interface EditAddressDialogProps {
@@ -194,10 +194,9 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
                     <Button
                         variant="ghost"
                         size="icon_xs"
-                        className="text-muted-foreground hover:text-foreground"
+                        className="rounded-full"
                     >
                         <Pencil size={14} />
-                        <span className="sr-only">Editar endereço</span>
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[520px]">
