@@ -221,12 +221,12 @@ export default function Cart() {
                                             </div>
                                         </ScrollArea>
                                         <Separator />
-                                        
+
                                         <div className="flex flex-col gap-2 p-3 bg-muted/50 rounded-lg border">
                                             <span className="text-sm font-medium text-card-foreground">
                                                 Cupom de Desconto
                                             </span>
-                                            
+
                                             {appliedCoupon ? (
                                                 <div className="flex items-center justify-between p-2 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
                                                     <div className="flex items-center gap-2">
@@ -258,8 +258,8 @@ export default function Cart() {
                                                             }
                                                         }}
                                                     />
-                                                    <Button 
-                                                        onClick={handleApplyCoupon} 
+                                                    <Button
+                                                        onClick={handleApplyCoupon}
                                                         disabled={!couponCode.trim() || validating}
                                                         variant="outline"
                                                     >
@@ -301,7 +301,7 @@ export default function Cart() {
                                         <div>
                                             <Button asChild disabled={cartItems.length === 0}>
                                                 <Link href="/my/checkout">
-                                                Continuar para o Checkout
+                                                    Continuar para o Checkout
                                                 </Link>
                                             </Button>
                                         </div>

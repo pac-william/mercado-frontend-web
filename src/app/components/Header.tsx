@@ -6,9 +6,9 @@ import { CartItemResponseDTO } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
 import { SessionData, User } from "@auth0/nextjs-auth0/types";
 import Link from "next/link";
+import AuthButtons from "./AuthButtons";
 import CartSheet from "./CartSheet";
 import { ProfileMenuDropDown } from "./ProfileMenuDropDown";
-import AuthButtons from "./AuthButtons";
 
 export default async function Header() {
     const session = await auth0.getSession() as SessionData;
@@ -31,9 +31,7 @@ export default async function Header() {
                 </h1>
                 <div className="ml-auto flex flex-row gap-8">
                     <div className="flex flex-row gap-2">
-                        <CartSheet cartItems={items} />
-
-                        <Separator orientation="vertical" />
+                        {session ? <><CartSheet cartItems={items} /> <Separator orientation="vertical" /></> : null}
 
                         <Button variant="link" size="sm" asChild>
                             <Link href="/my/history">
