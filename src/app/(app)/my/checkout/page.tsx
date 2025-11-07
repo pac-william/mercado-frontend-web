@@ -1,10 +1,15 @@
 import { getAddresses } from "@/actions/address.actions";
+import { getCart } from "@/actions/cart.actions";
 import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import DeliveryForm from "./components/DeliveryForm";
+import OrderSummary from "./components/OrderSummary";
+import PaymentMethod from "./components/PaymentMethod";
 
-export async function CheckoutPage() {
+export default async function CheckoutPage() {
 
     const { addresses } = await getAddresses();
+    const items = await getCart();
 
     return (
         <div className="flex flex-col flex-1">
@@ -15,16 +20,16 @@ export async function CheckoutPage() {
 
                     <div className="flex flex-1 flex-row gap-4">
                         <div className="flex flex-1 flex-col gap-4">
-                            {/* <CouponInput />
 
                             <PaymentMethod />
 
-                            <DeliveryForm /> */}
+                            <DeliveryForm addresses={addresses} />
+
                         </div>
 
                         <div className="w-[380px] h-[calc(100vh-100px)] sticky top-4">
                             <div className="flex flex-col gap-4 h-full">
-                                {/* <OrderSummary /> */}
+                                <OrderSummary cart={items} addresses={addresses} />
                             </div>
                         </div>
                     </div>
@@ -34,5 +39,3 @@ export async function CheckoutPage() {
 
     );
 }
-
-

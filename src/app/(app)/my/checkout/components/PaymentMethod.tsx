@@ -7,12 +7,11 @@ import { CreditCard, Smartphone, Wallet } from "lucide-react";
 export type PaymentMethod = 'credit' | 'debit' | 'pix';
 
 interface PaymentMethodProps {
-    onSelectMethod: (method: PaymentMethod) => void;
     selectedMethod?: PaymentMethod;
     isLoading?: boolean;
 }
 
-export default function PaymentMethod({ onSelectMethod, selectedMethod, isLoading }: PaymentMethodProps) {
+export default function PaymentMethod({ selectedMethod, isLoading }: PaymentMethodProps) {
     const paymentMethods = [
         {
             id: 'credit' as PaymentMethod,
@@ -57,7 +56,6 @@ export default function PaymentMethod({ onSelectMethod, selectedMethod, isLoadin
                                         ? 'border-primary bg-primary/5 dark:bg-primary/10'
                                         : 'border-border bg-background hover:border-primary/50 hover:bg-muted/50'
                                 } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
-                                onClick={() => !isLoading && onSelectMethod(method.id)}
                             >
                                 <div className={`flex items-center justify-center w-12 h-12 rounded-lg ${
                                     isSelected ? 'bg-primary/10' : 'bg-muted'

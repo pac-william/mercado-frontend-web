@@ -1,324 +1,301 @@
-'use client';
+"use client"
 
-import { getAddresses } from "@/actions/address.actions";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { AddressResponseDTO } from "@/dtos/addressDTO";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, MapPin, Plus, Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState, useTransition } from "react"
+import { Controller, useForm, type SubmitHandler } from "react-hook-form"
+import { toast } from "sonner"
+import { z } from "zod"
 
-const deliverySchema = z.object({
-    addressId: z.string().optional(),
-    street: z.string().min(3, "Rua deve ter pelo menos 3 caracteres"),
-    number: z.string().min(1, "Número é obrigatório"),
-    complement: z.string().optional(),
-    neighborhood: z.string().min(3, "Bairro deve ter pelo menos 3 caracteres"),
-    city: z.string().min(3, "Cidade deve ter pelo menos 3 caracteres"),
-    state: z.string().length(2, "Estado deve ter 2 caracteres (ex: MG)"),
-    zipCode: z.string().regex(/^\d{5}-?\d{3}$/, "CEP inválido (ex: 12345-678)"),
-});
+import { updateAddress } from "@/actions/address.actions"
+import { AddressDomain } from "@/app/domain/addressDomain"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { AddressDTO as addressSchema } from "@/dtos/addressDTO"
 
-export type DeliveryFormData = z.infer<typeof deliverySchema>;
+const baseAddressSchema = addressSchema.pick({
+    name: true,
+    street: true,
+    number: true,
+    neighborhood: true,
+    city: true,
+    state: true,
+    zipCode: true,
+    complement: true,
+})
+
+const deliveryFormSchema = baseAddressSchema.extend({
+    selectedAddressId: z.string().min(1, { message: "Selecione um endereço" }).optional(),
+    rememberData: z.enum(["existing", "new"]),
+})
+
+type DeliveryFormValues = z.infer<typeof deliveryFormSchema>
 
 interface DeliveryFormProps {
-    addresses: AddressResponseDTO[];
+    addresses: AddressDomain[]
 }
 
+const buildValuesFromAddress = (
+    address: AddressDomain | null | undefined,
+    mode: DeliveryFormValues["rememberData"],
+): DeliveryFormValues => ({
+    name: address?.name ?? "",
+    street: address?.street ?? "",
+    number: address?.number ?? "",
+    neighborhood: address?.neighborhood ?? "",
+    city: address?.city ?? "",
+    state: address?.state ?? "",
+    zipCode: address?.zipCode ?? "",
+    complement: address?.complement ?? "",
+    rememberData: mode,
+    selectedAddressId: mode === "existing" ? address?.id : undefined,
+})
+
 export default function DeliveryForm({ addresses }: DeliveryFormProps) {
-    const [addresses, setAddresses] = useState<AddressResponseDTO[]>([]);
-    const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
-    const [selectedAddressId, setSelectedAddressId] = useState<string>("");
-    const [showNewAddressForm, setShowNewAddressForm] = useState(false);
-    const [isLoadingCep, setIsLoadingCep] = useState(false);
+    const router = useRouter()
+    const [isPending, startTransition] = useTransition()
+    const defaultAddress = useMemo(
+        () => addresses.find((address) => address.isFavorite) ?? addresses[0],
+        [addresses],
+    )
 
-    const form = useForm<DeliveryFormData>({
-        resolver: zodResolver(deliverySchema),
-        defaultValues: {
-            addressId: "",
-            street: "",
-            number: "",
-            complement: "",
-            neighborhood: "",
-            city: "",
-            state: "",
-            zipCode: "",
-        },
-    });
+    const defaultMode = addresses.length ? "existing" : "new"
 
-    const handleSelectAddress = useCallback((addressId: string) => {
-        setSelectedAddressId(addressId);
-        const address = addresses.find(a => a.id === addressId);
-        
-        if (address) {
-            form.setValue("addressId", addressId);
-            form.setValue("street", address.street);
-            form.setValue("number", address.number);
-            form.setValue("complement", address.complement || "");
-            form.setValue("neighborhood", address.neighborhood);
-            form.setValue("city", address.city);
-            form.setValue("state", address.state);
-            form.setValue("zipCode", address.zipCode);
-        }
-        
-        setShowNewAddressForm(false);
-    }, [addresses, form]);
+    const initialValues = useMemo(
+        () => buildValuesFromAddress(defaultMode === "existing" ? defaultAddress : null, defaultMode),
+        [defaultAddress, defaultMode],
+    )
 
-    const loadAddresses = useCallback(async () => {
-        setIsLoadingAddresses(true);
-        try {
-            const data = await getAddresses();
-            setAddresses(data.addresses);
-            
-            // Select favorite address by default
-            const favoriteAddress = data.addresses.find(addr => addr.isFavorite);
-            if (favoriteAddress) {
-                handleSelectAddress(favoriteAddress.id);
-            }
-        } catch (error) {
-            console.error("Erro ao carregar endereços:", error);
-            toast.error("Erro ao carregar endereços");
-            setShowNewAddressForm(true);
-        } finally {
-            setIsLoadingAddresses(false);
-        }
-    }, [handleSelectAddress]);
+    const form = useForm<DeliveryFormValues>({
+        resolver: zodResolver(deliveryFormSchema),
+        defaultValues: initialValues,
+    })
+
+    const [mode, setMode] = useState<DeliveryFormValues["rememberData"]>(initialValues.rememberData)
 
     useEffect(() => {
-        loadAddresses();
-    }, [loadAddresses]);
+        form.reset(initialValues)
+        setMode(initialValues.rememberData)
+    }, [initialValues, form])
 
-    
+    const selectedAddressId = form.watch("selectedAddressId")
 
-    const handleUseNewAddress = () => {
-        setSelectedAddressId("");
-        form.setValue("addressId", "");
-        form.reset({
-            street: "",
-            number: "",
-            complement: "",
-            neighborhood: "",
-            city: "",
-            state: "",
-            zipCode: "",
-        });
-        setShowNewAddressForm(true);
-    };
+    const selectedAddress = useMemo(() => {
+        if (mode !== "existing") {
+            return null
+        }
+        if (!selectedAddressId) {
+            return defaultAddress ?? null
+        }
+        return addresses.find((address) => address.id === selectedAddressId) ?? null
+    }, [addresses, selectedAddressId, mode, defaultAddress])
 
-    const handleSearchCep = async () => {
-        const zipCode = form.getValues("zipCode");
-        
-        if (!zipCode) {
-            toast.error("Digite um CEP");
-            return;
+    useEffect(() => {
+        if (mode === "existing") {
+            const addressToApply = selectedAddress ?? defaultAddress ?? null
+            form.reset(buildValuesFromAddress(addressToApply, "existing"), {
+                keepDefaultValues: true,
+            })
+            return
         }
 
-        const cleanCep = zipCode.replace(/\D/g, "");
+        form.reset(buildValuesFromAddress(null, "new"), {
+            keepDefaultValues: true,
+        })
+    }, [mode, selectedAddress, defaultAddress, form])
 
-        if (cleanCep.length !== 8) {
-            toast.error("CEP deve ter 8 dígitos");
-            return;
+    const onSubmit: SubmitHandler<DeliveryFormValues> = (values) => {
+        const addressId = values.selectedAddressId
+
+        if (mode === "existing" && addressId) {
+            startTransition(async () => {
+                try {
+                    await updateAddress(addressId, {
+                        name: values.name.trim(),
+                        street: values.street.trim(),
+                        number: values.number.trim(),
+                        neighborhood: values.neighborhood.trim(),
+                        city: values.city.trim(),
+                        state: values.state.trim(),
+                        zipCode: values.zipCode.trim(),
+                        complement: values.complement?.trim() || undefined,
+                    })
+                    toast.success("Endereço atualizado para entrega")
+                    router.refresh()
+                } catch (error) {
+                    const message =
+                        error instanceof Error ? error.message : "Erro ao atualizar endereço"
+                    toast.error(message)
+                }
+            })
+            return
         }
 
-        setIsLoadingCep(true);
-        try {
-            const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
-            const data = await response.json();
-
-            if (data.erro) {
-                toast.error("CEP não encontrado");
-            } else {
-                form.setValue("street", data.logradouro || "");
-                form.setValue("neighborhood", data.bairro || "");
-                form.setValue("city", data.localidade || "");
-                form.setValue("state", data.uf || "");
-                form.setValue("complement", data.complemento || "");
-                toast.success("Endereço encontrado!");
+        startTransition(async () => {
+            try {
+                // TODO: integrar com criação de endereço na entrega quando definido
+                toast.success("Endereço para entrega definido")
+                router.refresh()
+            } catch (error) {
+                const message =
+                    error instanceof Error ? error.message : "Erro ao salvar endereço"
+                toast.error(message)
             }
-        } catch (error) {
-            console.error("Erro ao buscar CEP:", error);
-            toast.error("Erro ao buscar endereço");
-        } finally {
-            setIsLoadingCep(false);
-        }
-    };
+        })
+    }
 
     return (
         <Card className="bg-card border-border">
             <CardHeader>
-                <CardTitle className="text-card-foreground">Endereço de Entrega</CardTitle>
-                <CardDescription className="text-muted-foreground">
-                    Selecione um endereço cadastrado ou adicione um novo
-                </CardDescription>
+                <CardTitle className="text-lg text-card-foreground">Entrega</CardTitle>
             </CardHeader>
-            <Separator />
-            <CardContent className="pt-6 space-y-6">
-                {!showNewAddressForm && (
-                    <div className="space-y-4">
-                        {isLoadingAddresses ? (
-                            <div className="flex items-center justify-center py-8">
-                                <Loader2 className="w-6 h-6 animate-spin" />
-                            </div>
-                        ) : addresses.length > 0 ? (
-                            <div className="space-y-3">
-                                {addresses.map((address) => (
-                                    <label
-                                        key={address.id}
-                                        className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
-                                            selectedAddressId === address.id
-                                                ? "border-primary bg-primary/5"
-                                                : "border-border hover:border-primary/50"
-                                        }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="address"
-                                            value={address.id}
-                                            checked={selectedAddressId === address.id}
-                                            onChange={() => handleSelectAddress(address.id)}
-                                            className="mt-1"
-                                        />
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="font-medium">{address.name}</span>
-                                                {address.isFavorite && (
-                                                    <Badge variant="secondary" className="text-xs">
-                                                        Favorito
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-muted-foreground">
-                                                {address.street}, {address.number}
-                                                {address.complement && ` - ${address.complement}`}
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {address.neighborhood} - {address.city}/{address.state}
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">
-                                                CEP: {address.zipCode}
-                                            </p>
-                                        </div>
-                                    </label>
-                                ))}
-                            </div>
-                        ) : null}
-
-                        <div className="flex gap-2">
-                            {addresses.length > 0 && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="w-full"
-                                    onClick={handleUseNewAddress}
-                                    disabled={isLoading}
-                                >
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Usar Novo Endereço
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {showNewAddressForm && (
-                    <div className="space-y-4">
-                        {addresses.length > 0 && (
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full"
-                                onClick={() => {
-                                    if (addresses.length > 0) {
-                                        const favoriteAddress = addresses.find(addr => addr.isFavorite);
-                                        if (favoriteAddress) {
-                                            handleSelectAddress(favoriteAddress.id);
-                                        }
-                                    }
-                                    setShowNewAddressForm(false);
-                                }}
-                                disabled={isLoading}
-                            >
-                                <MapPin className="w-4 h-4 mr-2" />
-                                Usar Endereço Cadastrado
-                            </Button>
-                        )}
-
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardContent className="space-y-6">
+                <div className="space-y-3">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <div className="space-y-4">
+                                {addresses.length ? (
                                     <FormField
                                         control={form.control}
-                                        name="zipCode"
+                                        name="rememberData"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>CEP</FormLabel>
+                                                <FormLabel className="text-sm text-muted-foreground">
+                                                    Escolha como deseja preencher os dados de entrega
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input 
-                                                        placeholder="12345-678" 
-                                                        {...field}
-                                                        onChange={(e) => {
-                                                            const value = e.target.value.replace(/\D/g, "");
-                                                            const formatted = value.length > 5 
-                                                                ? `${value.slice(0, 5)}-${value.slice(5, 8)}` 
-                                                                : value;
-                                                            field.onChange(formatted);
-                                                        }}
-                                                        onBlur={(e) => {
-                                                            const cleanCep = e.target.value.replace(/\D/g, "");
-                                                            if (cleanCep.length === 8) {
-                                                                handleSearchCep();
+                                                    <RadioGroup
+                                                        onValueChange={(value) => {
+                                                            field.onChange(value)
+                                                            setMode(value as "existing" | "new")
+                                                            if (value === "new") {
+                                                                form.setValue("selectedAddressId", undefined)
+                                                            } else {
+                                                                const nextAddress = selectedAddress ?? defaultAddress
+                                                                form.setValue("selectedAddressId", nextAddress?.id)
                                                             }
                                                         }}
-                                                        disabled={isLoading}
-                                                    />
+                                                        value={field.value}
+                                                        className="grid gap-2"
+                                                    >
+                                                        <FormItem className="flex items-center gap-3 rounded-lg border p-3">
+                                                            <FormControl>
+                                                                <RadioGroupItem value="existing" />
+                                                            </FormControl>
+                                                            <div className="space-y-1">
+                                                                <FormLabel className="text-base">
+                                                                    Usar endereço existente
+                                                                </FormLabel>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    Escolha um dos seus endereços cadastrados e atualize os detalhes, se necessário.
+                                                                </p>
+                                                            </div>
+                                                        </FormItem>
+                                                        <FormItem className="flex items-center gap-3 rounded-lg border p-3">
+                                                            <FormControl>
+                                                                <RadioGroupItem value="new" />
+                                                            </FormControl>
+                                                            <div className="space-y-1">
+                                                                <FormLabel className="text-base">
+                                                                    Informar novo endereço
+                                                                </FormLabel>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    Digite manualmente os detalhes de entrega para este pedido.
+                                                                </p>
+                                                            </div>
+                                                        </FormItem>
+                                                    </RadioGroup>
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                ) : null}
+
+                                {mode === "existing" && addresses.length ? (
+                                    <Controller
+                                        control={form.control}
+                                        name="selectedAddressId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Selecione o endereço</FormLabel>
+                                                    <Select
+                                                        onValueChange={(value) => {
+                                                            field.onChange(value)
+                                                        }}
+                                                        value={field.value ?? undefined}
+                                                    >
+                                                    <FormControl>
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Selecione um endereço" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {addresses.map((address) => (
+                                                            <SelectItem key={address.id} value={address.id}>
+                                                                {address.name} - {address.street}, {address.number}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                ) : null}
+                            </div>
+
+                            {mode === "existing" && !selectedAddress ? (
+                                <p className="text-sm text-muted-foreground">
+                                    Selecione um endereço para visualizar e editar os detalhes.
+                                </p>
+                            ) : null}
+
+                            {mode === "new" || selectedAddress ? (
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem className="sm:col-span-2">
+                                                <FormLabel>Identificação</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Casa" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                    
-                                    <div className="flex items-end pb-2">
-                                        <Button 
-                                            type="button" 
-                                            variant="outline" 
-                                            onClick={handleSearchCep}
-                                            disabled={isLoadingCep || isLoading}
-                                            className="w-full"
-                                        >
-                                            {isLoadingCep ? (
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <Search className="w-4 h-4 mr-2" />
-                                                    Buscar
-                                                </>
-                                            )}
-                                        </Button>
-                                    </div>
-                                    
                                     <FormField
                                         control={form.control}
                                         name="street"
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="sm:col-span-2">
                                                 <FormLabel>Rua</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Nome da rua" {...field} disabled={isLoading} />
+                                                    <Input placeholder="Rua das Flores" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <FormField
                                         control={form.control}
                                         name="number"
@@ -326,57 +303,51 @@ export default function DeliveryForm({ addresses }: DeliveryFormProps) {
                                             <FormItem>
                                                 <FormLabel>Número</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="123" {...field} disabled={isLoading} />
+                                                    <Input placeholder="123" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-
                                     <FormField
                                         control={form.control}
                                         name="complement"
                                         render={({ field }) => (
-                                            <FormItem className="md:col-span-2">
+                                            <FormItem>
                                                 <FormLabel>Complemento (opcional)</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Apto 101, Bloco A" {...field} disabled={isLoading} />
+                                                    <Input placeholder="Apto 101" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                </div>
-
-                                <FormField
-                                    control={form.control}
-                                    name="neighborhood"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Bairro</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Nome do bairro" {...field} disabled={isLoading} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="neighborhood"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Bairro</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Centro" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                     <FormField
                                         control={form.control}
                                         name="city"
                                         render={({ field }) => (
-                                            <FormItem className="md:col-span-3">
+                                            <FormItem>
                                                 <FormLabel>Cidade</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Nome da cidade" {...field} disabled={isLoading} />
+                                                    <Input placeholder="São Paulo" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-
                                     <FormField
                                         control={form.control}
                                         name="state"
@@ -384,24 +355,45 @@ export default function DeliveryForm({ addresses }: DeliveryFormProps) {
                                             <FormItem>
                                                 <FormLabel>Estado</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="MG" maxLength={2} {...field} disabled={isLoading} />
+                                                    <Input placeholder="SP" maxLength={2} {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="zipCode"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>CEP</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="00000-000" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
                                 </div>
+                            ) : null}
 
-                                <Button type="submit" className="w-full" disabled={isLoading}>
-                                    {isLoading ? "Processando..." : "Finalizar Pedido"}
-                                </Button>
-                            </form>
-                        </Form>
-                    </div>
-                )}
+                            <Separator />
+
+                            <CardFooter className="px-0">
+                                <div className="ml-auto flex items-center gap-3">
+                                    <Button
+                                        type="submit"
+                                        disabled={isPending || (mode === "existing" && !selectedAddress)}
+                                    >
+                                        {isPending ? "Salvando..." : "Salvar endereço de entrega"}
+                                    </Button>
+                                </div>
+                            </CardFooter>
+                        </form>
+                    </Form>
+                </div>
             </CardContent>
         </Card>
-    );
+    )
 }
-
 
