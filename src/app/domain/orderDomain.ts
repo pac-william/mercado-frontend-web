@@ -8,6 +8,8 @@ export class Order {
         public marketId: string,
         public status: string,
         public total: number,
+        public addressId: string,
+        public paymentMethod: string,
         public deliveryAddress: string,
         public items?: OrderItem[],
         public delivererId?: string,

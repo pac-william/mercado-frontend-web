@@ -2,16 +2,18 @@ import { z } from "zod";
 
 export const OrderItemDTO = z.object({
     productId: z.string({ message: "ID do produto é obrigatório" }),
-    quantity: z.number().min(1, { message: "Quantidade deve ser maior que zero" }),
+    quantity: z.number().int().min(1, { message: "Quantidade deve ser maior que zero" }),
     price: z.number().min(0, { message: "Preço deve ser maior ou igual a zero" }),
 });
 
 export type OrderItemDTO = z.infer<typeof OrderItemDTO>;
 
 export const OrderCreateDTO = z.object({
-    userId: z.string({ message: "ID do usuário é obrigatório" }),
     marketId: z.string({ message: "ID do mercado é obrigatório" }),
-    deliveryAddress: z.string().min(10, { message: "Endereço de entrega é obrigatório" }),
+    addressId: z.string({ message: "ID do endereço é obrigatório" }),
+    paymentMethod: z.enum(["CREDIT_CARD", "DEBIT_CARD", "PIX", "CASH"], {
+        message: "Método de pagamento inválido",
+    }),
     items: z.array(OrderItemDTO).min(1, { message: "Pedido deve ter pelo menos um item" }),
     couponCode: z.string().optional(),
 });
@@ -22,11 +24,13 @@ export interface OrderResponseDTO {
     id: string;
     userId: string;
     marketId: string;
+    addressId: string;
     delivererId?: string | null;
     couponId?: string | null;
     status: string;
     total: number;
     discount?: number | null;
+    paymentMethod: "CREDIT_CARD" | "DEBIT_CARD" | "PIX" | "CASH";
     deliveryAddress: string;
     items: Array<{
         id: string;

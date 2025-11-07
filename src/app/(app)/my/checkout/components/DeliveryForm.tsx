@@ -7,7 +7,7 @@ import { Controller, useForm, type SubmitHandler } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import { updateAddress } from "@/actions/address.actions"
+import { createAddress, updateAddress } from "@/actions/address.actions"
 import { AddressDomain } from "@/app/domain/addressDomain"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -51,6 +51,8 @@ type DeliveryFormValues = z.infer<typeof deliveryFormSchema>
 
 interface DeliveryFormProps {
     addresses: AddressDomain[]
+    selectedAddressId?: string
+    onAddressSelected?: (addressId: string | undefined) => void
 }
 
 const buildValuesFromAddress = (
@@ -69,7 +71,7 @@ const buildValuesFromAddress = (
     selectedAddressId: mode === "existing" ? address?.id : undefined,
 })
 
-export default function DeliveryForm({ addresses }: DeliveryFormProps) {
+export default function DeliveryForm({ addresses, selectedAddressId: externalSelectedAddressId, onAddressSelected }: DeliveryFormProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
     const defaultAddress = useMemo(
@@ -94,7 +96,16 @@ export default function DeliveryForm({ addresses }: DeliveryFormProps) {
     useEffect(() => {
         form.reset(initialValues)
         setMode(initialValues.rememberData)
-    }, [initialValues, form])
+        if (initialValues.rememberData === "existing") {
+            onAddressSelected?.(initialValues.selectedAddressId)
+        }
+    }, [initialValues, form, onAddressSelected])
+
+    useEffect(() => {
+        if (externalSelectedAddressId && mode === "existing") {
+            form.setValue("selectedAddressId", externalSelectedAddressId)
+        }
+    }, [externalSelectedAddressId, form, mode])
 
     const selectedAddressId = form.watch("selectedAddressId")
 
@@ -139,6 +150,7 @@ export default function DeliveryForm({ addresses }: DeliveryFormProps) {
                         complement: values.complement?.trim() || undefined,
                     })
                     toast.success("Endereço atualizado para entrega")
+                    onAddressSelected?.(addressId)
                     router.refresh()
                 } catch (error) {
                     const message =
@@ -151,8 +163,26 @@ export default function DeliveryForm({ addresses }: DeliveryFormProps) {
 
         startTransition(async () => {
             try {
-                // TODO: integrar com criação de endereço na entrega quando definido
-                toast.success("Endereço para entrega definido")
+                const newAddress = await createAddress({
+                    name: values.name.trim(),
+                    street: values.street.trim(),
+                    number: values.number.trim(),
+                    neighborhood: values.neighborhood.trim(),
+                    city: values.city.trim(),
+                    state: values.state.trim(),
+                    zipCode: values.zipCode.trim(),
+                    complement: values.complement?.trim() || undefined,
+                    isFavorite: false,
+                    isActive: true,
+                })
+
+                toast.success("Endereço criado com sucesso")
+                setMode("existing")
+                form.reset(buildValuesFromAddress(newAddress, "existing"), {
+                    keepDefaultValues: true,
+                })
+                form.setValue("selectedAddressId", newAddress.id)
+                onAddressSelected?.(newAddress.id)
                 router.refresh()
             } catch (error) {
                 const message =
@@ -185,12 +215,16 @@ export default function DeliveryForm({ addresses }: DeliveryFormProps) {
                                                     <RadioGroup
                                                         onValueChange={(value) => {
                                                             field.onChange(value)
-                                                            setMode(value as "existing" | "new")
-                                                            if (value === "new") {
+                                                            const nextMode = value as "existing" | "new"
+                                                            setMode(nextMode)
+                                                            if (nextMode === "new") {
                                                                 form.setValue("selectedAddressId", undefined)
+                                                                onAddressSelected?.(undefined)
                                                             } else {
                                                                 const nextAddress = selectedAddress ?? defaultAddress
-                                                                form.setValue("selectedAddressId", nextAddress?.id)
+                                                                const nextId = nextAddress?.id
+                                                                form.setValue("selectedAddressId", nextId)
+                                                                onAddressSelected?.(nextId)
                                                             }
                                                         }}
                                                         value={field.value}
@@ -239,6 +273,7 @@ export default function DeliveryForm({ addresses }: DeliveryFormProps) {
                                                     <Select
                                                         onValueChange={(value) => {
                                                             field.onChange(value)
+                                                            onAddressSelected?.(value)
                                                         }}
                                                         value={field.value ?? undefined}
                                                     >

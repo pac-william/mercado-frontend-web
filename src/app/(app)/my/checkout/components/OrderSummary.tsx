@@ -13,17 +13,27 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { CartResponse } from "@/dtos/cartDTO";
 
+import { type PaymentMethod as PaymentMethodType } from "./PaymentMethod";
+
 interface OrderSummaryProps {
     cart: CartResponse;
     addresses: AddressDomain[];
+    selectedAddressId?: string;
+    paymentMethod: PaymentMethodType;
 }
 
-const formatDeliveryAddress = (address: AddressDomain) => {
-    const complement = address.complement ? ` - ${address.complement}` : "";
-    return `${address.street}, ${address.number}${complement} - ${address.neighborhood}, ${address.city} - ${address.state}, ${address.zipCode}`;
+const getFallbackAddress = (addresses: AddressDomain[], selectedAddressId?: string) => {
+    if (selectedAddressId) {
+        const selected = addresses.find((item) => item.id === selectedAddressId);
+        if (selected) {
+            return selected;
+        }
+    }
+
+    return addresses.find((item) => item.isFavorite) ?? addresses[0];
 };
 
-export default function OrderSummary({ cart, addresses }: OrderSummaryProps) {
+export default function OrderSummary({ cart, addresses, selectedAddressId, paymentMethod }: OrderSummaryProps) {
     const subtotal = cart.totalValue;
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
@@ -34,10 +44,15 @@ export default function OrderSummary({ cart, addresses }: OrderSummaryProps) {
             return;
         }
 
-        const address = addresses.find((item) => item.isFavorite) ?? addresses.at(0);
+        const address = getFallbackAddress(addresses, selectedAddressId);
 
         if (!address) {
             toast.error("Cadastre ou selecione um endereço de entrega");
+            return;
+        }
+
+        if (!paymentMethod) {
+            toast.error("Selecione um método de pagamento");
             return;
         }
 
@@ -51,9 +66,9 @@ export default function OrderSummary({ cart, addresses }: OrderSummaryProps) {
         startTransition(async () => {
             try {
                 await createOrder({
-                    userId: cart.userId,
                     marketId,
-                    deliveryAddress: formatDeliveryAddress(address),
+                    addressId: address.id,
+                    paymentMethod,
                     items: cart.items.map((item) => ({
                         productId: item.productId,
                         quantity: item.quantity,
@@ -62,7 +77,7 @@ export default function OrderSummary({ cart, addresses }: OrderSummaryProps) {
                 });
 
                 toast.success("Pedido realizado com sucesso");
-                router.push("/my/history");
+                router.push("/my/orders");
                 router.refresh();
             } catch (error) {
                 const message =
@@ -118,7 +133,12 @@ export default function OrderSummary({ cart, addresses }: OrderSummaryProps) {
                     className="w-full"
                     size="lg"
                     onClick={handleCreateOrder}
-                    disabled={isPending || !cart.items.length || !addresses.length}
+                    disabled={
+                        isPending ||
+                        !cart.items.length ||
+                        !addresses.length ||
+                        !paymentMethod
+                    }
                 >
                     {isPending ? "Finalizando..." : "Finalizar pedido"}
                 </Button>
