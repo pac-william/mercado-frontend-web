@@ -1,8 +1,10 @@
+import { getAddresses } from "@/actions/address.actions";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { LogOut, MapPin, User } from "lucide-react";
-import AddressesSection from "./components/sections/AddressesSection";
+import AddressesSection from "./components/address/AddressesSection";
 import LogoutSection from "./components/sections/LogoutSection";
 import { PersonalInfoSection } from "./components/sections/PersonalInfoSection";
 
@@ -16,6 +18,8 @@ export default async function Profile() {
         { id: 'logout' as Section, label: 'Sair da conta', icon: LogOut, destructive: true },
     ];
 
+    const { addresses } = await getAddresses();
+
     return (
         <div className="flex flex-col flex-1 gap-4 container mx-auto my-4">
             <div className="flex flex-col flex-1 lg:flex-row gap-6">
@@ -25,16 +29,17 @@ export default async function Profile() {
                             {menuItems.map((item) => {
                                 const Icon = item.icon;
                                 return (
-                                    <button
+                                    <Button
                                         key={item.id}
+                                        variant="ghost"
                                         className={cn(
                                             "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                                             "hover:bg-accent hover:text-accent-foreground",
                                         )}
                                     >
-                                        <Icon className="w-4 h-4" />
+                                        <Icon size={16} />
                                         <span className="flex-1 text-left">{item.label}</span>
-                                    </button>
+                                    </Button>
                                 );
                             })}
                         </nav>
@@ -44,7 +49,7 @@ export default async function Profile() {
                     <ScrollArea className="flex flex-col flex-grow h-0 pr-4">
                         <div className="flex flex-col flex-1 gap-6">
                             <PersonalInfoSection />
-                            <AddressesSection />
+                            <AddressesSection addresses={addresses} />
                             <LogoutSection />
                         </div>
                     </ScrollArea>

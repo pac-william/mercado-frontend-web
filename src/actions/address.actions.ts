@@ -1,7 +1,8 @@
 "use server"
 
+import { AddressDomain, AddressPaginatedResponse } from "@/app/domain/addressDomain";
 import { baseUrl } from "@/config/server";
-import { AddressCreateDTO, AddressFavoriteDTO, AddressListResponseDTO, AddressResponseDTO, AddressUpdateDTO } from "@/dtos/addressDTO";
+import { AddressDTO, AddressUpdateDTO } from "@/dtos/addressDTO";
 import { auth0 } from "@/lib/auth0";
 import { buildSearchParams } from "@/lib/misc";
 
@@ -10,7 +11,7 @@ interface GetAddressesFilters {
     size?: number;
 }
 
-export const getAddresses = async (filters?: GetAddressesFilters): Promise<AddressListResponseDTO> => {
+export const getAddresses = async (filters?: GetAddressesFilters): Promise<AddressPaginatedResponse> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -38,7 +39,7 @@ export const getAddresses = async (filters?: GetAddressesFilters): Promise<Addre
             throw new Error('Erro ao buscar endereços');
         }
 
-        const data = await response.json() as AddressListResponseDTO;
+        const data = await response.json() as AddressPaginatedResponse;
         return data;
     } catch (error) {
         console.error('Erro ao buscar endereços:', error);
@@ -46,7 +47,7 @@ export const getAddresses = async (filters?: GetAddressesFilters): Promise<Addre
     }
 }
 
-export const getAddressById = async (id: string): Promise<AddressResponseDTO> => {
+export const getAddressById = async (id: string): Promise<AddressDomain> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -72,7 +73,7 @@ export const getAddressById = async (id: string): Promise<AddressResponseDTO> =>
             throw new Error('Erro ao buscar endereço');
         }
 
-        const address = await response.json() as AddressResponseDTO;
+        const address = await response.json() as AddressDomain;
         return address;
     } catch (error) {
         console.error('Erro ao buscar endereço:', error);
@@ -80,7 +81,7 @@ export const getAddressById = async (id: string): Promise<AddressResponseDTO> =>
     }
 }
 
-export const getFavoriteAddress = async (): Promise<AddressResponseDTO | null> => {
+export const getFavoriteAddress = async (): Promise<AddressDomain | null> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -106,7 +107,7 @@ export const getFavoriteAddress = async (): Promise<AddressResponseDTO | null> =
             throw new Error('Erro ao buscar endereço favorito');
         }
 
-        const address = await response.json() as AddressResponseDTO;
+        const address = await response.json() as AddressDomain;
         return address;
     } catch (error) {
         console.error('Erro ao buscar endereço favorito:', error);
@@ -114,7 +115,7 @@ export const getFavoriteAddress = async (): Promise<AddressResponseDTO | null> =
     }
 }
 
-export const getActiveAddresses = async (): Promise<AddressResponseDTO[]> => {
+export const getActiveAddresses = async (): Promise<AddressDomain[]> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -137,7 +138,7 @@ export const getActiveAddresses = async (): Promise<AddressResponseDTO[]> => {
             throw new Error('Erro ao buscar endereços ativos');
         }
 
-        const addresses = await response.json() as AddressResponseDTO[];
+        const addresses = await response.json() as AddressDomain[];
         return addresses;
     } catch (error) {
         console.error('Erro ao buscar endereços ativos:', error);
@@ -145,7 +146,7 @@ export const getActiveAddresses = async (): Promise<AddressResponseDTO[]> => {
     }
 }
 
-export const createAddress = async (data: AddressCreateDTO): Promise<AddressResponseDTO> => {
+export const createAddress = async (data: AddressDTO): Promise<AddressDomain> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -173,7 +174,7 @@ export const createAddress = async (data: AddressCreateDTO): Promise<AddressResp
             throw new Error('Erro ao criar endereço');
         }
 
-        const address = await response.json() as AddressResponseDTO;
+        const address = await response.json() as AddressDomain;
         return address;
     } catch (error) {
         console.error('Erro ao criar endereço:', error);
@@ -181,7 +182,7 @@ export const createAddress = async (data: AddressCreateDTO): Promise<AddressResp
     }
 }
 
-export const updateAddress = async (id: string, data: AddressUpdateDTO): Promise<AddressResponseDTO> => {
+export const updateAddress = async (id: string, data: AddressUpdateDTO): Promise<AddressDomain> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -212,7 +213,7 @@ export const updateAddress = async (id: string, data: AddressUpdateDTO): Promise
             throw new Error('Erro ao atualizar endereço');
         }
 
-        const address = await response.json() as AddressResponseDTO;
+        const address = await response.json() as AddressDomain;
         return address;
     } catch (error) {
         console.error('Erro ao atualizar endereço:', error);
@@ -220,7 +221,7 @@ export const updateAddress = async (id: string, data: AddressUpdateDTO): Promise
     }
 }
 
-export const patchAddress = async (id: string, data: AddressUpdateDTO): Promise<AddressResponseDTO> => {
+export const patchAddress = async (id: string, data: AddressUpdateDTO): Promise<AddressDomain> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -251,7 +252,7 @@ export const patchAddress = async (id: string, data: AddressUpdateDTO): Promise<
             throw new Error('Erro ao atualizar endereço');
         }
 
-        const address = await response.json() as AddressResponseDTO;
+        const address = await response.json() as AddressDomain;
         return address;
     } catch (error) {
         console.error('Erro ao atualizar endereço:', error);
@@ -259,7 +260,7 @@ export const patchAddress = async (id: string, data: AddressUpdateDTO): Promise<
     }
 }
 
-export const deleteAddress = async (id: string): Promise<AddressResponseDTO> => {
+export const deleteAddress = async (id: string): Promise<AddressDomain> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -285,49 +286,10 @@ export const deleteAddress = async (id: string): Promise<AddressResponseDTO> => 
             throw new Error('Erro ao excluir endereço');
         }
 
-        const address = await response.json() as AddressResponseDTO;
+        const address = await response.json() as AddressDomain;
         return address;
     } catch (error) {
         console.error('Erro ao excluir endereço:', error);
-        throw error;
-    }
-}
-
-export const setFavoriteAddress = async (id: string, data: AddressFavoriteDTO): Promise<AddressResponseDTO> => {
-    try {
-        const session = await auth0.getSession();
-        if (!session) {
-            throw new Error('Usuário não autenticado');
-        }
-
-        const response = await fetch(`${baseUrl}/api/v1/addresses/${id}/favorite`, {
-            method: "PATCH",
-            body: JSON.stringify(data),
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${session.tokenSet.idToken}`,
-            },
-            cache: 'no-store',
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error('Usuário não autenticado');
-            }
-            if (response.status === 404) {
-                throw new Error('Endereço não encontrado');
-            }
-            if (response.status === 400) {
-                const error = await response.json();
-                throw new Error(error.message || 'Erro de validação');
-            }
-            throw new Error('Erro ao definir endereço favorito');
-        }
-
-        const address = await response.json() as AddressResponseDTO;
-        return address;
-    } catch (error) {
-        console.error('Erro ao definir endereço favorito:', error);
         throw error;
     }
 }
