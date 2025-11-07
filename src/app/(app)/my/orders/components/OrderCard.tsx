@@ -83,7 +83,7 @@ export default function OrderCard({
                     <Separator />
 
                     <Button asChild className="w-full">
-                        <Link href={`/order/${id}`}>
+                        <Link href={`orders/${id}`}>
                             Ver Detalhes
                         </Link>
                     </Button>

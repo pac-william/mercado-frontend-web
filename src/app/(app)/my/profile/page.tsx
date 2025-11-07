@@ -1,4 +1,5 @@
 import { getAddresses } from "@/actions/address.actions";
+import RouterBack from "@/components/RouterBack";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,9 +22,9 @@ export default async function Profile() {
     const { addresses } = await getAddresses();
 
     return (
-        <div className="flex flex-col flex-1 gap-4 container mx-auto my-4">
-            <div className="flex flex-col flex-1 lg:flex-row gap-6">
-                <Card className="bg-card border-border lg:sticky lg:top-4 w-[320px]">
+        <div className="flex flex-col flex-1 container mx-auto my-4">
+            <div className="flex flex-1 gap-4">
+                <Card className="flex flex-col w-[320px]">
                     <CardContent className="p-4">
                         <nav className="space-y-1">
                             {menuItems.map((item) => {
@@ -45,9 +46,10 @@ export default async function Profile() {
                         </nav>
                     </CardContent>
                 </Card>
-                <div className="flex flex-col flex-1">
-                    <ScrollArea className="flex flex-col flex-grow h-0 pr-4">
-                        <div className="flex flex-col flex-1 gap-6">
+                <div className="flex flex-col flex-1 pr-2">
+                    <ScrollArea className="flex flex-col flex-grow h-0">
+                        <RouterBack />
+                        <div className="flex flex-col gap-4 p-4 mb-32">
                             <PersonalInfoSection />
                             <AddressesSection addresses={addresses} />
                             <LogoutSection />
