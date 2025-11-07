@@ -10,11 +10,20 @@ import { Suggestion } from "@/types/suggestion";
 import { Package, ShoppingBag, Utensils } from "lucide-react";
 import "moment/locale/pt-br";
 import { Metadata } from "next";
+import CategoryMenu from "./CategoryMenu";
 
 export const metadata: Metadata = {
     title: 'Smart Market - Sugestão',
     description: 'Sugestão personalizada de produtos',
 }
+
+const formatCategoryId = (name: string) =>
+    name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-");
 
 export default async function SuggestionPage({ params }: { params: Promise<{ suggestion_id: string }> }) {
     const suggestion_id = (await params).suggestion_id;
@@ -48,14 +57,19 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
     const commonItems = suggestionData.data.items.filter(item => item.type === "common");
     const utensilItems = suggestionData.data.items.filter(item => item.type === "utensil");
 
+    const categories = Object.entries(itemsByCategory).map(([categoryName, items]) => ({
+        id: formatCategoryId(categoryName),
+        name: categoryName,
+        items,
+    }));
+
     return (
-        <div className="flex flex-col flex-1">
-            <div className="container mx-auto my-4">
-                <RouterBack />
-            </div>
-            <div className="flex flex-col flex-1 justify-center items-center">
-                <div className="flex flex-col flex-1 max-w-[50%] relative px-2">
+        <div className="flex flex-col flex-1 container mx-auto my-4">
+            <div className="flex flex-1 gap-4">
+                <CategoryMenu title={suggestionData.task} categories={categories} />
+                <div className="flex flex-col flex-1 pr-2">
                     <ScrollArea className="flex flex-col flex-grow h-0">
+                        <RouterBack />
                         {/* Header da sugestão */}
                         <div className="flex flex-col gap-4 p-4 mb-32">
                             <div className="flex items-center gap-4">
@@ -82,7 +96,7 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
 
                             <p className="text-muted-foreground leading-relaxed">
                                 Encontramos {suggestionData.data.items.length} produtos
-                                em {Object.keys(itemsByCategory).length} categorias diferentes.
+                                em {categories.length} categorias diferentes.
                             </p>
 
                             {/* Lista dos produtos necessários */}
@@ -96,11 +110,15 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
 
 
                             {/* Produtos por Categoria */}
-                            {Object.entries(itemsByCategory).map(([categoryName, items]) => (
-                                <Card key={categoryName} className="bg-card border-border">
+                            {categories.map(({ id, name, items }) => (
+                                <Card
+                                    key={id}
+                                    id={id}
+                                    className="bg-card border-border"
+                                >
                                     <CardHeader>
                                         <CardTitle className="text-xl font-semibold text-primary">
-                                            {categoryName}
+                                            {name}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
@@ -126,7 +144,7 @@ async function ProductSuggestion({ productName, categoryId }: { productName: str
     const { products } = await getProducts({ name: productName, categoryId: categoryId, size: 20 });
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {products.map((product: Product) => (
                 <ProductCard key={product.id} product={product} variant="suggestion" badgeText={product.unit} badgeVariant="secondary" />
             ))}
