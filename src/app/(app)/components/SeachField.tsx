@@ -7,23 +7,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface SearchFieldProps {
-    /** Nome do parâmetro na URL (ex: 'search', 'query', 'filter') */
     paramName?: string;
-    /** Placeholder do input */
     placeholder?: string;
-    /** Largura do input */
     width?: string;
-    /** Tempo de debounce em milissegundos */
     debounceMs?: number;
-    /** Parâmetros que devem ser removidos quando uma nova busca é feita */
     clearParamsOnSearch?: string[];
-    /** Classe CSS adicional para o container */
     className?: string;
 }
 
 export default function SearchField({
     paramName = "search",
-    placeholder = "Pesquisar produto",
+    placeholder = "Buscar produto",
     width = "w-[300px]",
     debounceMs = 500,
     clearParamsOnSearch = ["page"],

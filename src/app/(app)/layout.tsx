@@ -1,17 +1,17 @@
-import Header from "../components/Header";
-import AdminHeader from "../admin/components/AdminHeader";
-import { auth0 } from "@/lib/auth0";
 import { getUserByAuth0Id } from "@/actions/user.actions";
+import { auth0 } from "@/lib/auth0";
+import AdminHeader from "../admin/components/AdminHeader";
+import Header from "../components/Header";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
     const session = await auth0.getSession();
-    
+
     let isAdmin = false;
     if (session?.user?.sub) {
         try {
             const user = session.user as { app_metadata?: { role?: string }; user_metadata?: { role?: string } };
             const roleFromToken = user?.app_metadata?.role || user?.user_metadata?.role;
-            
+
             if (roleFromToken) {
                 isAdmin = roleFromToken === 'MARKET_ADMIN' || roleFromToken === 'ADMIN';
             } else {

@@ -5,6 +5,7 @@ import { CartItemResponseDTO } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
 import { SessionData, User } from "@auth0/nextjs-auth0/types";
 import Link from "next/link";
+import SearchField from "../(app)/components/SeachField";
 import AuthButtons from "./AuthButtons";
 import CartSheet from "./CartSheet";
 import { ProfileMenuDropDown } from "./ProfileMenuDropDown";
@@ -19,15 +20,15 @@ export default async function Header() {
     } catch (error) {
         console.error("Erro ao carregar carrinho:", error);
     }
-
     return (
         <header className="flex w-full justify-between items-center p-4 bg-background border-b border-border">
-            <div className="flex flex-row gap-4 container mx-auto">
+            <div className="grid grid-cols-3 gap-4 container mx-auto">
                 <h1 className="text-2xl font-bold text-foreground items-center flex">
                     <Link href="/" className="text-foreground hover:text-primary">
                         Smart Market
                     </Link>
                 </h1>
+                <SearchField paramName="name" />
                 <div className="ml-auto flex flex-row gap-8">
                     <div className="flex flex-row gap-2">
                         {session ? <><CartSheet cartItems={items} /> <Separator orientation="vertical" /></> : null}

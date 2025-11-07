@@ -13,7 +13,6 @@ import { MarqueeDemo } from "../components/Marquee";
 import ProductCard from "../components/ProductCard";
 import SearchAiBar from "../components/SearchBar";
 import { Product } from "../domain/productDomain";
-import TopFilters from "./components/TopFilters";
 
 
 export const metadata: Metadata = {
@@ -190,7 +189,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                         </Card>
                     </div>
                     <div className="flex flex-col flex-1 gap-4">
-                        <TopFilters />
                         {
                             products?.length > 0 ? (
                                 <>

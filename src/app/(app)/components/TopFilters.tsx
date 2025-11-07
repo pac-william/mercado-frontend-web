@@ -1,11 +1,9 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import SearchField from "./SeachField";
 
 export default function TopFilters() {
 
     return (
         <div className="flex flex-row gap-4 justify-between">
-            <SearchField paramName="name" />
             <Select>
                 <SelectTrigger className="w-[100px] bg-background border-border text-foreground">
                     <SelectValue placeholder="10" />
