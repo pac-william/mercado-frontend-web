@@ -12,6 +12,8 @@ export class AddressDomain {
         public state: string,
         public zipCode: string,
         public complement?: string | null,
+        public latitude?: number | null,
+        public longitude?: number | null,
         public isFavorite: boolean = false,
         public isActive: boolean = true,
         public createdAt: Date = new Date(),

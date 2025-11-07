@@ -1,5 +1,6 @@
 "use client"
 
+import GoogleMaps from "@/app/components/GoogleMaps";
 import { AddressDomain } from "@/app/domain/addressDomain";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,9 @@ interface AddressCardProps {
 }
 
 export default function AddressCard({ address }: AddressCardProps) {
+    const hasLocation = address.latitude !== null && address.latitude !== undefined &&
+        address.longitude !== null && address.longitude !== undefined;
+
     return (
         <Card className="flex flex-col flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -32,7 +36,7 @@ export default function AddressCard({ address }: AddressCardProps) {
                 </div>
             </CardHeader>
             <Separator />
-            <CardContent className="flex flex-col flex-1 p-4">
+            <CardContent className="flex flex-col flex-1 p-4 gap-4">
                 <div className="space-y-1 text-sm text-muted-foreground">
                     <p>
                         {address.street}, {address.number}
@@ -43,6 +47,13 @@ export default function AddressCard({ address }: AddressCardProps) {
                         {address.city} - {address.state}, {address.zipCode}
                     </p>
                 </div>
+                <GoogleMaps
+                    latitude={address.latitude}
+                    longitude={address.longitude}
+                    height="220px"
+                    zoom={hasLocation ? 16 : 12}
+                    interactive={false}
+                />
             </CardContent>
         </Card>
     );

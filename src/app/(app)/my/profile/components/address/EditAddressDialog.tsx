@@ -7,24 +7,25 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { updateAddress } from "@/actions/address.actions"
+import GoogleMaps from "@/app/components/GoogleMaps"
 import { AddressDomain } from "@/app/domain/addressDomain"
 import { Button } from "@/components/ui/button"
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { AddressDTO as addressSchema, type AddressDTO as AddressFormValues } from "@/dtos/addressDTO"
@@ -60,6 +61,8 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
         complement: address.complement ?? "",
         isFavorite: address.isFavorite ?? false,
         isActive: address.isActive ?? true,
+        latitude: address.latitude ?? undefined,
+        longitude: address.longitude ?? undefined,
     }), [address])
 
     const form = useForm<AddressFormValues>({
@@ -73,6 +76,10 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
     }, [defaultValues, form])
 
     const zipCodeValue = form.watch("zipCode")
+    const latitudeValue = form.watch("latitude")
+    const longitudeValue = form.watch("longitude")
+    const hasLocation = latitudeValue !== undefined && latitudeValue !== null &&
+        longitudeValue !== undefined && longitudeValue !== null
 
     useEffect(() => {
         const sanitizedCep = zipCodeValue?.replace(/\D/g, "") ?? ""
@@ -80,8 +87,50 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
         if (sanitizedCep.length !== 8 || sanitizedCep === lastFetchedCepRef.current) {
             if (sanitizedCep.length < 8) {
                 form.clearErrors("zipCode")
+                form.setValue("latitude", undefined, {
+                    shouldDirty: false,
+                    shouldTouch: false,
+                    shouldValidate: false,
+                })
+                form.setValue("longitude", undefined, {
+                    shouldDirty: false,
+                    shouldTouch: false,
+                    shouldValidate: false,
+                })
             }
             return
+        }
+
+        const fetchCoordinates = async (cep: string) => {
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?postalcode=${cep}&country=Brazil&format=json`,
+                    {
+                        headers: {
+                            "Accept": "application/json",
+                        },
+                    },
+                )
+                if (!response.ok) {
+                    return
+                }
+
+                const data: Array<{ lat: string; lon: string }> = await response.json()
+                if (!Array.isArray(data) || data.length === 0) {
+                    return
+                }
+
+                const { lat, lon } = data[0]
+                const latitude = Number.parseFloat(lat)
+                const longitude = Number.parseFloat(lon)
+
+                if (!Number.isNaN(latitude) && !Number.isNaN(longitude)) {
+                    form.setValue("latitude", latitude, { shouldDirty: true, shouldValidate: true })
+                    form.setValue("longitude", longitude, { shouldDirty: true, shouldValidate: true })
+                }
+            } catch (error) {
+                console.error("Erro ao buscar coordenadas do CEP:", error)
+            }
         }
 
         const fetchCep = async () => {
@@ -131,6 +180,8 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
                 if (data.complemento) {
                     form.setValue("complement", data.complemento, { shouldDirty: true })
                 }
+
+                await fetchCoordinates(sanitizedCep)
             } catch (error) {
                 const message =
                     error instanceof Error ? error.message : "Erro ao consultar CEP"
@@ -157,6 +208,11 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
         }
     }
 
+    const handleLocationChange = (coordinates: { latitude: number; longitude: number }) => {
+        form.setValue("latitude", coordinates.latitude, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+        form.setValue("longitude", coordinates.longitude, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+    }
+
     const onSubmit = (values: AddressFormValues) => {
         startTransition(async () => {
             try {
@@ -172,6 +228,8 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
                     complement: values.complement?.trim() || undefined,
                     isFavorite: values.isFavorite ?? false,
                     isActive: values.isActive ?? true,
+                    latitude: values.latitude ?? undefined,
+                    longitude: values.longitude ?? undefined,
                 })
 
                 toast.success("Endereço atualizado com sucesso")
@@ -208,6 +266,43 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
                     </DialogHeader>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid gap-4 sm:grid-cols-2">
+                            <FormField
+                                control={form.control}
+                                name="zipCode"
+                                render={({ field }) => (
+                                    <FormItem className="sm:col-span-2">
+                                        <FormLabel>CEP</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="00000-000"
+                                                {...field}
+                                                value={field.value}
+                                                onChange={(event) => {
+                                                    const digitsOnly = event.target.value
+                                                        .replace(/\D/g, "")
+                                                        .slice(0, 8)
+                                                    const formatted = digitsOnly.replace(
+                                                        /(\d{5})(\d{0,3})/,
+                                                        (_, p1: string, p2: string) =>
+                                                            p2 ? `${p1}-${p2}` : p1,
+                                                    )
+                                                    lastFetchedCepRef.current = null
+                                                    field.onChange(formatted)
+                                                }}
+                                                onBlur={(event) => {
+                                                    field.onBlur()
+                                                    const digitsOnly = event.target.value.replace(/\D/g, "")
+                                                    if (digitsOnly.length !== 8) {
+                                                        form.setError("zipCode", {
+                                                            message: "Informe um CEP válido com 8 dígitos",
+                                                        })
+                                                    }
+                                                }}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
                             <FormField
                                 control={form.control}
                                 name="name"
@@ -292,44 +387,50 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
                                     </FormItem>
                                 )}
                             />
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <FormField
                                 control={form.control}
-                                name="zipCode"
+                                name="latitude"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>CEP</FormLabel>
+                                        <FormLabel>Latitude</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="00000-000"
                                                 {...field}
-                                                value={field.value}
-                                                onChange={(event) => {
-                                                    const digitsOnly = event.target.value
-                                                        .replace(/\D/g, "")
-                                                        .slice(0, 8)
-                                                    const formatted = digitsOnly.replace(
-                                                        /(\d{5})(\d{0,3})/,
-                                                        (_, p1: string, p2: string) =>
-                                                            p2 ? `${p1}-${p2}` : p1,
-                                                    )
-                                                    lastFetchedCepRef.current = null
-                                                    field.onChange(formatted)
-                                                }}
-                                                onBlur={(event) => {
-                                                    field.onBlur()
-                                                    const digitsOnly = event.target.value.replace(/\D/g, "")
-                                                    if (digitsOnly.length !== 8) {
-                                                        form.setError("zipCode", {
-                                                            message: "Informe um CEP válido com 8 dígitos",
-                                                        })
-                                                    }
-                                                }}
+                                                value={field.value ?? ""}
+                                                readOnly
+                                                placeholder="Selecione no mapa"
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="longitude"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Longitude</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                value={field.value ?? ""}
+                                                readOnly
+                                                placeholder="Selecione no mapa"
                                             />
                                         </FormControl>
                                     </FormItem>
                                 )}
                             />
                         </div>
+                        <GoogleMaps
+                            latitude={latitudeValue}
+                            longitude={longitudeValue}
+                            height="260px"
+                            zoom={hasLocation ? 16 : 12}
+                            onLocationChange={handleLocationChange}
+                        />
                         {form.formState.errors.root?.message ? (
                             <p className="text-sm text-destructive">
                                 {form.formState.errors.root.message}

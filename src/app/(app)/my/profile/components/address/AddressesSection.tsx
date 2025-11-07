@@ -1,4 +1,5 @@
 import { AddressDomain } from "@/app/domain/addressDomain";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import AddressCard from "./AddressCard";
@@ -16,7 +17,10 @@ export default function AddressesSection({ addresses }: AddressesSectionProps) {
                     <CardTitle className="text-card-foreground">Endereços</CardTitle>
                     <CardDescription className="text-muted-foreground">Gerencie seus endereços de entrega</CardDescription>
                 </div>
-                <CreateAddressDialog />
+                <div className="flex items-center justify-end gap-2">
+                    <Badge variant="outline" className="text-xs">{addresses.length}/3</Badge>
+                    <CreateAddressDialog addressesCount={addresses.length} />
+                </div>
             </CardHeader>
             <Separator />
             <CardContent className="flex flex-col flex-1 gap-4">
