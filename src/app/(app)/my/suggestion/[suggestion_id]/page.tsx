@@ -25,6 +25,9 @@ const formatCategoryId = (name: string) =>
         .trim()
         .replace(/\s+/g, "-");
 
+const formatProductAnchorId = (categoryName: string, productName: string) =>
+    `${formatCategoryId(categoryName)}-${formatCategoryId(productName)}`;
+
 export default async function SuggestionPage({ params }: { params: Promise<{ suggestion_id: string }> }) {
     const suggestion_id = (await params).suggestion_id;
 
@@ -57,16 +60,28 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
     const commonItems = suggestionData.data.items.filter(item => item.type === "common");
     const utensilItems = suggestionData.data.items.filter(item => item.type === "utensil");
 
-    const categories = Object.entries(itemsByCategory).map(([categoryName, items]) => ({
+    const categorySections = Object.entries(itemsByCategory).map(([categoryName, items]) => ({
         id: formatCategoryId(categoryName),
         name: categoryName,
-        items,
+        items: items.map((item) => ({
+            ...item,
+            anchorId: formatProductAnchorId(categoryName, item.name),
+        })),
+    }));
+
+    const menuCategories = categorySections.map(({ id, name, items }) => ({
+        id,
+        name,
+        items: items.map(({ name, anchorId }) => ({
+            name,
+            anchorId,
+        })),
     }));
 
     return (
         <div className="flex flex-col flex-1 container mx-auto my-4">
             <div className="flex flex-1 gap-4">
-                <CategoryMenu title={suggestionData.task} categories={categories} />
+                <CategoryMenu title={suggestionData.task} categories={menuCategories} />
                 <div className="flex flex-col flex-1 pr-2">
                     <ScrollArea className="flex flex-col flex-grow h-0">
                         <RouterBack />
@@ -96,7 +111,7 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
 
                             <p className="text-muted-foreground leading-relaxed">
                                 Encontramos {suggestionData.data.items.length} produtos
-                                em {categories.length} categorias diferentes.
+                                em {categorySections.length} categorias diferentes.
                             </p>
 
                             {/* Lista dos produtos necessários */}
@@ -110,7 +125,7 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
 
 
                             {/* Produtos por Categoria */}
-                            {categories.map(({ id, name, items }) => (
+                            {categorySections.map(({ id, name, items }) => (
                                 <Card
                                     key={id}
                                     id={id}
@@ -121,9 +136,14 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
                                             {name}
                                         </CardTitle>
                                     </CardHeader>
-                                    <CardContent>
+                                    <CardContent className="flex flex-col gap-6">
                                         {items.map(item => (
-                                            <ProductSuggestion key={item.name} productName={item.name} categoryId={item.categoryId} />
+                                            <div key={item.anchorId} id={item.anchorId} className="flex flex-col gap-2">
+                                                <h3 className="text-lg font-medium text-foreground">
+                                                    {item.name}
+                                                </h3>
+                                                <ProductSuggestion productName={item.name} categoryId={item.categoryId} />
+                                            </div>
                                         ))}
                                     </CardContent>
                                 </Card>

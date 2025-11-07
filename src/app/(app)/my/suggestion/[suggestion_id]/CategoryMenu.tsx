@@ -12,7 +12,10 @@ type CategoryMenuProps = {
     categories: Array<{
         id: string;
         name: string;
-        items: Array<{ name: string }>;
+        items: Array<{
+            name: string;
+            anchorId: string;
+        }>;
     }>;
 };
 
@@ -43,11 +46,19 @@ export default function CategoryMenu({ title, categories }: CategoryMenuProps) {
                                 >
                                     {category.name}
                                 </Button>
-                                <span className="flex flex-col gap-1 text-foreground/80 ml-4">
+                                <div className="flex flex-col gap-1 text-foreground/80 ml-4">
                                     {category.items.map((item) => (
-                                        <span key={item.name}>{item.name}</span>
+                                        <Button
+                                            key={item.anchorId}
+                                            variant="link"
+                                            size="sm"
+                                            onClick={(event) => handleScroll(event, item.anchorId)}
+                                            className="text-left justify-start p-0 line-clamp-1 text-ellipsis whitespace-nowrap overflow-hidden w-full text-muted-foreground hover:text-foreground"
+                                        >
+                                            {item.name}
+                                        </Button>
                                     ))}
-                                </span>
+                                </div>
                             </div>
                         ))}
                     </div>
