@@ -59,7 +59,7 @@ export const getProducts = async (filters?: GetProductsFilters): Promise<Product
     }
 }
 
-export const getProductsByMarket = async (marketId: string, filters?: GetPaymentsFilters) => {
+export const getProductsByMarket = async (marketId: string, filters?: GetProductsFilters) => {
     try {
         const params = buildSearchParams({
             page: filters?.page,
