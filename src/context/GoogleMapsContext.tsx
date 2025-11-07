@@ -5,11 +5,11 @@ import { createContext, useContext } from "react";
 
 const GoogleMapsContext = createContext({ isLoaded: false, loadError: null as unknown });
 
-export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {
+export function GoogleMapsProvider({ children, googleMapsApiKey, googleMapId }: { children: React.ReactNode, googleMapsApiKey: string, googleMapId: string }) {
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-maps-script",
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-    mapIds: [process.env.NEXT_PUBLIC_GOOGLE_MAP_ID!],
+    googleMapsApiKey: googleMapsApiKey,
+    mapIds: [googleMapId],
   });
 
   return (
