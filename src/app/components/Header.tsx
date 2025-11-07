@@ -1,6 +1,5 @@
 import { getCart } from "@/actions/cart.actions";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CartItemResponseDTO } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
@@ -32,14 +31,6 @@ export default async function Header() {
                 <div className="ml-auto flex flex-row gap-8">
                     <div className="flex flex-row gap-2">
                         {session ? <><CartSheet cartItems={items} /> <Separator orientation="vertical" /></> : null}
-
-                        <Button variant="link" size="sm" asChild>
-                            <Link href="/my/shopping">
-                                Compras
-                            </Link>
-                        </Button>
-
-                        <Separator orientation="vertical" />
                     </div>
 
                     <div className="flex flex-row gap-2">
