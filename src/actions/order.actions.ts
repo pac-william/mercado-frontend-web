@@ -1,7 +1,8 @@
 "use server"
 
+import { OrderPaginatedResponse } from "@/app/domain/orderDomain";
 import { baseUrl } from "@/config/server";
-import { OrderCreateDTO, OrderResponseDTO, OrderUpdateDTO, AssignDelivererDTO } from "@/dtos/orderDTO";
+import { AssignDelivererDTO, OrderCreateDTO, OrderResponseDTO, OrderUpdateDTO } from "@/dtos/orderDTO";
 import { auth0 } from "@/lib/auth0";
 import { buildSearchParams } from "@/lib/misc";
 
@@ -50,7 +51,7 @@ export const createOrder = async (data: OrderCreateDTO): Promise<OrderResponseDT
     }
 }
 
-export const getOrders = async (filters?: GetOrdersFilters) => {
+export const getOrders = async (filters?: GetOrdersFilters): Promise<OrderPaginatedResponse> => {
     try {
         const session = await auth0.getSession();
         if (!session) {

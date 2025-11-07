@@ -47,7 +47,7 @@ export function ProfileMenuDropDown({ currentUser }: { currentUser: User }) {
                 </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
-                    <Link href="/my-orders" className="flex items-center cursor-pointer">
+                    <Link href="/my/orders" className="flex items-center cursor-pointer">
                         <Package />
                         <span>Meus Pedidos</span>
                     </Link>
