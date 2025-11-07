@@ -1,7 +1,30 @@
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth0 } from "./lib/auth0";
 
+const MOBILE_DOWNLOAD_PATH = "/mobile-download";
+const MOBILE_USER_AGENT_REGEX =
+  /mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+
+function shouldRedirectToMobileDownload(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (
+    pathname.startsWith(MOBILE_DOWNLOAD_PATH) ||
+    pathname.startsWith("/api")
+  ) {
+    return false;
+  }
+
+  const userAgent = request.headers.get("user-agent") ?? "";
+  return MOBILE_USER_AGENT_REGEX.test(userAgent);
+}
+
 export async function middleware(request: NextRequest) {
+  if (shouldRedirectToMobileDownload(request)) {
+    const redirectUrl = new URL(MOBILE_DOWNLOAD_PATH, request.url);
+    return NextResponse.redirect(redirectUrl);
+  }
+
   return await auth0.middleware(request);
 }
 

@@ -2,7 +2,8 @@
 
 import { useGoogleMapsLoader } from "@/context/GoogleMapsContext";
 import { GoogleMap, Marker } from "@react-google-maps/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MapPin } from "lucide-react";
 
 const DEFAULT_CENTER = {
   lat: -23.55052, // São Paulo
@@ -43,64 +44,62 @@ export default function GoogleMaps({
     typeof longitude === "number" &&
     !Number.isNaN(longitude);
 
-  const derivedCenter = useMemo(
+  const initialCenter = useMemo(
     () => (hasCoordinates ? { lat: latitude!, lng: longitude! } : DEFAULT_CENTER),
     [hasCoordinates, latitude, longitude],
   );
 
-  const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(
-    hasCoordinates ? { lat: latitude!, lng: longitude! } : null,
-  );
+  const [mapCenter, setMapCenter] = useState(initialCenter);
+  const mapRef = useRef<google.maps.Map | null>(null);
 
   useEffect(() => {
     if (hasCoordinates) {
-      const nextPosition = { lat: latitude!, lng: longitude! };
-      setMarkerPosition(nextPosition);
+      const nextCenter = { lat: latitude!, lng: longitude! };
+      setMapCenter(nextCenter);
+      if (mapRef.current) {
+        mapRef.current.setCenter(nextCenter);
+      }
     } else if (!isInteractive) {
-      setMarkerPosition(null);
+      setMapCenter(DEFAULT_CENTER);
+      if (mapRef.current) {
+        mapRef.current.setCenter(DEFAULT_CENTER);
+      }
     }
   }, [hasCoordinates, latitude, longitude, isInteractive]);
 
-  const handleLocationUpdate = useCallback(
-    (lat: number, lng: number) => {
-      const nextPosition = { lat, lng };
-      setMarkerPosition(nextPosition);
-      onLocationChange?.({ latitude: lat, longitude: lng });
+  const handleMapLoad = useCallback(
+    (map: google.maps.Map) => {
+      mapRef.current = map;
+      map.setCenter(mapCenter);
     },
-    [onLocationChange],
+    [mapCenter],
   );
 
-  const handleMapClick = useCallback(
-    (event: google.maps.MapMouseEvent) => {
-      if (!isInteractive) {
-        return;
+  const handleMapUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
+
+  const handleMapIdle = useCallback(() => {
+    if (!isInteractive || !mapRef.current) {
+      return;
+    }
+
+    const currentCenter = mapRef.current.getCenter();
+    if (!currentCenter) {
+      return;
+    }
+
+    const lat = currentCenter.lat();
+    const lng = currentCenter.lng();
+    setMapCenter((previous) => {
+      if (previous.lat === lat && previous.lng === lng) {
+        return previous;
       }
+      return { lat, lng };
+    });
 
-      const latLng = event.latLng;
-      if (!latLng) {
-        return;
-      }
-
-      handleLocationUpdate(latLng.lat(), latLng.lng());
-    },
-    [handleLocationUpdate, isInteractive],
-  );
-
-  const handleMarkerDragEnd = useCallback(
-    (event: google.maps.MapMouseEvent) => {
-      if (!isInteractive) {
-        return;
-      }
-
-      const latLng = event.latLng;
-      if (!latLng) {
-        return;
-      }
-
-      handleLocationUpdate(latLng.lat(), latLng.lng());
-    },
-    [handleLocationUpdate, isInteractive],
-  );
+    onLocationChange?.({ latitude: lat, longitude: lng });
+  }, [isInteractive, onLocationChange]);
 
   useEffect(() => {
     if (loadError) {
@@ -141,33 +140,52 @@ export default function GoogleMaps({
   }
 
   return (
-    <GoogleMap
-      mapContainerStyle={containerStyle}
-      center={markerPosition ?? derivedCenter}
-      zoom={zoom}
-      onClick={isInteractive ? handleMapClick : undefined}
-      options={{
-        mapId: "47b8cc93327a8bbc91a2e6e6",
-        draggableCursor: isInteractive ? undefined : "default",
-        disableDoubleClickZoom: !isInteractive,
-        draggable: isInteractive,
-        scrollwheel: isInteractive,
-        keyboardShortcuts: isInteractive,
-        gestureHandling: isInteractive ? "greedy" : "none",
-        clickableIcons: isInteractive,
-        zoomControl: isInteractive,
-        streetViewControl: false,
-        mapTypeControl: isInteractive,
-        fullscreenControl: isInteractive,
+    <div
+      style={{
+        ...containerStyle,
+        position: "relative",
       }}
     >
-      {markerPosition ? (
-        <Marker
-          position={markerPosition}
-          draggable={isInteractive}
-          onDragEnd={handleMarkerDragEnd}
-        />
+      <GoogleMap
+        mapContainerStyle={{ width: "100%", height: "100%" }}
+        center={mapCenter}
+        zoom={zoom}
+        onLoad={handleMapLoad}
+        onUnmount={handleMapUnmount}
+        onIdle={handleMapIdle}
+        options={{
+          mapId: "47b8cc93327a8bbc91a2e6e6",
+          draggableCursor: isInteractive ? undefined : "default",
+          disableDoubleClickZoom: !isInteractive,
+          draggable: isInteractive,
+          scrollwheel: isInteractive,
+          keyboardShortcuts: isInteractive,
+          gestureHandling: isInteractive ? "greedy" : "none",
+          clickableIcons: isInteractive,
+          zoomControl: isInteractive,
+          streetViewControl: false,
+          mapTypeControl: isInteractive,
+          fullscreenControl: isInteractive,
+        }}
+      >
+        {!isInteractive && hasCoordinates ? <Marker position={mapCenter} /> : null}
+      </GoogleMap>
+
+      {isInteractive ? (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -100%)",
+            pointerEvents: "none",
+            color: "#ef4444",
+          }}
+        >
+          <MapPin size={28} strokeWidth={2.5} className="drop-shadow-md" />
+        </div>
       ) : null}
-    </GoogleMap>
+    </div>
   );
 }
+
