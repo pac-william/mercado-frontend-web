@@ -29,11 +29,10 @@ const deliverySchema = z.object({
 export type DeliveryFormData = z.infer<typeof deliverySchema>;
 
 interface DeliveryFormProps {
-    onSubmit: (data: DeliveryFormData) => void;
-    isLoading?: boolean;
+    addresses: AddressResponseDTO[];
 }
 
-export default function DeliveryForm({ onSubmit, isLoading }: DeliveryFormProps) {
+export default function DeliveryForm({ addresses }: DeliveryFormProps) {
     const [addresses, setAddresses] = useState<AddressResponseDTO[]>([]);
     const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
     const [selectedAddressId, setSelectedAddressId] = useState<string>("");

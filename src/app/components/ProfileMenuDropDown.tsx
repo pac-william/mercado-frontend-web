@@ -12,11 +12,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { User } from "@auth0/nextjs-auth0/types"
 import { History, LogOut, Package, User as UserIcon } from "lucide-react"
-import { useTheme } from "next-themes"
 import Link from "next/link"
 
 export function ProfileMenuDropDown({ currentUser }: { currentUser: User }) {
-    const { setTheme, theme } = useTheme()
     const profilePicture = currentUser.picture || '/images/profile-placeholder.png';
     return (
         <DropdownMenu>
@@ -36,32 +34,32 @@ export function ProfileMenuDropDown({ currentUser }: { currentUser: User }) {
 
                 <DropdownMenuItem asChild>
                     <Link href="/my/profile" className="flex items-center cursor-pointer">
-                        <UserIcon className="mr-2 h-4 w-4" />
+                        <UserIcon />
                         <span>Perfil</span>
                     </Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
                     <Link href="/my/history" className="flex items-center cursor-pointer">
-                        <History className="mr-2 h-4 w-4" />
+                        <History />
                         <span>Histórico de Sugestões</span>
                     </Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
                     <Link href="/my-orders" className="flex items-center cursor-pointer">
-                        <Package className="mr-2 h-4 w-4" />
+                        <Package />
                         <span>Meus Pedidos</span>
                     </Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem asChild>
-                    <a href="/auth/logout" className="flex items-center cursor-pointer">
-                        <LogOut className="mr-2 h-4 w-4" />
+                <DropdownMenuItem asChild variant="destructive">
+                    <Link href="/auth/logout" className="flex items-center cursor-pointer">
+                        <LogOut />
                         <span>Sair</span>
-                    </a>
+                    </Link>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

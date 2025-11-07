@@ -14,7 +14,7 @@ export default function OrderSummary({ total, discount, itemsTotal }: OrderSumma
     const discountValue = discount || 0;
 
     return (
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border ">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-card-foreground">
                     <Receipt className="w-5 h-5" />

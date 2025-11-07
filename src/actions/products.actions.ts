@@ -59,6 +59,45 @@ export const getProducts = async (filters?: GetProductsFilters): Promise<Product
     }
 }
 
+export const getProductsByMarket = async (marketId: string, filters?: GetPaymentsFilters) => {
+    try {
+        const params = buildSearchParams({
+            page: filters?.page,
+            size: filters?.size,
+            name: filters?.name,
+        });
+
+        const response = await fetch(`${baseUrl}/api/v1/products/markets/${marketId}?${params.toString()}`, {
+            cache: 'no-store',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Produtos não encontrados');
+            }
+            if (response.status >= 500) {
+                throw new Error('Erro no servidor ao buscar produtos');
+            }
+            try {
+                const error = await response.json();
+                throw new Error(error.message || 'Erro ao buscar produtos');
+            } catch {
+                throw new Error(`Erro ao buscar produtos (status: ${response.status})`);
+            }
+        }
+
+        const data = await response.json() as ProductPaginatedResponse;
+        return data;
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        throw error;
+    }
+}
+
 export const getProductsById = async (id: string) => {
     try {
         const response = await fetch(`${baseUrl}/api/v1/products/${id}`, {

@@ -8,15 +8,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-interface CouponInputProps {
-    onApply: (code: string, discount: number) => void;
-    onRemove: () => void;
-    orderTotal: number;
-    appliedCode?: string;
-    isLoading?: boolean;
-}
-
-export default function CouponInput({ onApply, onRemove, orderTotal, appliedCode, isLoading }: CouponInputProps) {
+export default function CouponInput() {
     const [couponCode, setCouponCode] = useState("");
     const [validating, setValidating] = useState(false);
 
@@ -27,11 +19,10 @@ export default function CouponInput({ onApply, onRemove, orderTotal, appliedCode
         try {
             const result = await validateCoupon({
                 code: couponCode.trim().toUpperCase(),
-                orderTotal
+                orderTotal: 0
             });
 
             if (result.isValid && result.discount) {
-                onApply(couponCode.trim().toUpperCase(), result.discount);
                 toast.success(`Cupom aplicado! Desconto de R$ ${result.discount.toFixed(2)}`);
                 setCouponCode("");
             } else {
@@ -45,7 +36,6 @@ export default function CouponInput({ onApply, onRemove, orderTotal, appliedCode
     };
 
     const handleRemove = () => {
-        onRemove();
         toast.info("Cupom removido");
     };
 
@@ -57,7 +47,6 @@ export default function CouponInput({ onApply, onRemove, orderTotal, appliedCode
                         Cupom de Desconto
                     </span>
                     
-                    {appliedCode ? (
                         <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
                             <div className="flex items-center gap-2">
                                 <CheckCircle2 className="w-4 h-4 text-green-600" />

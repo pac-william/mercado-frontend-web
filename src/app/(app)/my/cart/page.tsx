@@ -1,36 +1,27 @@
 'use client';
 
 import { getCart as getCartAction, removeCartItem, updateCartItemQuantity } from "@/actions/cart.actions";
-import { validateCoupon } from "@/actions/coupon.actions";
 import { getMarkets } from "@/actions/market.actions";
 import ProductCard from "@/app/components/ProductCard";
 import { Market } from "@/app/domain/marketDomain";
 import { formatPrice } from "@/app/utils/formatters";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import RouterBack from "@/components/RouterBack";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { CartResponse } from "@/dtos/cartDTO";
-import { CheckCircle2, Trash2, XCircle } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import AddressInput from "./components/AddressInput";
-import SelectMethod from "./components/SelectMethod";
+import MarketsCorousel from "./components/MarketsCorousel";
 
 export default function Cart() {
     const [cart, setCart] = useState<CartResponse | null>(null);
     const [markets, setMarkets] = useState<Market[]>([]);
     const [loading, setLoading] = useState(true);
-    const [couponCode, setCouponCode] = useState("");
-    const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>();
-    const [couponDiscount, setCouponDiscount] = useState(0);
-    const [validating, setValidating] = useState(false);
 
     const deliveryFee = 10;
 
@@ -57,38 +48,7 @@ export default function Cart() {
     const cartItems = cart?.items || [];
 
     const subtotal = cart?.totalValue || 0;
-    const total = subtotal - couponDiscount + deliveryFee;
-
-    const handleApplyCoupon = async () => {
-        if (!couponCode.trim() || !cart) return;
-
-        setValidating(true);
-        try {
-            const result = await validateCoupon({
-                code: couponCode.trim().toUpperCase(),
-                orderTotal: cart.totalValue
-            });
-
-            if (result.isValid && result.discount) {
-                setAppliedCoupon(couponCode.trim().toUpperCase());
-                setCouponDiscount(result.discount);
-                toast.success(`Cupom aplicado! Desconto de ${formatPrice(result.discount)}`);
-                setCouponCode("");
-            } else {
-                toast.error(result.message || "Cupom inválido");
-            }
-        } catch {
-            toast.error("Erro ao validar cupom");
-        } finally {
-            setValidating(false);
-        }
-    };
-
-    const handleRemoveCoupon = () => {
-        setAppliedCoupon(undefined);
-        setCouponDiscount(0);
-        toast.info("Cupom removido");
-    };
+    const total = subtotal + deliveryFee;
 
     const handleQuantityChange = async (productId: string, quantity: number) => {
         const cartItem = cartItems.find(item => item.product.id === productId);
@@ -132,29 +92,7 @@ export default function Cart() {
                 <div className="flex flex-1 flex-col gap-4 container mx-auto my-4">
                     <RouterBack />
                     <h1 className="text-2xl font-bold text-foreground">Carrinho</h1>
-                    {markets.length > 0 && (
-                        <Carousel className="w-full">
-                            <CarouselContent className="flex flex-1">
-                                {markets.slice(0, 8).map((market) => {
-                                    return (
-                                        <CarouselItem key={market.id} className="max-w-[320px] min-w-[320px] basis-1/4">
-                                            <Card className="flex flex-1 flex-row gap-2 p-4 shadow-none bg-card border-border">
-                                                <Avatar className="w-10 h-10 shadow-md">
-                                                    <AvatarImage src={market.logo} alt={market.name} width={100} height={100} className="rounded-full" />
-                                                    <AvatarFallback className="bg-primary text-primary-foreground">{market.name.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex flex-col">
-                                                    <span className="text-card-foreground font-medium">{market.name}</span>
-                                                    <span className="text-sm text-muted-foreground">Total: {formatPrice(0)}</span>
-                                                    <span className="text-sm text-muted-foreground">Distância: {0}km</span>
-                                                </div>
-                                            </Card>
-                                        </CarouselItem>
-                                    )
-                                })}
-                            </CarouselContent>
-                        </Carousel>
-                    )}
+                    <MarketsCorousel markets={markets} />
                     <div className="flex flex-1 flex-row gap-4">
                         <div className="flex flex-1 flex-col gap-4">
                             {cartItems.length === 0 ? (
@@ -187,10 +125,8 @@ export default function Cart() {
                                 </div>
                             )}
                         </div>
-                        <div className="w-[380px] h-[calc(100vh-113px)] sticky top-4">
+                        <div className="w-[380px] h-[calc(100vh-100px)] sticky top-4">
                             <div className="flex flex-col gap-4 h-full">
-                                <AddressInput />
-                                <SelectMethod />
                                 <Card className="flex flex-col flex-1 bg-card border-border">
                                     <CardContent className="flex flex-1 flex-col gap-2">
                                         <ScrollArea className="flex flex-col flex-grow h-0 pr-4 gap-2">
@@ -221,66 +157,7 @@ export default function Cart() {
                                             </div>
                                         </ScrollArea>
                                         <Separator />
-                                        
-                                        <div className="flex flex-col gap-2 p-3 bg-muted/50 rounded-lg border">
-                                            <span className="text-sm font-medium text-card-foreground">
-                                                Cupom de Desconto
-                                            </span>
-                                            
-                                            {appliedCoupon ? (
-                                                <div className="flex items-center justify-between p-2 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
-                                                    <div className="flex items-center gap-2">
-                                                        <CheckCircle2 className="w-4 h-4 text-green-600" />
-                                                        <span className="text-sm font-medium text-green-700 dark:text-green-400">
-                                                            {appliedCoupon}
-                                                        </span>
-                                                    </div>
-                                                    <Button
-                                                        onClick={handleRemoveCoupon}
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-auto p-1 text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
-                                                    >
-                                                        <XCircle className="w-4 h-4" />
-                                                    </Button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex gap-2">
-                                                    <Input
-                                                        placeholder="Digite o código"
-                                                        value={couponCode}
-                                                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                                        disabled={validating}
-                                                        className="flex-1"
-                                                        onKeyPress={(e) => {
-                                                            if (e.key === 'Enter') {
-                                                                handleApplyCoupon();
-                                                            }
-                                                        }}
-                                                    />
-                                                    <Button 
-                                                        onClick={handleApplyCoupon} 
-                                                        disabled={!couponCode.trim() || validating}
-                                                        variant="outline"
-                                                    >
-                                                        {validating ? "..." : "Aplicar"}
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <Separator />
                                         <div className="flex flex-col gap-1">
-                                            {couponDiscount > 0 && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-sm text-green-600 dark:text-green-400">
-                                                        Desconto ({appliedCoupon})
-                                                    </span>
-                                                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                                                        -{formatPrice(couponDiscount)}
-                                                    </span>
-                                                </div>
-                                            )}
                                             <div className="flex justify-between">
                                                 <span className="text-sm text-card-foreground">Frete</span>
                                                 <span className="text-sm text-card-foreground">{formatPrice(deliveryFee)}</span>
@@ -301,7 +178,7 @@ export default function Cart() {
                                         <div>
                                             <Button asChild disabled={cartItems.length === 0}>
                                                 <Link href="/my/checkout">
-                                                Continuar para o Checkout
+                                                    Continuar para o Checkout
                                                 </Link>
                                             </Button>
                                         </div>

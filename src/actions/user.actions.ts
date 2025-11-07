@@ -1,10 +1,43 @@
 "use server"
 
+import { User } from "@/app/domain/userDomain";
 import { baseUrl } from "@/config/server";
-import { UserResponseDTO, UserUpdateDTO } from "@/dtos/userDTO";
+import { UserUpdateDTO } from "@/dtos/userDTO";
 import { auth0 } from "@/lib/auth0";
 
-export const getUserByAuth0Id = async (auth0Id: string): Promise<UserResponseDTO> => {
+export const getUserMe = async (): Promise<User> => {
+    const session = await auth0.getSession();
+    if (!session) {
+        throw new Error("Usuário não autenticado");
+    }
+
+    const response = await fetch(`${baseUrl}/api/v1/users/me`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.tokenSet.idToken}`,
+        },
+        cache: "no-store",
+    });
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            throw new Error("Usuário não autenticado");
+        }
+        if (response.status === 404) {
+            throw new Error("Usuário não encontrado");
+        }
+        if (response.status === 500) {
+            throw new Error("Erro interno do servidor");
+        }
+        throw new Error("Erro ao buscar usuário");
+    }
+
+    const user = await response.json() as User;
+    return user;
+};
+
+export const getUserByAuth0Id = async (auth0Id: string): Promise<User> => {
     const session = await auth0.getSession();
     if (!session) {
         throw new Error("Usuário não autenticado");
@@ -29,11 +62,11 @@ export const getUserByAuth0Id = async (auth0Id: string): Promise<UserResponseDTO
         throw new Error("Erro ao buscar usuário");
     }
 
-    const user = await response.json() as UserResponseDTO;
+    const user = await response.json() as User;
     return user;
 };
 
-export const updateUser = async (id: string, data: UserUpdateDTO): Promise<UserResponseDTO> => {
+export const updateUser = async (id: string, data: UserUpdateDTO): Promise<User> => {
     const session = await auth0.getSession();
     if (!session) {
         throw new Error("Usuário não autenticado");
@@ -71,8 +104,6 @@ export const updateUser = async (id: string, data: UserUpdateDTO): Promise<UserR
         throw new Error("Erro ao atualizar usuário");
     }
 
-    const user = await response.json() as UserResponseDTO;
+    const user = await response.json() as User;
     return user;
 };
-
-

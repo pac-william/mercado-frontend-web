@@ -23,13 +23,13 @@ export default function OrderSummary({ items, discount = 0, couponCode }: OrderS
     const total = subtotal - discount;
 
     return (
-        <Card className="bg-card border-border h-fit sticky top-4">
+        <Card className="flex flex-col flex-1 bg-card border-border">
             <CardHeader>
                 <CardTitle className="text-card-foreground">Resumo do Pedido</CardTitle>
             </CardHeader>
             <Separator />
-            <CardContent className="p-4">
-                <ScrollArea className="max-h-[300px] pr-4">
+            <CardContent className="flex flex-1 flex-col p-4">
+                <ScrollArea className="flex flex-grow flex-col h-0 overflow-y-auto pr-4">
                     <div className="flex flex-col gap-3">
                         {items.map((item) => (
                             <div key={item.id} className="flex justify-between items-start gap-2">
@@ -55,7 +55,7 @@ export default function OrderSummary({ items, discount = 0, couponCode }: OrderS
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="text-card-foreground">{formatPrice(subtotal)}</span>
                 </div>
-                
+
                 {discount > 0 && couponCode && (
                     <div className="flex justify-between w-full text-sm">
                         <span className="text-green-600">
@@ -66,9 +66,9 @@ export default function OrderSummary({ items, discount = 0, couponCode }: OrderS
                         </span>
                     </div>
                 )}
-                
+
                 <Separator />
-                
+
                 <div className="flex justify-between w-full">
                     <span className="font-semibold text-card-foreground">Total</span>
                     <span className="font-bold text-lg text-card-foreground">
