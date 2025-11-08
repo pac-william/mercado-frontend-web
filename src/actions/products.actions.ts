@@ -160,3 +160,74 @@ export const createProduct = async (product: ProductDTO) => {
         throw error;
     }
 }
+
+export const updateProduct = async (id: string, product: ProductDTO) => {
+    try {
+        const session = await auth0.getSession();
+        if (!session) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        const response = await fetch(`${baseUrl}/api/v1/products/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(product),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session.tokenSet.idToken}`,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Usuário não autenticado');
+            }
+            if (response.status === 403) {
+                throw new Error('Acesso negado');
+            }
+            if (response.status === 400) {
+                const error = await response.json();
+                throw new Error(error.message || 'Erro de validação');
+            }
+            throw new Error('Erro ao atualizar produto');
+        }
+
+        const data = await response.json() as Product;
+        return data;
+    } catch (error) {
+        console.error('Erro ao atualizar produto:', error);
+        throw error;
+    }
+}
+
+export const deleteProduct = async (id: string) => {
+    try {
+        const session = await auth0.getSession();
+        if (!session) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        const response = await fetch(`${baseUrl}/api/v1/products/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${session.tokenSet.idToken}`,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Usuário não autenticado');
+            }
+            if (response.status === 403) {
+                throw new Error('Acesso negado');
+            }
+            throw new Error('Erro ao deletar produto');
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Erro ao deletar produto:', error);
+        throw error;
+    }
+}

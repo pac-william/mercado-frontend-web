@@ -156,12 +156,28 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
     );
 }
 
+const isValidObjectId = (value?: string) => {
+    if (!value) return false;
+    return /^[0-9a-fA-F]{24}$/.test(value);
+};
+
 async function ProductSuggestion({ productName, categoryId }: { productName: string, categoryId: string }) {
-    // Buscar produtos para cada nome (podemos otimizar isso depois)
+    const filters: { name: string; size: number; categoryId?: string } = {
+        name: productName,
+        size: 20,
+    };
 
-    console.log(productName, categoryId);
+    if (isValidObjectId(categoryId)) {
+        filters.categoryId = categoryId;
+    }
 
-    const { products } = await getProducts({ name: productName, categoryId: categoryId, size: 20 });
+    let products: Product[] = [];
+    try {
+        const response = await getProducts(filters);
+        products = response.products;
+    } catch (error) {
+        console.error("Erro ao buscar produtos para sugestão:", error);
+    }
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

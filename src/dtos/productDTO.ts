@@ -3,7 +3,10 @@ import { z } from "zod";
 export const ProductDTO = z.object({
     name: z.string().min(1, { error: "Nome do produto é obrigatório" }),
     price: z.number({ error: "Preço do produto é obrigatório" }),
+    unit: z.string().min(1, { message: "Unidade é obrigatória" }).default("unidade"),
     marketId: z.string({ error: "ID do mercado é obrigatório" }),
+    categoryId: z.string().min(1, { message: "Categoria é obrigatória" }),
+    sku: z.string().trim().optional(),
     image: z.string().optional(),
 });
 
