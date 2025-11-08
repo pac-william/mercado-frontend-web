@@ -9,7 +9,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Store, User } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface AuthChoiceModalProps {
     open: boolean;
@@ -18,25 +18,6 @@ interface AuthChoiceModalProps {
 }
 
 export default function AuthChoiceModal({ open, onOpenChange, type }: AuthChoiceModalProps) {
-    const router = useRouter();
-
-    const handleChoice = (isMarket: boolean) => {
-        if (type === "login") {
-            if (isMarket) {
-                router.push("/auth/login?market=true");
-            } else {
-                router.push("/auth/login");
-            }
-        } else {
-            if (isMarket) {
-                router.push("/auth/register-market");
-            } else {
-                router.push("/auth/login");
-            }
-        }
-        onOpenChange(false);
-    };
-
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
@@ -52,33 +33,23 @@ export default function AuthChoiceModal({ open, onOpenChange, type }: AuthChoice
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
                     <div className="grid grid-cols-2 gap-4 py-4">
-                        <Button
-                            variant="outline"
-                            className="flex flex-col items-center justify-center h-24 gap-2 hover:bg-accent"
-                            onClick={() => handleChoice(false)}
-                        >
-                            <User size={16} />
-                            <span className="font-semibold">Cliente</span>
-                            <span className="text-xs text-muted-foreground">
-                                {type === "login" ? "Entrar como cliente" : "Criar conta de cliente"}
-                            </span>
+                        <Button variant="outline" className="flex flex-col items-center justify-center h-24 gap-2 hover:bg-accent" asChild>
+                            <Link href="/auth/login">
+                                <User size={16} />
+                                <span className="font-semibold">Cliente</span>
+                                <span className="text-xs text-muted-foreground">
+                                    {type === "login" ? "Entrar como cliente" : "Criar conta de cliente"}
+                                </span>
+                            </Link>
                         </Button>
-                        <Button
-                            variant="outline"
-                            className="flex flex-col items-center justify-center h-24 gap-2 hover:bg-accent"
-                            onClick={() => handleChoice(true)}
-                        >
-                            <Store size={16} />
-                            <span className="font-semibold">Mercado</span>
-                            <span className="text-xs text-muted-foreground">
-                                {type === "login" ? "Entrar como mercado" : "Criar conta de mercado"}
-                            </span>
-                        </Button>
-                    </div>
-                    <div className="flex flex-row gap-2 items-center justify-center">
-                        <span className="text-sm text-muted-foreground">Ainda não tem uma conta?</span>
-                        <Button variant="link" className="text-sm text-muted-foreground hover:text-primary" onClick={() => handleChoice(type === "login" ? false : true)}>
-                            Cadastrar conta
+                        <Button variant="outline" className="flex flex-col items-center justify-center h-24 gap-2 hover:bg-accent" asChild>
+                            <Link href="https://manage.romulogdonadoni.com.br/auth/login">
+                                <Store size={16} />
+                                <span className="font-semibold">Mercado</span>
+                                <span className="text-xs text-muted-foreground">
+                                    {type === "login" ? "Entrar como mercado" : "Criar conta de mercado"}
+                                </span>
+                            </Link>
                         </Button>
                     </div>
                 </div>
