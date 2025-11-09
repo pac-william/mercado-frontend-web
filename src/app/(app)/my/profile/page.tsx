@@ -9,6 +9,8 @@ import AddressesSection from "./components/address/AddressesSection";
 import LogoutSection from "./components/sections/LogoutSection";
 import { PersonalInfoSection } from "./components/sections/PersonalInfoSection";
 
+export const dynamic = "force-dynamic";
+
 type Section = 'personal' | 'addresses' | 'security' | 'logout';
 
 export default async function Profile() {

@@ -4,6 +4,8 @@ import { Market } from "@/app/domain/marketDomain";
 import { CartResponse } from "@/dtos/cartDTO";
 import CartContent from "./components/CartContent";
 
+export const dynamic = "force-dynamic";
+
 export default async function Cart() {
     let cart: CartResponse | null = null;
     let markets: Market[] = [];

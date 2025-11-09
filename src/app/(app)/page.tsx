@@ -1,4 +1,3 @@
-import { getMarkets } from "@/actions/market.actions";
 import { getProducts } from "@/actions/products.actions";
 import Pagination from "@/app/components/Pagination";
 import PriceSlider from "@/components/price-slider";
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
 export default async function Home({ searchParams }: { searchParams: Promise<{ page: number, size: number, name: string }> }) {
     const { page, size, name } = await searchParams;
     const { products, meta } = await getProducts({ page: page || 1, size: size || 100, name: name });
-    const { markets } = await getMarkets();
+    /* const { markets } = await getMarkets(); */
 
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">

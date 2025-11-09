@@ -4,6 +4,8 @@ import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CheckoutContent from "./components/CheckoutContent";
 
+export const dynamic = "force-dynamic";
+
 export default async function CheckoutPage() {
 
     const { addresses } = await getAddresses();

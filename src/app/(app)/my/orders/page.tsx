@@ -3,6 +3,8 @@ import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import OrdersContent from "./components/OrdersContent";
 
+export const dynamic = "force-dynamic";
+
 export default async function MyOrdersPage() {
 
     const ordersResponse = await getOrders();
