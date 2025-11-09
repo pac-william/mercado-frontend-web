@@ -1,9 +1,10 @@
 "use client";
 
+import googleMapsPin from "@/../public/Map_Pin.png";
 import { useGoogleMapsLoader } from "@/context/GoogleMapsContext";
 import { GoogleMap, Marker } from "@react-google-maps/api";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MapPin } from "lucide-react";
 
 const DEFAULT_CENTER = {
   lat: -23.55052, // São Paulo
@@ -160,6 +161,7 @@ export default function GoogleMaps({
           draggable: isInteractive,
           scrollwheel: isInteractive,
           keyboardShortcuts: isInteractive,
+          disableDefaultUI: !isInteractive,
           gestureHandling: isInteractive ? "greedy" : "none",
           clickableIcons: isInteractive,
           zoomControl: isInteractive,
@@ -182,7 +184,7 @@ export default function GoogleMaps({
             color: "#ef4444",
           }}
         >
-          <MapPin size={28} strokeWidth={2.5} className="drop-shadow-md" />
+          <Image src={googleMapsPin} alt="Google Maps Pin" width={28} height={28} className="drop-shadow-md" />
         </div>
       ) : null}
     </div>
