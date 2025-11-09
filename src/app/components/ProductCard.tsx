@@ -197,8 +197,8 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                     <Separator />
 
                     <CardContent className="p-0 relative w-full aspect-square">
-                        <Link href={`/product/${product.id}`}>
-                            <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
+                        <Link href={`/market/${product.marketId}/product/${product.id}`}>
+                            <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8 cursor-pointer" />
                         </Link>
                     </CardContent>
 
