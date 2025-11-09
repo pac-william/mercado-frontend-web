@@ -12,7 +12,8 @@ export class Suggestion {
 
 export class SuggestionListItem {
     constructor(
-        public id: string
+        public id: string,
+        public task: string,
     ) { }
 }
 
