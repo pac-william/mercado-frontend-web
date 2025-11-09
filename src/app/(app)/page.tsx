@@ -9,7 +9,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
 import HeroSection from "../components/HeroSection";
-import { MarqueeDemo } from "../components/Marquee";
 import ProductCard from "../components/ProductCard";
 import SearchAiBar from "../components/SearchBar";
 import { Product } from "../domain/productDomain";
@@ -33,12 +32,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                     <SearchAiBar particles />
                 </div>
 
-                <MarqueeDemo reviews={markets.map((market) => ({
+                {/* <MarqueeDemo reviews={markets.map((market) => ({
                     name: market.name,
                     username: market.address,
                     body: market.logo || "",
                     img: market.logo || "https://placehold.co/150",
-                }))} />
+                }))} /> */}
 
                 <div className="flex flex-1 gap-4 container mx-auto mt-20">
                     <div className="w-[320px] h-[calc(100vh-113px)] sticky top-4">

@@ -1,5 +1,6 @@
 "use server";
 
+import { SuggestionPaginatedResponse } from "@/app/domain/suggestionDomain";
 import { baseUrl } from "@/config/server";
 import { auth0 } from "@/lib/auth0";
 import type { Suggestion, SuggestionCreateResponse } from "@/types/suggestion";
@@ -65,16 +66,7 @@ export async function getSuggestionById(id: string): Promise<Suggestion> {
   }
 }
 
-export async function getUserSuggestions(page: number = 1, size: number = 10): Promise<{
-  suggestions: { id: string }[];
-  meta: {
-    page: number;
-    size: number;
-    total: number;
-    totalPages: number;
-    totalItems: number;
-  };
-}> {
+export async function getUserSuggestions(page: number = 1, size: number = 10): Promise<SuggestionPaginatedResponse> {
   try {
     const session = await auth0.getSession();
     if (!session) {
@@ -95,7 +87,7 @@ export async function getUserSuggestions(page: number = 1, size: number = 10): P
       throw new Error(`Erro ao buscar histórico de sugestões: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as SuggestionPaginatedResponse;
     return data;
   } catch (error) {
     console.error('Erro ao buscar histórico de sugestões:', error);

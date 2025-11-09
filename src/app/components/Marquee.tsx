@@ -48,7 +48,7 @@ interface MarqueeDemoProps {
 
 export function MarqueeDemo({ reviews }: MarqueeDemoProps) {
     return (
-        <div className="relative flex-1 w-screen  flex-col items-center justify-center overflow-hidden">
+        <div className="w-full flex-col items-center justify-center overflow-hidden">
             <Marquee pauseOnHover className="[--duration:60s]">
                 {reviews.map((review, index) => (
                     <ReviewCard key={`${review.username}-forward-${index}`} {...review} />

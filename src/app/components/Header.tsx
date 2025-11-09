@@ -20,7 +20,7 @@ export default async function Header() {
         console.error("Erro ao carregar carrinho:", error);
     }
     return (
-        <header className="flex w-full justify-between items-center p-4 bg-background border-b border-border">
+        <header className="flex justify-between items-center p-4 bg-background border-b border-border">
             <div className="grid grid-cols-3 gap-4 container mx-auto">
                 <h1 className="text-2xl font-bold text-foreground items-center flex">
                     <Link href="/" className="text-foreground hover:text-primary">
