@@ -11,6 +11,7 @@ import HeroSection from "../components/HeroSection";
 import ProductCard from "../components/ProductCard";
 import SearchAiBar from "../components/SearchBar";
 import { Product } from "../domain/productDomain";
+import SearchField from "./components/SeachField";
 
 
 export const metadata: Metadata = {
@@ -187,6 +188,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                         </Card>
                     </div>
                     <div className="flex flex-col flex-1 gap-4">
+                        <SearchField paramName="name" />
                         {
                             products?.length > 0 ? (
                                 <>
