@@ -43,7 +43,7 @@ export default function AuthChoiceModal({ open, onOpenChange, type }: AuthChoice
                             </Link>
                         </Button>
                         <Button variant="outline" className="flex flex-col items-center justify-center h-24 gap-2 hover:bg-accent" asChild>
-                            <Link href="https://manage.romulogdonadoni.com.br/auth/login">
+                            <Link href="https://manage.smart-market/auth/login">
                                 <Store size={16} />
                                 <span className="font-semibold">Mercado</span>
                                 <span className="text-xs text-muted-foreground">
