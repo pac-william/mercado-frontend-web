@@ -1,9 +1,8 @@
 "use client";
 
-import googleMapsPin from "@/../public/Map_Pin.png";
 import { useGoogleMapsLoader } from "@/context/GoogleMapsContext";
 import { GoogleMap, Marker } from "@react-google-maps/api";
-import Image from "next/image";
+import { Pin } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const DEFAULT_CENTER = {
@@ -184,7 +183,7 @@ export default function GoogleMaps({
             color: "#ef4444",
           }}
         >
-          <Image src={googleMapsPin} alt="Google Maps Pin" width={28} height={28} className="drop-shadow-md" />
+          <Pin className="size-6 text-destructive" />
         </div>
       ) : null}
     </div>
