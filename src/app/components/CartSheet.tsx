@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { CartItemResponseDTO } from "@/dtos/cartDTO";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingBasket, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -33,14 +33,18 @@ export default function CartSheet({ cartItems }: CartSheetProps) {
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen} defaultOpen={false}>
             <SheetTrigger asChild>
-                <Button variant="link" size="sm" className="relative">
-                    Carrinho
-                    {totalItems > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                            {totalItems}
+                <Button variant="ghost" className="relative flex flex-row gap-2 items-center h-auto">
+                    <ShoppingBasket size={20} />
+                    <div className="flex flex-col justify-start">
+                        <span className="text-sm font-bold text-foreground">
+                            {formatPrice(totalValue)}
                         </span>
-                    )}
-                    <ShoppingCart className="w-5 h-5" />
+                        {totalItems > 0 && (
+                            <span className="text-xs text-muted-foreground text-start">
+                                {totalItems} {totalItems === 1 ? 'item' : 'itens'}
+                            </span>
+                        )}
+                    </div>
                 </Button>
             </SheetTrigger>
             <SheetContent className="flex flex-1 flex-col gap-0 bg-background border-border" side="right">

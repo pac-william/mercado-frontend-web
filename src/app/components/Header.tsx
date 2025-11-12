@@ -28,12 +28,12 @@ export default async function Header() {
                     </Link>
                 </h1>
                 <span></span>
-                <div className="ml-auto flex flex-row gap-8">
-                    <div className="flex flex-row gap-2">
+                <div className="ml-auto flex flex-row gap-8 items-center">
+                    <div className="flex flex-row gap-2 items-center">
                         {session ? <><CartSheet cartItems={items} /> <Separator orientation="vertical" /></> : null}
                     </div>
 
-                    <div className="flex flex-row gap-2">
+                    <div className="flex flex-row gap-2 items-center">
                         <AnimatedThemeToggler />
                         {session ? (
                             <ProfileMenuDropDown currentUser={session.user as User} />

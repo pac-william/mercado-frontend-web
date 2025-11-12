@@ -15,15 +15,8 @@ interface OrderCardProps {
     marketId?: string;
 }
 
-export default function OrderCard({ 
-    id, 
-    status, 
-    total, 
-    deliveryAddress, 
-    createdAt,
-    marketId 
-}: OrderCardProps) {
-    const formattedDate = createdAt 
+export default function OrderCard({ id, status, total, deliveryAddress, createdAt, marketId }: OrderCardProps) {
+    const formattedDate = createdAt
         ? new Date(createdAt).toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
@@ -33,9 +26,7 @@ export default function OrderCard({
         })
         : "Data não disponível";
 
-    const shortAddress = deliveryAddress && deliveryAddress.length > 60 
-        ? deliveryAddress.substring(0, 60) + "..." 
-        : deliveryAddress ?? "Endereço não disponível";
+    const shortAddress = deliveryAddress && deliveryAddress.length > 60 ? deliveryAddress.substring(0, 60) + "..." : deliveryAddress ?? "Endereço não disponível";
 
     return (
         <Card className="bg-card border-border hover:shadow-md transition-shadow">
@@ -51,7 +42,7 @@ export default function OrderCard({
                             </div>
                             <StatusBadge status={status} />
                         </div>
-                        
+
                         <div className="text-right">
                             <p className="text-2xl font-bold text-card-foreground">
                                 {formatPrice(total)}
@@ -66,12 +57,12 @@ export default function OrderCard({
                             <CalendarDays className="w-4 h-4" />
                             <span>{formattedDate}</span>
                         </div>
-                        
+
                         <div className="flex items-start gap-2 text-muted-foreground">
                             <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                             <span className="line-clamp-2">{shortAddress}</span>
                         </div>
-                        
+
                         {marketId && (
                             <div className="flex items-center gap-2 text-muted-foreground">
                                 <Store className="w-4 h-4" />
