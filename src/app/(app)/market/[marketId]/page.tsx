@@ -26,7 +26,7 @@ interface MarketPageSearchParams {
 }
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_SIZE = 12;
+const DEFAULT_SIZE = 30;
 const FALLBACK_MARKET_BANNER = "https://placehold.co/1200x320/png?text=Smart+Market";
 const DEFAULT_MARKET_RATING = 4.8;
 
@@ -44,21 +44,17 @@ const getInitials = (value?: string) => {
     return initials || "MK";
 };
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<MarketPageParams>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<MarketPageParams> }): Promise<Metadata> {
     const { marketId } = await params;
     try {
         const market = await getMarketById(marketId);
         return {
-            title: `${market.name} | Smart Market`,
+            title: `${market.name}`,
             description: `Confira os produtos disponíveis no ${market.name}.`,
         };
     } catch {
         return {
-            title: "Mercado | Smart Market",
+            title: "Mercado",
             description: "Confira os produtos disponíveis neste mercado.",
         };
     }
