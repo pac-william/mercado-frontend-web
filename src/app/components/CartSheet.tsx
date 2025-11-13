@@ -33,16 +33,19 @@ export default function CartSheet({ cartItems }: CartSheetProps) {
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen} defaultOpen={false}>
             <SheetTrigger asChild>
-                <Button variant="ghost" className="relative flex flex-row gap-2 items-center h-auto">
-                    <ShoppingBasket size={20} />
-                    <div className="flex flex-col justify-start">
-                        <span className="text-sm font-bold text-foreground">
-                            {formatPrice(totalValue)}
-                        </span>
-                        {totalItems > 0 && (
-                            <span className="text-xs text-muted-foreground text-start">
-                                {totalItems} {totalItems === 1 ? 'item' : 'itens'}
+                <Button
+                    variant="default"
+                    className="relative flex items-center gap-3 bg-primary px-5 py-1 h-auto text-primary-foreground hover:bg-primary/90"
+                >
+                    <ShoppingBasket className="size-5" />
+                    <div className="flex flex-col text-left leading-tight">
+                        <span className="text-sm font-semibold">{formatPrice(totalValue)}</span>
+                        {totalItems > 0 ? (
+                            <span className="text-xs text-primary-foreground/80">
+                                {totalItems} {totalItems === 1 ? "item" : "itens"}
                             </span>
+                        ) : (
+                            <span className="text-xs text-primary-foreground/80">Seu carrinho</span>
                         )}
                     </div>
                 </Button>
