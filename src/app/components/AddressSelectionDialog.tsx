@@ -20,7 +20,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { EllipsisVertical, Home, MapPin, Search } from "lucide-react";
-import Image from "next/image";
 
 interface AddressSelectionDialogProps {
     addresses: AddressDomain[];
@@ -28,10 +27,7 @@ interface AddressSelectionDialogProps {
     onSelectAddress?: (address: AddressDomain) => void;
     triggerLabel?: string;
     triggerDescription?: string;
-    illustrationSrc?: string;
 }
-
-const FALLBACK_ILLUSTRATION = "https://illustrations.popsy.co/white/pin-in-the-map.svg";
 
 type DisplayAddress = {
     address: AddressDomain;
@@ -64,7 +60,6 @@ export function AddressSelectionDialog({
     onSelectAddress,
     triggerLabel = "Onde você quer receber?",
     triggerDescription,
-    illustrationSrc = FALLBACK_ILLUSTRATION,
 }: AddressSelectionDialogProps) {
     const [open, setOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -113,15 +108,6 @@ export function AddressSelectionDialog({
             <DialogContent className="max-w-2xl gap-0 p-0">
                 <DialogHeader className="p-6 pb-2">
                     <div className="mx-auto mb-6 flex flex-col items-center gap-4">
-                        <div className="relative h-28 w-28">
-                            <Image
-                                src={illustrationSrc}
-                                alt="Ilustração de entrega"
-                                fill
-                                sizes="112px"
-                                className="object-contain"
-                            />
-                        </div>
                         <DialogTitle className="text-xl font-semibold text-foreground">
                             Onde você quer receber seu pedido?
                         </DialogTitle>
