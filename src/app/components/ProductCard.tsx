@@ -19,7 +19,7 @@ import { formatPrice } from "../utils/formatters";
 
 interface ProductCardProps {
     product: Product;
-    variant?: "quantity-select" | "buy-now" | "admin" | "history" | "suggestion";
+    variant?: "quantity-select" | "buy-now" | "owner" | "history" | "suggestion";
     badgeText?: string;
     badgeVariant?: "default" | "secondary" | "destructive" | "outline";
     initialQuantity?: number;
@@ -111,11 +111,11 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-card-foreground">Market 1</span>
                                 <div className="flex flex-row gap-1">
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
                                 </div>
                             </div>
                         </div>
@@ -188,11 +188,11 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                                     <span className="1text-sm font-bold text-card-foreground">Market 1</span>
                                 </Link>
                                 <div className="flex flex-row gap-1">
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
                                 </div>
                             </div>
                         </div>
@@ -200,6 +200,52 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
 
                     <Separator />
 
+                    <CardContent className="p-0 relative w-full aspect-square">
+                        <Link href={`/market/${product.marketId}/product/${product.id}`}>
+                            <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8 cursor-pointer" />
+                        </Link>
+                    </CardContent>
+
+                    <CardFooter className="flex flex-col flex-1 gap-2 items-start">
+                        <p className="text-sm line-clamp-2 text-card-foreground">{product.name}</p>
+                        <div className="flex flex-row w-full justify-between mt-auto">
+                            <div className="grid grid-cols-[auto_1fr] items-center w-full">
+                                {
+                                    shouldShowDiscount(product.id) ? (
+                                        <>
+                                            <p className="text-card-foreground">De</p>
+                                            <div className="flex flex-row items-center ml-2">
+                                                {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
+                                            </div>
+                                            <p className="text-card-foreground">Por</p>
+                                        </>
+                                    ) : null
+                                }
+                                <div className="flex flex-row items-center ml-2">
+                                    {mountPriceView(product.price, "new")}
+                                </div>
+                            </div>
+                            <div className="flex flex-row gap-2 items-end">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={handleAddToCart}
+                                    disabled={addingToCart}
+                                >
+                                    {addingToCart ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <ShoppingCart size={16} />
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    </CardFooter>
+                </Card>
+            );
+        case "owner":
+            return (
+                <Card className="flex flex-col max-w-xs w-full bg-card border-border">
                     <CardContent className="p-0 relative w-full aspect-square">
                         <Link href={`/market/${product.marketId}/product/${product.id}`}>
                             <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8 cursor-pointer" />
@@ -290,11 +336,11 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-card-foreground">Market 1</span>
                                 <div className="flex flex-row gap-1">
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
-                                    <Star size={16} className="text-yellow-500" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                    <Star size={16} className="text-amber-300" fill="currentColor" />
                                 </div>
                             </div>
                         </div>

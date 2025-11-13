@@ -184,7 +184,7 @@ export default function ProductPage({ params }: { params: Promise<{ product_id: 
                                         <h3 className="font-semibold text-foreground">BH Supermercados</h3>
                                         <div className="flex items-center gap-1">
                                             {[...Array(5)].map((_, i) => (
-                                                <Star key={i} size={16} className="text-yellow-500 fill-current" />
+                                                <Star key={i} size={16} className="text-amber-300" fill="currentColor" />
                                             ))}
                                             <span className="text-sm text-muted-foreground ml-1">(4.8)</span>
                                         </div>
