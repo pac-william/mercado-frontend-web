@@ -33,7 +33,7 @@ export default function CartSheet({ cartItems }: CartSheetProps) {
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen} defaultOpen={false}>
             <SheetTrigger asChild>
-                <Button variant="ghost" className="relative flex flex-row gap-2 items-center h-auto">
+                <Button variant="ghost" className="relative flex flex-row gap-2 items-center h-auto bg-muted">
                     <ShoppingBasket size={20} />
                     <div className="flex flex-col justify-start">
                         <span className="text-sm font-bold text-foreground">
