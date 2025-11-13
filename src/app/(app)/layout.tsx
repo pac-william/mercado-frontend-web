@@ -10,16 +10,18 @@ export default async function Layout({ children }: { children: React.ReactNode }
 
     let suggestionData: Suggestion[] = [];
 
-    try {
-        const { suggestions } = await getUserSuggestions(1, 100);
+    if (session) {
+        try {
+            const { suggestions } = await getUserSuggestions(1, 100);
 
-        const fetchedSuggestionData = await Promise.all(suggestions.map((suggestion: SuggestionListItem) =>
-            getSuggestionById(suggestion.id).catch(() => null)
-        ));
+            const fetchedSuggestionData = await Promise.all(suggestions.map((suggestion: SuggestionListItem) =>
+                getSuggestionById(suggestion.id).catch(() => null)
+            ));
 
-        suggestionData = fetchedSuggestionData.filter((s): s is Suggestion => s !== null);
-    } catch (error) {
-        console.error('Erro ao buscar histórico de sugestões:', error);
+            suggestionData = fetchedSuggestionData.filter((s): s is Suggestion => s !== null);
+        } catch (error) {
+            console.error('Erro ao buscar histórico de sugestões:', error);
+        }
     }
 
     return (

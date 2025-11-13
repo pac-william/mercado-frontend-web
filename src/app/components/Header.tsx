@@ -13,12 +13,16 @@ export default async function Header() {
     const session = await auth0.getSession() as SessionData;
 
     let items: CartItemResponseDTO[] = [];
-    try {
-        const cart = await getCart();
-        items = cart.items || [];
-    } catch (error) {
-        console.error("Erro ao carregar carrinho:", error);
+    
+    if (session) {
+        try {
+            const cart = await getCart();
+            items = cart.items || [];
+        } catch (error) {
+            console.error("Erro ao carregar carrinho:", error);
+        }
     }
+
     return (
         <header className="flex justify-between items-center p-4 bg-background border-b border-border">
             <div className="grid grid-cols-3 gap-4 container mx-auto">
