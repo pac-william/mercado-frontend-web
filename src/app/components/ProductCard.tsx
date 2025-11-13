@@ -179,10 +179,14 @@ export default function ProductCard({ product, variant = "buy-now", badgeText, b
             return (
                 <Card className="flex flex-col max-w-xs w-full bg-card border-border">
                     <CardHeader className="flex flex-row gap-2">
-                        <Image src={bh_supermercados} alt="Product" width={100} height={100} className="object-cover rounded-full aspect-square w-12 h-12 shadow-md border" />
+                        <Link href={`/market/${product.marketId}`}>
+                            <Image src={bh_supermercados} alt="Product" width={100} height={100} className="object-cover rounded-full aspect-square w-12 h-12 shadow-md border" />
+                        </Link>
                         <div className="rounded-full flex flex-col gap-2">
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-card-foreground">Market 1</span>
+                                <Link href={`/market/${product.marketId}`}>
+                                    <span className="1text-sm font-bold text-card-foreground">Market 1</span>
+                                </Link>
                                 <div className="flex flex-row gap-1">
                                     <Star size={16} className="text-yellow-500" />
                                     <Star size={16} className="text-yellow-500" />

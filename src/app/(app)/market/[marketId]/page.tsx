@@ -1,16 +1,19 @@
 import { getMarketById } from "@/actions/market.actions";
 import { getProductsByMarket } from "@/actions/products.actions";
 import SearchField from "@/app/(app)/components/SeachField";
+import Footer from "@/app/components/Footer";
 import Pagination from "@/app/components/Pagination";
 import ProductCard from "@/app/components/ProductCard";
 import { Product } from "@/app/domain/productDomain";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Star } from "lucide-react";
 import { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
+import { MarketActions } from "./MarketActions";
 
 interface MarketPageParams {
     marketId: string;
@@ -24,6 +27,8 @@ interface MarketPageSearchParams {
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_SIZE = 12;
+const FALLBACK_MARKET_BANNER = "https://placehold.co/1200x320/png?text=Smart+Market";
+const DEFAULT_MARKET_RATING = 4.8;
 
 const parseNumberParam = (value: string | undefined, fallback: number) => {
     if (!value) return fallback;
@@ -59,13 +64,12 @@ export async function generateMetadata({
     }
 }
 
-export default async function MarketPage({
-    params,
-    searchParams,
-}: {
+interface MarketPageProps {
     params: Promise<MarketPageParams>;
     searchParams: Promise<MarketPageSearchParams>;
-}) {
+}
+
+export default async function MarketPage({ params, searchParams }: MarketPageProps) {
     const { marketId } = await params;
     const { page, size, name } = await searchParams;
 
@@ -85,10 +89,25 @@ export default async function MarketPage({
         name,
     });
 
+    const bannerImage = market.logo || FALLBACK_MARKET_BANNER;
+    const ratingValue = typeof market.rating === "number" ? market.rating : DEFAULT_MARKET_RATING;
+    const ratingLabel = ratingValue.toFixed(1).replace(".", ",");
+
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="container mx-auto py-6 flex flex-col gap-6">
-                <Card className="bg-card border-border">
+                <Card className="bg-card border-border overflow-hidden">
+                    <div className="relative h-32 sm:h-48 w-full">
+                        <Image
+                            src={bannerImage}
+                            alt={`Banner do mercado ${market.name}`}
+                            fill
+                            priority
+                            className="object-cover"
+                            sizes="(min-width: 768px) 768px, 100vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-transparent" />
+                    </div>
                     <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                         <div className="flex items-center gap-4">
                             <Avatar className="h-20 w-20 border">
@@ -104,13 +123,16 @@ export default async function MarketPage({
                                 <CardDescription className="text-muted-foreground">
                                     {market.address}
                                 </CardDescription>
-                                {meta?.totalItems ? (
-                                    <Badge variant="secondary" className="w-fit">
-                                        {meta.totalItems} produtos disponíveis
-                                    </Badge>
-                                ) : null}
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Star className="size-4 text-amber-300" fill="currentColor" />
+                                    <span className="font-medium text-amber-300">{ratingLabel}</span>
+                                    {typeof market.ratingCount === "number" ? (
+                                        <span>({market.ratingCount} avaliações)</span>
+                                    ) : null}
+                                </div>
                             </div>
                         </div>
+                        <MarketActions marketName={market.name} />
                     </CardHeader>
                     <Separator />
                     <CardContent className="flex flex-col gap-4">
@@ -154,6 +176,7 @@ export default async function MarketPage({
                     )}
                 </div>
             </div>
+            <Footer />
         </ScrollArea>
     );
 }

@@ -6,6 +6,8 @@ export class Market {
         public name: string,
         public address: string,
         public logo: string,
+        public rating?: number,
+        public ratingCount?: number,
     ) { }
 }
 
