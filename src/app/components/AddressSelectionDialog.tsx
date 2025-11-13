@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { EllipsisVertical, Home, MapPin, Search } from "lucide-react";
+import { ChevronDown, EllipsisVertical, Home, MapPin, Search } from "lucide-react";
 
 interface AddressSelectionDialogProps {
     addresses: AddressDomain[];
@@ -102,6 +102,7 @@ export function AddressSelectionDialog({
                             {triggerText || "Adicionar endereço"}
                         </span>
                     </div>
+                    <ChevronDown className="size-4 text-primary" />
                 </Button>
             </DialogTrigger>
 

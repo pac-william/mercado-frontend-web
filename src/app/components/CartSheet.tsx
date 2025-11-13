@@ -1,15 +1,18 @@
 "use client"
 
+import { removeCartItem, updateCartItemQuantity } from "@/actions/cart.actions";
 import { formatPrice } from "@/app/utils/formatters";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { CartItemResponseDTO } from "@/dtos/cartDTO";
-import { ShoppingBasket, ShoppingCart } from "lucide-react";
+import { Minus, Plus, ShoppingBasket, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface CartSheetProps {
     cartItems: CartItemResponseDTO[];
@@ -17,16 +20,54 @@ interface CartSheetProps {
 
 export default function CartSheet({ cartItems }: CartSheetProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [localItems, setLocalItems] = useState<CartItemResponseDTO[]>(cartItems);
+    const router = useRouter();
+
+    // Atualiza os itens locais quando cartItems mudar (após refresh)
+    useEffect(() => {
+        setLocalItems(cartItems);
+    }, [cartItems]);
 
     const handleCloseSheet = () => {
         setIsOpen(false);
     }
 
-    const totalValue = cartItems.reduce((total, item) => {
+    const handleQuantityChange = async (itemId: string, newQuantity: number) => {
+        const item = localItems.find(i => i.id === itemId);
+        if (!item) return;
+
+        // Atualização otimista
+        const updatedItems = localItems.map(i =>
+            i.id === itemId ? { ...i, quantity: newQuantity } : i
+        );
+        setLocalItems(updatedItems);
+
+        try {
+            if (newQuantity === 0) {
+                // Remove o item se quantidade for 0
+                await removeCartItem(itemId);
+                setLocalItems(prev => prev.filter(i => i.id !== itemId));
+                toast.success("Item removido do carrinho");
+            } else {
+                // Atualiza a quantidade
+                await updateCartItemQuantity(itemId, { quantity: newQuantity });
+                toast.success("Quantidade atualizada");
+            }
+            // Atualiza o Header (Server Component)
+            router.refresh();
+        } catch (error) {
+            // Reverte em caso de erro
+            setLocalItems(cartItems);
+            console.error("Erro ao atualizar quantidade:", error);
+            toast.error("Erro ao atualizar quantidade");
+        }
+    }
+
+    const totalValue = localItems.reduce((total, item) => {
         return total + (item.product.price * item.quantity);
     }, 0);
 
-    const totalItems = cartItems.reduce((total, item) => {
+    const totalItems = localItems.reduce((total, item) => {
         return total + item.quantity;
     }, 0);
 
@@ -54,7 +95,7 @@ export default function CartSheet({ cartItems }: CartSheetProps) {
                 <SheetHeader>
                     <SheetTitle className="text-foreground">Carrinho</SheetTitle>
                     <SheetDescription className="text-muted-foreground">
-                        {cartItems.length > 0
+                        {localItems.length > 0
                             ? `${totalItems} ${totalItems === 1 ? 'item' : 'itens'} no carrinho`
                             : "Seu carrinho está vazio"
                         }
@@ -62,7 +103,7 @@ export default function CartSheet({ cartItems }: CartSheetProps) {
                 </SheetHeader>
                 <Separator />
 
-                {cartItems.length === 0 ? (
+                {localItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 flex-1">
                         <ShoppingCart className="w-16 h-16 text-muted-foreground mb-4" />
                         <p className="text-muted-foreground mb-4">Seu carrinho está vazio</p>
@@ -74,7 +115,7 @@ export default function CartSheet({ cartItems }: CartSheetProps) {
                     <>
                         <ScrollArea className="flex flex-col flex-grow h-0 overflow-y-auto p-4">
                             <div className="flex flex-col gap-2">
-                                {cartItems.map((item) => (
+                                {localItems.map((item) => (
                                     <div key={item.id} className="flex flex-1 justify-between items-start gap-4 p-3 rounded-lg bg-muted/50 border">
                                         <div className="w-16 h-16 bg-white rounded-md flex items-center justify-center">
                                             {item.product.image ? (
@@ -89,12 +130,38 @@ export default function CartSheet({ cartItems }: CartSheetProps) {
                                                 <ShoppingCart className="w-6 h-6 text-muted-foreground" />
                                             )}
                                         </div>
-                                        <div className="flex flex-col flex-1">
-                                            <p className="text-sm font-medium text-foreground  line-clamp-1">{item.product.name}</p>
-                                            <p className="text-xs text-muted-foreground">{item.quantity}x {item.product.unit}</p>
-                                            <p className="text-sm font-bold text-foreground mt-1">
+                                        <div className="flex flex-col flex-1 gap-2">
+                                            <p className="text-sm font-medium text-foreground line-clamp-1">{item.product.name}</p>
+                                            <p className="text-sm font-bold text-foreground">
                                                 {formatPrice(item.product.price * item.quantity)}
                                             </p>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-7 w-7"
+                                                    onClick={() => {
+                                                        const newQuantity = item.quantity - 1;
+                                                        if (newQuantity >= 0) {
+                                                            handleQuantityChange(item.id, newQuantity);
+                                                        }
+                                                    }}
+                                                >
+                                                    <Minus className="h-3 w-3" />
+                                                </Button>
+                                                <span className="text-sm font-medium text-foreground min-w-[2rem] text-center">
+                                                    {item.quantity}
+                                                </span>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-7 w-7"
+                                                    onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                                >
+                                                    <Plus className="h-3 w-3" />
+                                                </Button>
+                                                <span className="text-xs text-muted-foreground ml-1">{item.product.unit}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

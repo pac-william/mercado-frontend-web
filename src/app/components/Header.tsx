@@ -22,9 +22,9 @@ export default async function Header() {
     const { addresses } = addressResponse;
     const favoriteAddress = addresses.find((address) => address.isFavorite);
     const defaultAddress = favoriteAddress ?? addresses[0];
-    
+
     let items: CartItemResponseDTO[] = [];
-    
+
     if (session) {
         try {
             const cart = await getCart();
@@ -58,12 +58,14 @@ export default async function Header() {
                     ) : null}
 
                     <Separator orientation="vertical" className="hidden h-6 md:block" />
-                    <AnimatedThemeToggler />
-                    {session ? (
-                        <ProfileMenuDropDown currentUser={session.user as User} />
-                    ) : (
-                        <AuthButtons />
-                    )}
+                    <div className="flex flex-row items-center gap-2">
+                        <AnimatedThemeToggler />
+                        {session ? (
+                            <ProfileMenuDropDown currentUser={session.user as User} />
+                        ) : (
+                            <AuthButtons />
+                        )}
+                    </div>
                 </div>
             </div>
         </header>
