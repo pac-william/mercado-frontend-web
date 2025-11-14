@@ -6,12 +6,14 @@ import Pagination from "@/app/components/Pagination";
 import ProductCard from "@/app/components/ProductCard";
 import { Product } from "@/app/domain/productDomain";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Star } from "lucide-react";
+import { MessageCircle, Star } from "lucide-react";
 import { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MarketActions } from "./MarketActions";
 
@@ -128,6 +130,12 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
                                 </div>
                             </div>
                         </div>
+                        <Link href={`/chat/${marketId}`}>
+                            <Button variant="outline" size="icon" className="rounded-full">
+                                <MessageCircle className="size-4" />
+                                <span className="sr-only">Chat</span>
+                            </Button>
+                        </Link>
                         <MarketActions marketName={market.name} />
                     </CardHeader>
                     <Separator />
