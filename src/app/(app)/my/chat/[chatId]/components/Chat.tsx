@@ -42,7 +42,8 @@ export default function Chat({ chatId }: { chatId: string }) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [messageInput, setMessageInput] = useState("");
     const [isConnected, setIsConnected] = useState(false);
-    const [isJoiningRoom, setIsJoiningRoom] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [isJoiningRoom, setIsJoiningRoom] = useState(false); // Used internally for state management
     const [isSending, setIsSending] = useState(false);
     const [storeOwnerUsername, setStoreOwnerUsername] = useState<string | null>(null);
     const [backendUserId, setBackendUserId] = useState<string | null>(null);
@@ -95,8 +96,8 @@ export default function Chat({ chatId }: { chatId: string }) {
                     isActive: conv.isActive,
                     lastMessage: conv.lastMessage ? {
                         message: conv.lastMessage.message,
-                        timestamp: typeof conv.lastMessage.timestamp === 'string' 
-                            ? new Date(conv.lastMessage.timestamp) 
+                        timestamp: typeof conv.lastMessage.timestamp === 'string'
+                            ? new Date(conv.lastMessage.timestamp)
                             : conv.lastMessage.timestamp
                     } : null
                 }));
@@ -162,20 +163,20 @@ export default function Chat({ chatId }: { chatId: string }) {
             const currentBackendUserId = backendUserIdRef.current;
             const currentChatId = chatIdRef.current;
             const currentUser = user;
-            
+
             console.log("[CLIENTE] Message received from socket:", message);
             console.log("[CLIENTE] Current chatId from URL:", currentChatId);
             console.log("[CLIENTE] Backend userId:", currentBackendUserId);
-            
+
             // Check if message is from current chat
-            const expectedChatId = currentBackendUserId && currentChatId 
-                ? `${currentBackendUserId}-${currentChatId}` 
+            const expectedChatId = currentBackendUserId && currentChatId
+                ? `${currentBackendUserId}-${currentChatId}`
                 : currentRoomIdRef.current;
-            
+
             console.log("[CLIENTE] Expected chatId:", expectedChatId);
             console.log("[CLIENTE] Message chatId:", message.chat);
             console.log("[CLIENTE] Match:", expectedChatId === message.chat);
-            
+
             if (expectedChatId && message.chat === expectedChatId) {
                 // Check for duplicates
                 setMessages(prev => {
@@ -185,20 +186,20 @@ export default function Chat({ chatId }: { chatId: string }) {
                         console.log("[CLIENTE] Duplicate message detected by ID, skipping");
                         return prev;
                     }
-                    
+
                     // 2. Verificar se é uma mensagem própria (do próprio usuário)
                     // Mensagens próprias são persistidas ANTES de enviar via socket
                     // Então quando chegam via socket, já devem existir no estado (persistidas com userId)
                     const isOwnMessage = message.username === (currentUser?.name || "User");
                     if (isOwnMessage && currentBackendUserId) {
                         console.log("[CLIENTE] É mensagem própria, verificando duplicação...");
-                        
+
                         // Verificar se já existe uma mensagem persistida com o mesmo conteúdo e nosso userId
                         const hasPersistedMessage = prev.some(msg => {
                             const msgUserId = (msg as ChatMessage & { userId?: string }).userId;
-                            const sameContent = msg.message === message.message && 
-                                               msg.username === message.username;
-                            
+                            const sameContent = msg.message === message.message &&
+                                msg.username === message.username;
+
                             // Se a mensagem tem userId e é igual ao nosso backendUserId, é uma mensagem persistida nossa
                             if (msgUserId === currentBackendUserId && sameContent) {
                                 console.log("[CLIENTE] Encontrada mensagem persistida com mesmo conteúdo e userId");
@@ -206,26 +207,26 @@ export default function Chat({ chatId }: { chatId: string }) {
                             }
                             return false;
                         });
-                        
+
                         if (hasPersistedMessage) {
                             console.log("[CLIENTE] Mensagem própria já persistida detectada, ignorando mensagem do socket");
                             return prev; // Não adicionar mensagem do socket se já temos a persistida
                         }
-                        
+
                         // Verificar por conteúdo e timestamp próximo (caso a mensagem persistida ainda não tenha sido adicionada)
-                        const messageTime = typeof message.timestamp === 'string' 
-                            ? new Date(message.timestamp).getTime() 
+                        const messageTime = typeof message.timestamp === 'string'
+                            ? new Date(message.timestamp).getTime()
                             : message.timestamp.getTime();
-                        
+
                         const duplicateByContent = prev.some(msg => {
-                            const msgTime = typeof msg.timestamp === 'string' 
-                                ? new Date(msg.timestamp).getTime() 
+                            const msgTime = typeof msg.timestamp === 'string'
+                                ? new Date(msg.timestamp).getTime()
                                 : msg.timestamp.getTime();
-                            
+
                             const timeDiff = Math.abs(messageTime - msgTime);
-                            const sameContent = msg.message === message.message && 
-                                               msg.username === message.username;
-                            
+                            const sameContent = msg.message === message.message &&
+                                msg.username === message.username;
+
                             // Se conteúdo é igual, username é igual e timestamp é muito próximo (< 10 segundos)
                             // Provavelmente é a mesma mensagem
                             if (sameContent && timeDiff < 10000) {
@@ -234,43 +235,62 @@ export default function Chat({ chatId }: { chatId: string }) {
                             }
                             return false;
                         });
-                        
+
                         if (duplicateByContent) {
                             console.log("[CLIENTE] Mensagem própria duplicada por conteúdo/timestamp, ignorando socket");
                             return prev;
                         }
-                        
+
                         console.log("[CLIENTE] Mensagem própria não é duplicada, mas não deveria chegar via socket");
                         // Mesmo que não seja detectada como duplicada, se é nossa mensagem e não tem userId,
                         // provavelmente já foi persistida e não devemos adicionar
                         // Verificar se existe alguma mensagem recente (últimos 10 segundos) com o mesmo conteúdo
                         const recentMessage = prev.some(msg => {
-                            const msgTime = typeof msg.timestamp === 'string' 
-                                ? new Date(msg.timestamp).getTime() 
+                            const msgTime = typeof msg.timestamp === 'string'
+                                ? new Date(msg.timestamp).getTime()
                                 : msg.timestamp.getTime();
                             const timeDiff = Math.abs(messageTime - msgTime);
                             return msg.message === message.message && timeDiff < 10000;
                         });
-                        
+
                         if (recentMessage) {
                             console.log("[CLIENTE] Mensagem própria recente encontrada, ignorando socket");
                             return prev;
                         }
                     }
-                    
-                    // 3. Mensagem não é duplicada (é do lojista ou não é duplicata), adicionar ao estado
+
+                    // 3. Mensagem não é duplicada (é do lojista ou não é duplicata)
+                    // Antes de adicionar, verificar novamente se não há duplicata por ID
+                    // (pode ter sido adicionada entre a verificação e agora)
+                    const finalCheck = prev.some(msg => msg.id === message.id);
+                    if (finalCheck) {
+                        console.log("[CLIENTE] Duplicate detected in final check, skipping");
+                        return prev;
+                    }
+
                     console.log("[CLIENTE] Adding message to state (not duplicate)");
-                    return [...prev, {
+                    // Adicionar mensagem e deduplicar o array final (por segurança)
+                    const newMessages = [...prev, {
                         ...message,
                         timestamp: typeof message.timestamp === 'string' ? new Date(message.timestamp) : message.timestamp
                     }];
+
+                    // Deduplicar por ID (manter apenas a primeira ocorrência de cada ID)
+                    const deduplicated = newMessages.reduce((acc, msg) => {
+                        if (!acc.find(m => m.id === msg.id)) {
+                            acc.push(msg);
+                        }
+                        return acc;
+                    }, [] as (ChatMessage & { userId?: string })[]);
+
+                    return deduplicated;
                 });
             } else {
                 console.log("[CLIENTE] Message chatId doesn't match current chat, ignoring");
             }
-            
+
             // Update last message in conversations
-            setConversations(prev => prev.map(conv => 
+            setConversations(prev => prev.map(conv =>
                 conv.chatId === message.chat
                     ? {
                         ...conv,
@@ -326,7 +346,7 @@ export default function Chat({ chatId }: { chatId: string }) {
             });
         }
     }, [user, backendUserId]);
-    
+
     // Atualizar refs quando chatId ou backendUserId mudarem
     useEffect(() => {
         chatIdRef.current = chatId;
@@ -341,7 +361,7 @@ export default function Chat({ chatId }: { chatId: string }) {
         const enterChat = async () => {
             // Calculate chatId: {userId}-{marketId}
             const calculatedChatId = `${backendUserId}-${chatId}`;
-            
+
             // Leave previous chat if different
             if (currentRoomIdRef.current && currentRoomIdRef.current !== calculatedChatId) {
                 socket.emit("chat:leave");
@@ -380,7 +400,7 @@ export default function Chat({ chatId }: { chatId: string }) {
 
             // Join the chat with backendUserId to ensure correct chatId
             setIsJoiningRoom(true);
-            socket.emit("chat:join-market", { 
+            socket.emit("chat:join-market", {
                 marketId: chatId,
                 userId: backendUserId // Pass backendUserId to ensure correct chatId format
             });
@@ -407,27 +427,27 @@ export default function Chat({ chatId }: { chatId: string }) {
     // Select conversation
     const handleSelectConversation = (marketId: string) => {
         if (!socketRef.current?.connected) return;
-        
+
         // Update URL
-        router.push(`/chat/${marketId}`);
-        
+        router.push(`/my/chat/${marketId}`);
+
         // Calculate roomId for new conversation
         if (backendUserId) {
             const newRoomId = `${backendUserId}-${marketId}`;
-            
+
             // Leave previous room if different
             if (currentRoomIdRef.current && currentRoomIdRef.current !== newRoomId) {
                 socketRef.current.emit("chat:leave");
             }
-            
+
             // Update current roomId
             currentRoomIdRef.current = newRoomId;
         }
-        
+
         // Join new room with backendUserId to ensure correct chatId
         setIsJoiningRoom(true);
         setMessages([]);
-        socketRef.current.emit("chat:join-market", { 
+        socketRef.current.emit("chat:join-market", {
             marketId,
             userId: backendUserId // Pass backendUserId to ensure correct chatId format
         });
@@ -444,7 +464,7 @@ export default function Chat({ chatId }: { chatId: string }) {
 
         // Calculate chatId correctly: {userId}-{marketId}
         const calculatedChatId = `${backendUserId}-${chatId}`;
-        
+
         // Update currentRoomIdRef if necessary
         if (currentRoomIdRef.current !== calculatedChatId) {
             currentRoomIdRef.current = calculatedChatId;
@@ -455,25 +475,25 @@ export default function Chat({ chatId }: { chatId: string }) {
         try {
             const persistedMessage = await createMessage(calculatedChatId, messageText);
             console.log("[CLIENTE] Mensagem persistida:", persistedMessage.id);
-            
+
             // Adicionar mensagem persistida ao estado
             setMessages(prev => {
                 // Verificar se já existe (pode ter chegado via socket antes da persistência)
-                const alreadyExists = prev.some(msg => 
+                const alreadyExists = prev.some(msg =>
                     msg.id === persistedMessage.id ||
                     ((msg as ChatMessage & { userId?: string }).userId === persistedMessage.userId &&
-                     msg.message === persistedMessage.message &&
-                     msg.username === persistedMessage.username)
+                        msg.message === persistedMessage.message &&
+                        msg.username === persistedMessage.username)
                 );
-                
+
                 if (alreadyExists) {
                     console.log("[CLIENTE] Mensagem persistida já existe no estado, atualizando");
                     // Atualizar mensagem existente com dados persistidos (garantir ID correto)
                     return prev.map(msg => {
-                        if (msg.id === persistedMessage.id || 
+                        if (msg.id === persistedMessage.id ||
                             ((msg as ChatMessage & { userId?: string }).userId === persistedMessage.userId &&
-                             msg.message === persistedMessage.message &&
-                             msg.username === persistedMessage.username)) {
+                                msg.message === persistedMessage.message &&
+                                msg.username === persistedMessage.username)) {
                             return {
                                 ...msg,
                                 id: persistedMessage.id, // Garantir ID correto do banco
@@ -483,21 +503,41 @@ export default function Chat({ chatId }: { chatId: string }) {
                         return msg;
                     });
                 }
-                
+
                 // Adicionar mensagem persistida
                 console.log("[CLIENTE] Adicionando mensagem persistida ao estado");
-                return [...prev, {
+                const newMessages = [...prev, {
                     id: persistedMessage.id,
                     chat: persistedMessage.chatId,
                     username: persistedMessage.username,
                     message: persistedMessage.message,
-                    timestamp: typeof persistedMessage.createdAt === 'string' 
-                        ? new Date(persistedMessage.createdAt) 
+                    timestamp: typeof persistedMessage.createdAt === 'string'
+                        ? new Date(persistedMessage.createdAt)
                         : persistedMessage.createdAt,
                     userId: persistedMessage.userId
                 } as ChatMessage & { userId?: string }];
+
+                // Deduplicar por ID (garantir que não há duplicatas)
+                const deduplicated = newMessages.reduce((acc, msg) => {
+                    const existing = acc.find(m => m.id === msg.id);
+                    if (!existing) {
+                        acc.push(msg);
+                    } else {
+                        // Se já existe, preferir a versão com userId (persistida)
+                        const existingHasUserId = !!(existing as ChatMessage & { userId?: string }).userId;
+                        const newHasUserId = !!(msg as ChatMessage & { userId?: string }).userId;
+                        if (newHasUserId && !existingHasUserId) {
+                            // Substituir pela versão com userId
+                            const index = acc.indexOf(existing);
+                            acc[index] = msg;
+                        }
+                    }
+                    return acc;
+                }, [] as (ChatMessage & { userId?: string })[]);
+
+                return deduplicated;
             });
-            
+
             // Enviar via Socket.IO DEPOIS de persistir
             // Quando chegar via socket, a verificação de duplicação vai ignorar porque já temos a persistida
             socketRef.current.emit("chat:send-message", {
@@ -564,8 +604,8 @@ export default function Chat({ chatId }: { chatId: string }) {
     const currentUsername = user.name || "User";
 
     return (
-        <div className="grid gap-6 lg:grid-cols-[320px_1fr] h-full">
-            <Card className="h-full">
+        <div className="flex flex-row flex-1 gap-6 ">
+            <Card className="w-[320px]">
                 <CardHeader>
                     <CardTitle>My Chats</CardTitle>
                     <CardDescription>Conversations with store owners</CardDescription>
@@ -612,7 +652,7 @@ export default function Chat({ chatId }: { chatId: string }) {
                 </CardContent>
             </Card>
 
-            <Card className="flex flex-col h-full max-h-[calc(100vh-200px)]">
+            <Card className="flex flex-col flex-1">
                 <CardHeader className="border-b">
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col">
@@ -636,30 +676,70 @@ export default function Chat({ chatId }: { chatId: string }) {
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-                {isJoiningRoom ? (
-                    <div className="flex items-center justify-center flex-1">
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                        <span className="ml-2 text-sm text-muted-foreground">
-                            Joining room...
-                        </span>
-                    </div>
-                ) : (
-                    <>
-                        <ScrollArea className="flex-1 p-4">
-                            <div className="space-y-4">
-                                {messages.length === 0 ? (
-                                    <div className="text-center text-muted-foreground py-8">
-                                        <p>No messages yet.</p>
-                                        <p className="text-sm mt-2">Be the first to send a message!</p>
-                                    </div>
-                                ) : (
-                                    messages.map((message) => {
+                <CardContent className="flex-1 flex flex-col p-0">
+                    <ScrollArea className="flex flex-col flex-grow h-0 overflow-y-auto p-4">
+                        <div className="flex flex-col flex-1 gap-4">
+                            {messages.length === 0 ? (
+                                <div className="text-center text-muted-foreground py-8">
+                                    <p>No messages yet.</p>
+                                    <p className="text-sm mt-2">Be the first to send a message!</p>
+                                </div>
+                            ) : (
+                                // Remover duplicatas antes de renderizar usando useMemo equivalente inline
+                                (() => {
+                                    // Criar um Map para deduplicar mensagens por ID
+                                    const uniqueMessagesMap = new Map<string, ChatMessage & { userId?: string }>();
+
+                                    // Primeira passada: adicionar todas as mensagens únicas
+                                    messages.forEach((message) => {
+                                        const msg = message as ChatMessage & { userId?: string };
+
+                                        if (!uniqueMessagesMap.has(msg.id)) {
+                                            // Não existe, adicionar
+                                            uniqueMessagesMap.set(msg.id, msg);
+                                        } else {
+                                            // Já existe, verificar qual é melhor (preferir mensagem persistida com userId)
+                                            const existing = uniqueMessagesMap.get(msg.id)!;
+
+                                            // Preferir mensagem com userId (persistida)
+                                            if (msg.userId && !existing.userId) {
+                                                uniqueMessagesMap.set(msg.id, msg);
+                                            } else if (msg.userId && existing.userId) {
+                                                // Ambas têm userId, usar a mais recente
+                                                const existingTime = typeof existing.timestamp === 'string'
+                                                    ? new Date(existing.timestamp).getTime()
+                                                    : existing.timestamp.getTime();
+                                                const newTime = typeof msg.timestamp === 'string'
+                                                    ? new Date(msg.timestamp).getTime()
+                                                    : msg.timestamp.getTime();
+
+                                                if (newTime > existingTime) {
+                                                    uniqueMessagesMap.set(msg.id, msg);
+                                                }
+                                            }
+                                        }
+                                    });
+
+                                    // Converter para array, ordenar por timestamp e renderizar
+                                    const uniqueMessages = Array.from(uniqueMessagesMap.values())
+                                        .sort((a, b) => {
+                                            const timeA = typeof a.timestamp === 'string'
+                                                ? new Date(a.timestamp).getTime()
+                                                : a.timestamp.getTime();
+                                            const timeB = typeof b.timestamp === 'string'
+                                                ? new Date(b.timestamp).getTime()
+                                                : b.timestamp.getTime();
+                                            return timeA - timeB;
+                                        });
+
+                                    return uniqueMessages.map((message) => {
                                         // Comparar por userId se disponível, caso contrário usar username
-                                        const messageUserId = (message as ChatMessage & { userId?: string }).userId;
-                                        const isOwnMessage = messageUserId 
-                                            ? messageUserId === backendUserId 
+                                        const messageUserId = message.userId;
+                                        const isOwnMessage = messageUserId
+                                            ? messageUserId === backendUserId
                                             : message.username === currentUsername;
+
+                                        // Usar ID como key (já garantimos que são únicos)
                                         return (
                                             <div
                                                 key={message.id}
@@ -693,42 +773,41 @@ export default function Chat({ chatId }: { chatId: string }) {
                                                 </div>
                                             </div>
                                         );
-                                    })
-                                )}
-                                <div ref={messagesEndRef} />
-                            </div>
-                        </ScrollArea>
-                        <form
-                            onSubmit={handleSendMessage}
-                            className="border-t p-4 flex gap-2"
+                                    });
+                                })()
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+                    </ScrollArea>
+                    <form
+                        onSubmit={handleSendMessage}
+                        className="border-t p-4 flex gap-2"
+                    >
+                        <Input
+                            value={messageInput}
+                            onChange={(e) => setMessageInput(e.target.value)}
+                            placeholder="Type your message..."
+                            disabled={!isConnected || isSending}
+                            className="flex-1"
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSendMessage(e);
+                                }
+                            }}
+                        />
+                        <Button
+                            type="submit"
+                            disabled={!isConnected || !messageInput.trim() || isSending}
+                            size="icon"
                         >
-                            <Input
-                                value={messageInput}
-                                onChange={(e) => setMessageInput(e.target.value)}
-                                placeholder="Type your message..."
-                                disabled={!isConnected || isSending}
-                                className="flex-1"
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleSendMessage(e);
-                                    }
-                                }}
-                            />
-                            <Button
-                                type="submit"
-                                disabled={!isConnected || !messageInput.trim() || isSending}
-                                size="icon"
-                            >
-                                {isSending ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                    <Send className="h-4 w-4" />
-                                )}
-                            </Button>
-                        </form>
-                    </>
-                )}
+                            {isSending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Send className="h-4 w-4" />
+                            )}
+                        </Button>
+                    </form>
                 </CardContent>
             </Card>
         </div>

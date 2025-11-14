@@ -130,13 +130,15 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
                                 </div>
                             </div>
                         </div>
-                        <Link href={`/chat/${marketId}`}>
-                            <Button variant="outline" size="icon" className="rounded-full">
-                                <MessageCircle className="size-4" />
-                                <span className="sr-only">Chat</span>
-                            </Button>
-                        </Link>
-                        <MarketActions marketName={market.name} />
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                            <Link href={`/my/chat/${marketId}`}>
+                                <Button variant="outline" size="icon" className="rounded-full">
+                                    <MessageCircle className="size-4" />
+                                    <span className="sr-only">Chat</span>
+                                </Button>
+                            </Link>
+                            <MarketActions marketName={market.name} />
+                        </div>
                     </CardHeader>
                     <Separator />
                     <CardContent className="flex flex-col gap-4">

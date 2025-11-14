@@ -7,7 +7,7 @@ interface ChatPageProps {
 export default async function ChatPage({ params }: ChatPageProps) {
     const { chatId } = await params;
     return (
-        <div className="flex flex-1 container mx-auto">
+        <div className="flex flex-1 container mx-auto py-6">
             <Chat chatId={chatId} />
         </div>
     )

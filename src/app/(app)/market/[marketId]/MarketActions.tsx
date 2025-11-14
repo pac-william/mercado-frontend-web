@@ -25,10 +25,10 @@ interface MarketActionsProps {
 
 export function MarketActions({ marketName }: MarketActionsProps) {
     return (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <>
             <NotificationDialog marketName={marketName} />
             <ShareDialog marketName={marketName} />
-        </div>
+        </>
     );
 }
 
