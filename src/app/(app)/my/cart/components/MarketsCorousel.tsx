@@ -16,7 +16,7 @@ export default function MarketsCorousel({ markets }: { markets: Market[] }) {
                                 <CarouselItem key={market.id} className="max-w-[320px] min-w-[320px] basis-1/4">
                                     <Card className="flex flex-1 flex-row gap-2 p-4 shadow-none bg-card border-border">
                                         <Avatar className="w-10 h-10 shadow-md">
-                                            <AvatarImage src={market.logo} alt={market.name} width={100} height={100} className="rounded-full" />
+                                            <AvatarImage src={market.profilePicture} alt={market.name} width={100} height={100} className="rounded-full" />
                                             <AvatarFallback className="bg-primary text-primary-foreground">{market.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col">
