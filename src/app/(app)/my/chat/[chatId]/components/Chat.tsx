@@ -1,18 +1,21 @@
 "use client"
 
-import { createChat, createMessage, getChatByChatId, getCustomerConversations } from "@/actions/chat.actions";
+import { createChat, createMessage, getChatByChatId, getCustomerConversations, markMessagesAsRead } from "@/actions/chat.actions";
 import { getUserMe } from "@/actions/user.actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { Loader2, Send } from "lucide-react";
+import { AlertCircle, Check, CheckCheck, Loader2, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 const MESSAGING_SERVER_URL = process.env.NEXT_PUBLIC_MESSAGING_SERVER_URL;
+
+type MessageStatus = "not_sent" | "sent" | "delivered" | "read";
 
 interface ChatMessage {
     id: string;
@@ -20,6 +23,7 @@ interface ChatMessage {
     username: string;
     message: string;
     timestamp: Date | string;
+    status?: MessageStatus;
 }
 
 interface Conversation {
@@ -122,36 +126,69 @@ export default function Chat({ chatId }: { chatId: string }) {
                     if (chatWithMessages && chatWithMessages.messages.length > 0) {
                         // Convert backend messages to expected format
                         // Incluir userId nas mensagens para comparação correta
-                        const formattedMessages: ChatMessage[] = chatWithMessages.messages.map(msg => ({
-                            id: msg.id,
-                            chat: msg.chatId,
-                            username: msg.username,
-                            message: msg.message,
-                            timestamp: typeof msg.createdAt === 'string' ? new Date(msg.createdAt) : msg.createdAt,
-                            userId: msg.userId // Incluir userId para comparação
-                        } as ChatMessage & { userId?: string }));
-                        setMessages(formattedMessages);
+                        // Mensagens do backend têm status baseado no readAt
+                        const formattedMessages: ChatMessage[] = chatWithMessages.messages.map(msg => {
+                            const isOwnMessage = msg.userId === (backendUserIdRef.current || backendUserId);
+                            let status: MessageStatus | undefined = undefined;
+                            
+                            if (isOwnMessage) {
+                                // Se é mensagem do próprio cliente, verificar se foi lida
+                                status = msg.readAt ? "read" as MessageStatus : "delivered" as MessageStatus;
+                            }
+                            
+                            return {
+                                id: msg.id,
+                                chat: msg.chatId,
+                                username: msg.username,
+                                message: msg.message,
+                                timestamp: typeof msg.createdAt === 'string' ? new Date(msg.createdAt) : msg.createdAt,
+                                userId: msg.userId, // Incluir userId para comparação
+                                status
+                            } as ChatMessage & { userId?: string };
+                        });
+                        // Ordenar mensagens por timestamp antes de definir
+                        const sortedMessages = formattedMessages.sort((a, b) => {
+                            const timeA = typeof a.timestamp === 'string' ? new Date(a.timestamp).getTime() : a.timestamp.getTime();
+                            const timeB = typeof b.timestamp === 'string' ? new Date(b.timestamp).getTime() : b.timestamp.getTime();
+                            return timeA - timeB;
+                        });
+                        setMessages(sortedMessages);
                     } else {
                         // Chat doesn't exist yet or has no messages, use socket messages
-                        setMessages(receivedMessages.map(msg => ({
+                        const sortedSocketMessages = receivedMessages.map(msg => ({
                             ...msg,
                             timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp
-                        })));
+                        })).sort((a, b) => {
+                            const timeA = typeof a.timestamp === 'string' ? new Date(a.timestamp).getTime() : a.timestamp.getTime();
+                            const timeB = typeof b.timestamp === 'string' ? new Date(b.timestamp).getTime() : b.timestamp.getTime();
+                            return timeA - timeB;
+                        });
+                        setMessages(sortedSocketMessages);
                     }
                 } catch (error) {
                     console.error("Error fetching messages from backend:", error);
                     // Fallback to socket messages
-                    setMessages(receivedMessages.map(msg => ({
+                    const sortedSocketMessages = receivedMessages.map(msg => ({
                         ...msg,
                         timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp
-                    })));
+                    })).sort((a, b) => {
+                        const timeA = typeof a.timestamp === 'string' ? new Date(a.timestamp).getTime() : a.timestamp.getTime();
+                        const timeB = typeof b.timestamp === 'string' ? new Date(b.timestamp).getTime() : b.timestamp.getTime();
+                        return timeA - timeB;
+                    });
+                    setMessages(sortedSocketMessages);
                 }
             } else {
                 // Fallback to socket messages
-                setMessages(receivedMessages.map(msg => ({
+                const sortedSocketMessages = receivedMessages.map(msg => ({
                     ...msg,
                     timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp
-                })));
+                })).sort((a, b) => {
+                    const timeA = typeof a.timestamp === 'string' ? new Date(a.timestamp).getTime() : a.timestamp.getTime();
+                    const timeB = typeof b.timestamp === 'string' ? new Date(b.timestamp).getTime() : b.timestamp.getTime();
+                    return timeA - timeB;
+                });
+                setMessages(sortedSocketMessages);
             }
             setIsJoiningRoom(false);
         });
@@ -271,7 +308,8 @@ export default function Chat({ chatId }: { chatId: string }) {
                     // Adicionar mensagem e deduplicar o array final (por segurança)
                     const newMessages = [...prev, {
                         ...message,
-                        timestamp: typeof message.timestamp === 'string' ? new Date(message.timestamp) : message.timestamp
+                        timestamp: typeof message.timestamp === 'string' ? new Date(message.timestamp) : message.timestamp,
+                        status: (message.status || "delivered") as MessageStatus
                     }];
 
                     // Deduplicar por ID (manter apenas a primeira ocorrência de cada ID)
@@ -282,7 +320,16 @@ export default function Chat({ chatId }: { chatId: string }) {
                         return acc;
                     }, [] as (ChatMessage & { userId?: string })[]);
 
-                    return deduplicated;
+                    // Ordenar por timestamp após adicionar (garantir ordem correta)
+                    return deduplicated.sort((a, b) => {
+                        const timeA = typeof a.timestamp === 'string'
+                            ? new Date(a.timestamp).getTime()
+                            : a.timestamp.getTime();
+                        const timeB = typeof b.timestamp === 'string'
+                            ? new Date(b.timestamp).getTime()
+                            : b.timestamp.getTime();
+                        return timeA - timeB;
+                    });
                 });
             } else {
                 console.log("[CLIENTE] Message chatId doesn't match current chat, ignoring");
@@ -301,6 +348,38 @@ export default function Chat({ chatId }: { chatId: string }) {
                     : conv
             ));
         });
+
+        // Mensagens marcadas como lidas (notificação do lojista)
+        newSocket.on("chat:messages-read", (data: { chatId: string; readBy: string; readAt: Date }) => {
+            const currentChatId = chatIdRef.current;
+            const currentBackendUserId = backendUserIdRef.current;
+
+            // Verificar se é do chat atual
+            const expectedChatId = currentBackendUserId && currentChatId
+                ? `${currentBackendUserId}-${currentChatId}`
+                : currentRoomIdRef.current;
+
+            if (expectedChatId && data.chatId === expectedChatId) {
+                console.log("[CLIENTE] Mensagens marcadas como lidas pelo lojista");
+                
+                // Atualizar status de todas as mensagens próprias (do cliente) para "read"
+                setMessages(prev => prev.map(msg => {
+                    const msgUserId = (msg as ChatMessage & { userId?: string }).userId;
+                    // Se é mensagem do próprio cliente, atualizar status para "read"
+                    if (msgUserId === currentBackendUserId && msg.status && msg.status !== "read") {
+                        return {
+                            ...msg,
+                            status: "read" as MessageStatus
+                        };
+                    }
+                    return msg;
+                }));
+            }
+        });
+
+        // Receber notificação quando lojista marca mensagens como lidas
+        // (o cliente marca quando visualiza, então receber essa notificação confirma)
+        // Este evento também é usado quando o lojista marca mensagens do cliente como lidas
 
         // User left chat event
         newSocket.on("chat:user-left", (data: { username: string; chatId: string }) => {
@@ -332,6 +411,8 @@ export default function Chat({ chatId }: { chatId: string }) {
                 newSocket.disconnect();
             }
         };
+        // backendUserId é usado via ref (backendUserIdRef) nos listeners para evitar problemas de closure
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, userLoading]);
 
     // Fetch backend userId when user loads
@@ -379,15 +460,33 @@ export default function Chat({ chatId }: { chatId: string }) {
                 const chatWithMessages = await getChatByChatId(calculatedChatId);
                 if (chatWithMessages && chatWithMessages.messages.length > 0) {
                     // Incluir userId nas mensagens para comparação correta
-                    const formattedMessages: ChatMessage[] = chatWithMessages.messages.map(msg => ({
-                        id: msg.id,
-                        chat: msg.chatId,
-                        username: msg.username,
-                        message: msg.message,
-                        timestamp: typeof msg.createdAt === 'string' ? new Date(msg.createdAt) : msg.createdAt,
-                        userId: msg.userId // Incluir userId para comparação
-                    } as ChatMessage & { userId?: string }));
-                    setMessages(formattedMessages);
+                    // Mensagens do backend têm status baseado no readAt
+                    const formattedMessages: ChatMessage[] = chatWithMessages.messages.map(msg => {
+                        const isOwnMessage = msg.userId === backendUserId;
+                        let status: MessageStatus | undefined = undefined;
+                        
+                        if (isOwnMessage) {
+                            // Se é mensagem do próprio cliente, verificar se foi lida
+                            status = msg.readAt ? "read" as MessageStatus : "delivered" as MessageStatus;
+                        }
+                        
+                        return {
+                            id: msg.id,
+                            chat: msg.chatId,
+                            username: msg.username,
+                            message: msg.message,
+                            timestamp: typeof msg.createdAt === 'string' ? new Date(msg.createdAt) : msg.createdAt,
+                            userId: msg.userId, // Incluir userId para comparação
+                            status
+                        } as ChatMessage & { userId?: string };
+                    });
+                    // Ordenar mensagens por timestamp antes de definir
+                    const sortedMessages = formattedMessages.sort((a, b) => {
+                        const timeA = typeof a.timestamp === 'string' ? new Date(a.timestamp).getTime() : a.timestamp.getTime();
+                        const timeB = typeof b.timestamp === 'string' ? new Date(b.timestamp).getTime() : b.timestamp.getTime();
+                        return timeA - timeB;
+                    });
+                    setMessages(sortedMessages);
                     setIsJoiningRoom(false);
                 } else {
                     setIsJoiningRoom(false);
@@ -403,6 +502,21 @@ export default function Chat({ chatId }: { chatId: string }) {
                 marketId: chatId,
                 userId: backendUserId // Pass backendUserId to ensure correct chatId format
             });
+
+            // Marcar mensagens como lidas quando o cliente visualiza o chat
+            try {
+                await markMessagesAsRead(calculatedChatId);
+                console.log("[CLIENTE] Mensagens marcadas como lidas");
+                
+                // Notificar o lojista via socket que as mensagens foram lidas
+                if (socket.connected) {
+                    socket.emit("chat:messages-read", {
+                        chatId: calculatedChatId,
+                    });
+                }
+            } catch (error) {
+                console.error("[CLIENTE] Erro ao marcar mensagens como lidas:", error);
+            }
         };
 
         enterChat();
@@ -441,85 +555,89 @@ export default function Chat({ chatId }: { chatId: string }) {
             currentRoomIdRef.current = calculatedChatId;
         }
 
-        // Persistir no backend PRIMEIRO (antes de enviar via socket)
-        // Isso garante que temos o ID correto e evitamos duplicação
+        // Criar ID temporário para a mensagem
+        const tempId = `temp-${Date.now()}-${Math.random()}`;
+
+        // Adicionar mensagem ao estado IMEDIATAMENTE com status "not_sent"
+        const newMessage: ChatMessage & { userId?: string } = {
+            id: tempId,
+            chat: calculatedChatId,
+            username: user?.name || "User",
+            message: messageText,
+            timestamp: new Date(),
+            status: "not_sent",
+            userId: backendUserId
+        };
+
+        setMessages(prev => [...prev, newMessage]);
+
+        // Enviar via Socket.IO PRIMEIRO (garantir que sempre envia)
+        socketRef.current.emit("chat:send-message", {
+            message: messageText,
+        });
+
+        // Atualizar status para "sent" após enviar
+        // Ordenar por timestamp para garantir ordem correta
+        setMessages(prev => {
+            const updated = prev.map(msg =>
+                msg.id === tempId ? { ...msg, status: "sent" as MessageStatus } : msg
+            );
+            
+            // Ordenar por timestamp após atualizar
+            return updated.sort((a, b) => {
+                const timeA = typeof a.timestamp === 'string'
+                    ? new Date(a.timestamp).getTime()
+                    : a.timestamp.getTime();
+                const timeB = typeof b.timestamp === 'string'
+                    ? new Date(b.timestamp).getTime()
+                    : b.timestamp.getTime();
+                return timeA - timeB;
+            });
+        });
+
+        // Tentar persistir no backend DEPOIS de enviar via socket
         try {
             const persistedMessage = await createMessage(calculatedChatId, messageText);
             console.log("[CLIENTE] Mensagem persistida:", persistedMessage.id);
 
-            // Adicionar mensagem persistida ao estado
+            // Atualizar mensagem temporária com dados persistidos e status "delivered"
+            // Manter o timestamp original da mensagem para preservar a ordem
             setMessages(prev => {
-                // Verificar se já existe (pode ter chegado via socket antes da persistência)
-                const alreadyExists = prev.some(msg =>
-                    msg.id === persistedMessage.id ||
-                    ((msg as ChatMessage & { userId?: string }).userId === persistedMessage.userId &&
-                        msg.message === persistedMessage.message &&
-                        msg.username === persistedMessage.username)
-                );
-
-                if (alreadyExists) {
-                    console.log("[CLIENTE] Mensagem persistida já existe no estado, atualizando");
-                    // Atualizar mensagem existente com dados persistidos (garantir ID correto)
-                    return prev.map(msg => {
-                        if (msg.id === persistedMessage.id ||
-                            ((msg as ChatMessage & { userId?: string }).userId === persistedMessage.userId &&
-                                msg.message === persistedMessage.message &&
-                                msg.username === persistedMessage.username)) {
-                            return {
-                                ...msg,
-                                id: persistedMessage.id, // Garantir ID correto do banco
-                                userId: persistedMessage.userId
-                            } as ChatMessage & { userId?: string };
-                        }
-                        return msg;
-                    });
-                }
-
-                // Adicionar mensagem persistida
-                console.log("[CLIENTE] Adicionando mensagem persistida ao estado");
-                const newMessages = [...prev, {
-                    id: persistedMessage.id,
-                    chat: persistedMessage.chatId,
-                    username: persistedMessage.username,
-                    message: persistedMessage.message,
-                    timestamp: typeof persistedMessage.createdAt === 'string'
-                        ? new Date(persistedMessage.createdAt)
-                        : persistedMessage.createdAt,
-                    userId: persistedMessage.userId
-                } as ChatMessage & { userId?: string }];
-
-                // Deduplicar por ID (garantir que não há duplicatas)
-                const deduplicated = newMessages.reduce((acc, msg) => {
-                    const existing = acc.find(m => m.id === msg.id);
-                    if (!existing) {
-                        acc.push(msg);
-                    } else {
-                        // Se já existe, preferir a versão com userId (persistida)
-                        const existingHasUserId = !!(existing as ChatMessage & { userId?: string }).userId;
-                        const newHasUserId = !!(msg as ChatMessage & { userId?: string }).userId;
-                        if (newHasUserId && !existingHasUserId) {
-                            // Substituir pela versão com userId
-                            const index = acc.indexOf(existing);
-                            acc[index] = msg;
-                        }
+                const updated = prev.map(msg => {
+                    if (msg.id === tempId || 
+                        ((msg as ChatMessage & { userId?: string }).userId === backendUserId &&
+                         msg.message === messageText &&
+                         msg.status === "sent")) {
+                        // Manter o timestamp original da mensagem para preservar a ordem
+                        const originalTimestamp = msg.timestamp;
+                        return {
+                            ...msg,
+                            id: persistedMessage.id,
+                            chat: persistedMessage.chatId,
+                            username: persistedMessage.username,
+                            timestamp: originalTimestamp, // Manter timestamp original
+                            userId: persistedMessage.userId,
+                            status: "delivered" as MessageStatus
+                        } as ChatMessage & { userId?: string };
                     }
-                    return acc;
-                }, [] as (ChatMessage & { userId?: string })[]);
-
-                return deduplicated;
-            });
-
-            // Enviar via Socket.IO DEPOIS de persistir
-            // Quando chegar via socket, a verificação de duplicação vai ignorar porque já temos a persistida
-            socketRef.current.emit("chat:send-message", {
-                message: messageText,
+                    return msg;
+                });
+                
+                // Ordenar por timestamp após atualizar (garantir ordem correta)
+                return updated.sort((a, b) => {
+                    const timeA = typeof a.timestamp === 'string'
+                        ? new Date(a.timestamp).getTime()
+                        : a.timestamp.getTime();
+                    const timeB = typeof b.timestamp === 'string'
+                        ? new Date(b.timestamp).getTime()
+                        : b.timestamp.getTime();
+                    return timeA - timeB;
+                });
             });
         } catch (error) {
             console.error("Error persisting message in backend:", error);
-            // Se falhar a persistência, ainda enviar via socket (mensagem temporária)
-            socketRef.current.emit("chat:send-message", {
-                message: messageText,
-            });
+            // Se falhar a persistência, manter status "sent" (mensagem enviada mas não persistida)
+            // A mensagem pode ser atualizada quando chegar via socket com dados do servidor
         } finally {
             setIsSending(false);
         }
@@ -565,6 +683,62 @@ export default function Chat({ chatId }: { chatId: string }) {
     }
 
     const currentUsername = user.name || "User";
+
+    // Componente para exibir ícone de status da mensagem
+    const MessageStatusIcon = ({ status }: { status: MessageStatus }) => {
+        const getStatusConfig = () => {
+            switch (status) {
+                case "not_sent":
+                    return {
+                        icon: AlertCircle,
+                        label: "Não enviado",
+                        className: "text-red-400"
+                    };
+                case "sent":
+                    return {
+                        icon: Check,
+                        label: "Enviado",
+                        className: "text-muted-foreground"
+                    };
+                case "delivered":
+                    return {
+                        icon: CheckCheck,
+                        label: "Enviado/Recebido",
+                        className: "text-muted-foreground"
+                    };
+                case "read":
+                    return {
+                        icon: CheckCheck,
+                        label: "Lido",
+                        className: "text-blue-400"
+                    };
+                default:
+                    return {
+                        icon: Check,
+                        label: "Enviado",
+                        className: "text-muted-foreground"
+                    };
+            }
+        };
+
+        const config = getStatusConfig();
+        const Icon = config.icon;
+
+        return (
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <span className="inline-flex items-center">
+                            <Icon className={cn("h-3 w-3", config.className)} />
+                        </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>{config.label}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        );
+    };
 
     return (
         <Card className="flex flex-col flex-1">
@@ -667,7 +841,7 @@ export default function Chat({ chatId }: { chatId: string }) {
                                                 className={cn(
                                                     "rounded-lg px-4 py-2 max-w-[80%]",
                                                     isOwnMessage
-                                                        ? "bg-primary text-primary-foreground"
+                                                        ? "bg-lime-200 text-gray-700"
                                                         : "bg-muted"
                                                 )}
                                             >
@@ -677,14 +851,19 @@ export default function Chat({ chatId }: { chatId: string }) {
                                                     </p>
                                                 )}
                                                 <p className="text-sm">{message.message}</p>
-                                                <p
-                                                    className={cn(
-                                                        "text-xs mt-1",
-                                                        isOwnMessage ? "opacity-70" : "opacity-60"
+                                                <div className="flex items-center justify-between gap-2 mt-1">
+                                                    <p
+                                                        className={cn(
+                                                            "text-xs",
+                                                            isOwnMessage ? "opacity-70" : "opacity-60"
+                                                        )}
+                                                    >
+                                                        {formatTimestamp(message.timestamp)}
+                                                    </p>
+                                                    {isOwnMessage && message.status && (
+                                                        <MessageStatusIcon status={message.status} />
                                                     )}
-                                                >
-                                                    {formatTimestamp(message.timestamp)}
-                                                </p>
+                                                </div>
                                             </div>
                                         </div>
                                     );
