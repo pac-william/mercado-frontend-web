@@ -1,5 +1,7 @@
 "use client"
 
+import { createChat, createMessage, getChatByChatId, getCustomerConversations } from "@/actions/chat.actions";
+import { getUserMe } from "@/actions/user.actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,18 +15,18 @@ import { io, Socket } from "socket.io-client";
 
 const MESSAGING_SERVER_URL = "http://localhost:4000";
 
-interface Message {
+interface ChatMessage {
     id: string;
-    room: string;
+    chat: string;
     username: string;
     message: string;
     timestamp: Date | string;
 }
 
-interface Conversa {
-    roomId: string;
+interface Conversation {
+    chatId: string;
     marketId: string;
-    lojistaUsername: string;
+    storeOwnerUsername: string;
     isActive: boolean;
     lastMessage: {
         message: string;
@@ -36,18 +38,21 @@ export default function Chat({ chatId }: { chatId: string }) {
     const { user, isLoading: userLoading } = useUser();
     const router = useRouter();
     const [socket, setSocket] = useState<Socket | null>(null);
-    const [conversas, setConversas] = useState<Conversa[]>([]);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [messageInput, setMessageInput] = useState("");
     const [isConnected, setIsConnected] = useState(false);
     const [isJoiningRoom, setIsJoiningRoom] = useState(false);
     const [isSending, setIsSending] = useState(false);
-    const [lojistaUsername, setLojistaUsername] = useState<string | null>(null);
+    const [storeOwnerUsername, setStoreOwnerUsername] = useState<string | null>(null);
+    const [backendUserId, setBackendUserId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const currentRoomIdRef = useRef<string | null>(null);
     const socketRef = useRef<Socket | null>(null);
+    const backendUserIdRef = useRef<string | null>(null);
+    const chatIdRef = useRef<string | null>(null);
 
-    // Scroll automático para a última mensagem
+    // Auto-scroll to last message
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -56,7 +61,7 @@ export default function Chat({ chatId }: { chatId: string }) {
         scrollToBottom();
     }, [messages]);
 
-    // Conectar ao Socket.IO e configurar eventos
+    // Connect to Socket.IO and setup events
     useEffect(() => {
         if (userLoading || !user?.name) return;
 
@@ -67,62 +72,206 @@ export default function Chat({ chatId }: { chatId: string }) {
             reconnectionDelay: 1000,
         });
 
-        // Evento: Conexão estabelecida
+        // Connection established event
         newSocket.on("connect", () => {
-            console.log("Conectado:", newSocket.id);
+            console.log("Connected:", newSocket.id);
             setIsConnected(true);
-            // Registrar como cliente
-            newSocket.emit("cliente:join", { username: user.name || "Usuário" });
+            // Register as client
+            newSocket.emit("cliente:join", { username: user.name || "User" });
         });
 
         socketRef.current = newSocket;
 
-        // Evento: Cliente registrado
-        newSocket.on("cliente:joined", () => {
-            // Listar conversas do cliente
-            newSocket.emit("cliente:conversas");
+        // Client registered event
+        newSocket.on("cliente:joined", async () => {
+            // Fetch conversations from backend
+            try {
+                const backendConversations = await getCustomerConversations();
+                // Convert to component expected format
+                const formattedConversations: Conversation[] = backendConversations.map(conv => ({
+                    chatId: conv.chatId, // chatId is {userId}-{marketId}
+                    marketId: conv.marketId,
+                    storeOwnerUsername: conv.storeOwnerUsername,
+                    isActive: conv.isActive,
+                    lastMessage: conv.lastMessage ? {
+                        message: conv.lastMessage.message,
+                        timestamp: typeof conv.lastMessage.timestamp === 'string' 
+                            ? new Date(conv.lastMessage.timestamp) 
+                            : conv.lastMessage.timestamp
+                    } : null
+                }));
+                setConversations(formattedConversations);
+            } catch (error) {
+                console.error("Error fetching conversations from backend:", error);
+            }
         });
 
-        // Evento: Receber lista de conversas
-        newSocket.on("cliente:conversas", (conversas: Conversa[]) => {
-            console.log("Conversas recebidas:", conversas);
-            setConversas(conversas);
+        // Chat joined event (confirmation of entering chat)
+        newSocket.on("chat:joined", (data: { chatId: string; marketId: string; lojistaUsername: string }) => {
+            console.log("Joined chat:", data);
+            setStoreOwnerUsername(data.lojistaUsername);
+            currentRoomIdRef.current = data.chatId;
         });
 
-        // Evento: Chat conectado (confirmação de entrada no chat)
-        newSocket.on("chat:joined", (data: { roomId: string; marketId: string; lojistaUsername: string }) => {
-            console.log("Entrou no chat:", data);
-            setLojistaUsername(data.lojistaUsername);
-            currentRoomIdRef.current = data.roomId;
-        });
-
-        // Evento: Histórico de mensagens ao entrar no chat
-        newSocket.on("chat:messages", (receivedMessages: Message[]) => {
-            setMessages(receivedMessages.map(msg => ({
-                ...msg,
-                timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp
-            })));
+        // Message history event when entering chat
+        newSocket.on("chat:messages", async (receivedMessages: ChatMessage[]) => {
+            // Fetch persisted messages from backend if roomId exists
+            if (currentRoomIdRef.current) {
+                try {
+                    const chatWithMessages = await getChatByChatId(currentRoomIdRef.current);
+                    if (chatWithMessages && chatWithMessages.messages.length > 0) {
+                        // Convert backend messages to expected format
+                        // Incluir userId nas mensagens para comparação correta
+                        const formattedMessages: ChatMessage[] = chatWithMessages.messages.map(msg => ({
+                            id: msg.id,
+                            chat: msg.chatId,
+                            username: msg.username,
+                            message: msg.message,
+                            timestamp: typeof msg.createdAt === 'string' ? new Date(msg.createdAt) : msg.createdAt,
+                            userId: msg.userId // Incluir userId para comparação
+                        } as ChatMessage & { userId?: string }));
+                        setMessages(formattedMessages);
+                    } else {
+                        // Chat doesn't exist yet or has no messages, use socket messages
+                        setMessages(receivedMessages.map(msg => ({
+                            ...msg,
+                            timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp
+                        })));
+                    }
+                } catch (error) {
+                    console.error("Error fetching messages from backend:", error);
+                    // Fallback to socket messages
+                    setMessages(receivedMessages.map(msg => ({
+                        ...msg,
+                        timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp
+                    })));
+                }
+            } else {
+                // Fallback to socket messages
+                setMessages(receivedMessages.map(msg => ({
+                    ...msg,
+                    timestamp: typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp
+                })));
+            }
             setIsJoiningRoom(false);
         });
 
-        // Evento: Nova mensagem recebida
-        newSocket.on("chat:message-received", (message: Message) => {
-            // Verificar se a mensagem é do chat atual
-            if (currentRoomIdRef.current === message.room) {
-                // Verificar duplicação
+        // New message received event
+        newSocket.on("chat:message-received", (message: ChatMessage) => {
+            // Usar refs para acessar valores atuais (evita problemas de closure)
+            const currentBackendUserId = backendUserIdRef.current;
+            const currentChatId = chatIdRef.current;
+            const currentUser = user;
+            
+            console.log("[CLIENTE] Message received from socket:", message);
+            console.log("[CLIENTE] Current chatId from URL:", currentChatId);
+            console.log("[CLIENTE] Backend userId:", currentBackendUserId);
+            
+            // Check if message is from current chat
+            const expectedChatId = currentBackendUserId && currentChatId 
+                ? `${currentBackendUserId}-${currentChatId}` 
+                : currentRoomIdRef.current;
+            
+            console.log("[CLIENTE] Expected chatId:", expectedChatId);
+            console.log("[CLIENTE] Message chatId:", message.chat);
+            console.log("[CLIENTE] Match:", expectedChatId === message.chat);
+            
+            if (expectedChatId && message.chat === expectedChatId) {
+                // Check for duplicates
                 setMessages(prev => {
-                    const exists = prev.some(msg => msg.id === message.id);
-                    if (exists) return prev;
+                    // 1. Verificar se a mensagem já existe pelo ID
+                    const existsById = prev.some(msg => msg.id === message.id);
+                    if (existsById) {
+                        console.log("[CLIENTE] Duplicate message detected by ID, skipping");
+                        return prev;
+                    }
+                    
+                    // 2. Verificar se é uma mensagem própria (do próprio usuário)
+                    // Mensagens próprias são persistidas ANTES de enviar via socket
+                    // Então quando chegam via socket, já devem existir no estado (persistidas com userId)
+                    const isOwnMessage = message.username === (currentUser?.name || "User");
+                    if (isOwnMessage && currentBackendUserId) {
+                        console.log("[CLIENTE] É mensagem própria, verificando duplicação...");
+                        
+                        // Verificar se já existe uma mensagem persistida com o mesmo conteúdo e nosso userId
+                        const hasPersistedMessage = prev.some(msg => {
+                            const msgUserId = (msg as ChatMessage & { userId?: string }).userId;
+                            const sameContent = msg.message === message.message && 
+                                               msg.username === message.username;
+                            
+                            // Se a mensagem tem userId e é igual ao nosso backendUserId, é uma mensagem persistida nossa
+                            if (msgUserId === currentBackendUserId && sameContent) {
+                                console.log("[CLIENTE] Encontrada mensagem persistida com mesmo conteúdo e userId");
+                                return true;
+                            }
+                            return false;
+                        });
+                        
+                        if (hasPersistedMessage) {
+                            console.log("[CLIENTE] Mensagem própria já persistida detectada, ignorando mensagem do socket");
+                            return prev; // Não adicionar mensagem do socket se já temos a persistida
+                        }
+                        
+                        // Verificar por conteúdo e timestamp próximo (caso a mensagem persistida ainda não tenha sido adicionada)
+                        const messageTime = typeof message.timestamp === 'string' 
+                            ? new Date(message.timestamp).getTime() 
+                            : message.timestamp.getTime();
+                        
+                        const duplicateByContent = prev.some(msg => {
+                            const msgTime = typeof msg.timestamp === 'string' 
+                                ? new Date(msg.timestamp).getTime() 
+                                : msg.timestamp.getTime();
+                            
+                            const timeDiff = Math.abs(messageTime - msgTime);
+                            const sameContent = msg.message === message.message && 
+                                               msg.username === message.username;
+                            
+                            // Se conteúdo é igual, username é igual e timestamp é muito próximo (< 10 segundos)
+                            // Provavelmente é a mesma mensagem
+                            if (sameContent && timeDiff < 10000) {
+                                console.log("[CLIENTE] Encontrada mensagem duplicada por conteúdo/timestamp (diff:", timeDiff, "ms)");
+                                return true;
+                            }
+                            return false;
+                        });
+                        
+                        if (duplicateByContent) {
+                            console.log("[CLIENTE] Mensagem própria duplicada por conteúdo/timestamp, ignorando socket");
+                            return prev;
+                        }
+                        
+                        console.log("[CLIENTE] Mensagem própria não é duplicada, mas não deveria chegar via socket");
+                        // Mesmo que não seja detectada como duplicada, se é nossa mensagem e não tem userId,
+                        // provavelmente já foi persistida e não devemos adicionar
+                        // Verificar se existe alguma mensagem recente (últimos 10 segundos) com o mesmo conteúdo
+                        const recentMessage = prev.some(msg => {
+                            const msgTime = typeof msg.timestamp === 'string' 
+                                ? new Date(msg.timestamp).getTime() 
+                                : msg.timestamp.getTime();
+                            const timeDiff = Math.abs(messageTime - msgTime);
+                            return msg.message === message.message && timeDiff < 10000;
+                        });
+                        
+                        if (recentMessage) {
+                            console.log("[CLIENTE] Mensagem própria recente encontrada, ignorando socket");
+                            return prev;
+                        }
+                    }
+                    
+                    // 3. Mensagem não é duplicada (é do lojista ou não é duplicata), adicionar ao estado
+                    console.log("[CLIENTE] Adding message to state (not duplicate)");
                     return [...prev, {
                         ...message,
                         timestamp: typeof message.timestamp === 'string' ? new Date(message.timestamp) : message.timestamp
                     }];
                 });
+            } else {
+                console.log("[CLIENTE] Message chatId doesn't match current chat, ignoring");
             }
             
-            // Atualizar última mensagem nas conversas
-            setConversas(prev => prev.map(conv => 
-                conv.roomId === message.room
+            // Update last message in conversations
+            setConversations(prev => prev.map(conv => 
+                conv.chatId === message.chat
                     ? {
                         ...conv,
                         lastMessage: {
@@ -134,30 +283,30 @@ export default function Chat({ chatId }: { chatId: string }) {
             ));
         });
 
-        // Evento: Usuário saiu do chat
-        newSocket.on("chat:user-left", (data: { username: string; roomId: string }) => {
-            console.log(`${data.username} saiu do chat`);
+        // User left chat event
+        newSocket.on("chat:user-left", (data: { username: string; chatId: string }) => {
+            console.log(`${data.username} left chat`);
         });
 
-        // Evento: Usuário desconectou
-        newSocket.on("chat:user-disconnected", (data: { username: string; roomId: string }) => {
-            console.log(`${data.username} desconectou`);
+        // User disconnected event
+        newSocket.on("chat:user-disconnected", (data: { username: string; chatId: string }) => {
+            console.log(`${data.username} disconnected`);
         });
 
-        // Evento: Erro
+        // Error event
         newSocket.on("error", (error: { message: string }) => {
-            console.error("Erro:", error.message);
+            console.error("Error:", error.message);
         });
 
-        // Evento: Desconexão
+        // Disconnect event
         newSocket.on("disconnect", () => {
-            console.log("Desconectado do servidor");
+            console.log("Disconnected from server");
             setIsConnected(false);
         });
 
         setSocket(newSocket);
 
-        // Limpeza ao desmontar
+        // Cleanup on unmount
         return () => {
             if (newSocket) {
                 newSocket.emit("chat:leave");
@@ -166,22 +315,81 @@ export default function Chat({ chatId }: { chatId: string }) {
         };
     }, [user, userLoading]);
 
-    // Entrar no chat quando conectar e quando o chatId mudar
+    // Fetch backend userId when user loads
     useEffect(() => {
-        if (!socketRef.current?.connected || !chatId) return;
-
-        // Sair da sala anterior
-        if (currentRoomIdRef.current && currentRoomIdRef.current !== `${socketRef.current.id}-${chatId}`) {
-            socketRef.current.emit("chat:leave");
+        if (user && !backendUserId) {
+            getUserMe().then(userData => {
+                setBackendUserId(userData.id);
+                backendUserIdRef.current = userData.id;
+            }).catch(error => {
+                console.error("Error fetching backend userId:", error);
+            });
         }
+    }, [user, backendUserId]);
+    
+    // Atualizar refs quando chatId ou backendUserId mudarem
+    useEffect(() => {
+        chatIdRef.current = chatId;
+        backendUserIdRef.current = backendUserId;
+    }, [chatId, backendUserId]);
 
-        // Entrar na nova sala
-        setIsJoiningRoom(true);
-        setMessages([]);
-        socketRef.current.emit("chat:join-market", { marketId: chatId });
-    }, [chatId, isConnected]);
+    // Join chat when connected and when chatId changes
+    useEffect(() => {
+        const socket = socketRef.current;
+        if (!socket?.connected || !chatId || !backendUserId) return;
 
-    // Limpeza ao sair da página
+        const enterChat = async () => {
+            // Calculate chatId: {userId}-{marketId}
+            const calculatedChatId = `${backendUserId}-${chatId}`;
+            
+            // Leave previous chat if different
+            if (currentRoomIdRef.current && currentRoomIdRef.current !== calculatedChatId) {
+                socket.emit("chat:leave");
+            }
+
+            // Create or ensure chat exists in backend
+            try {
+                await createChat(calculatedChatId, backendUserId, chatId);
+                currentRoomIdRef.current = calculatedChatId;
+            } catch (error) {
+                console.error("Error creating chat in backend:", error);
+            }
+
+            // Load persisted messages from backend
+            try {
+                const chatWithMessages = await getChatByChatId(calculatedChatId);
+                if (chatWithMessages && chatWithMessages.messages.length > 0) {
+                    // Incluir userId nas mensagens para comparação correta
+                    const formattedMessages: ChatMessage[] = chatWithMessages.messages.map(msg => ({
+                        id: msg.id,
+                        chat: msg.chatId,
+                        username: msg.username,
+                        message: msg.message,
+                        timestamp: typeof msg.createdAt === 'string' ? new Date(msg.createdAt) : msg.createdAt,
+                        userId: msg.userId // Incluir userId para comparação
+                    } as ChatMessage & { userId?: string }));
+                    setMessages(formattedMessages);
+                    setIsJoiningRoom(false);
+                } else {
+                    setIsJoiningRoom(false);
+                }
+            } catch (error) {
+                console.error("Error loading messages from backend:", error);
+                setIsJoiningRoom(false);
+            }
+
+            // Join the chat with backendUserId to ensure correct chatId
+            setIsJoiningRoom(true);
+            socket.emit("chat:join-market", { 
+                marketId: chatId,
+                userId: backendUserId // Pass backendUserId to ensure correct chatId format
+            });
+        };
+
+        enterChat();
+    }, [chatId, isConnected, backendUserId]);
+
+    // Cleanup on page exit
     useEffect(() => {
         const handleBeforeUnload = () => {
             if (socket) {
@@ -196,49 +404,126 @@ export default function Chat({ chatId }: { chatId: string }) {
         };
     }, [socket]);
 
-    // Selecionar conversa
-    const handleSelectConversa = (marketId: string) => {
+    // Select conversation
+    const handleSelectConversation = (marketId: string) => {
         if (!socketRef.current?.connected) return;
         
-        // Atualizar URL
+        // Update URL
         router.push(`/chat/${marketId}`);
         
-        // Sair da sala anterior
-        if (currentRoomIdRef.current) {
-            socketRef.current.emit("chat:leave");
+        // Calculate roomId for new conversation
+        if (backendUserId) {
+            const newRoomId = `${backendUserId}-${marketId}`;
+            
+            // Leave previous room if different
+            if (currentRoomIdRef.current && currentRoomIdRef.current !== newRoomId) {
+                socketRef.current.emit("chat:leave");
+            }
+            
+            // Update current roomId
+            currentRoomIdRef.current = newRoomId;
         }
         
-        // Entrar na nova sala
+        // Join new room with backendUserId to ensure correct chatId
         setIsJoiningRoom(true);
         setMessages([]);
-        socketRef.current.emit("chat:join-market", { marketId });
+        socketRef.current.emit("chat:join-market", { 
+            marketId,
+            userId: backendUserId // Pass backendUserId to ensure correct chatId format
+        });
     };
 
-    // Enviar mensagem
-    const handleSendMessage = (e: React.FormEvent) => {
+    // Send message
+    const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!socketRef.current || !messageInput.trim() || isSending) return;
+        if (!socketRef.current || !messageInput.trim() || isSending || !chatId || !backendUserId) return;
 
+        const messageText = messageInput.trim();
+        setMessageInput("");
         setIsSending(true);
 
-        socketRef.current.emit("chat:send-message", {
-            message: messageInput.trim(),
-        });
+        // Calculate chatId correctly: {userId}-{marketId}
+        const calculatedChatId = `${backendUserId}-${chatId}`;
+        
+        // Update currentRoomIdRef if necessary
+        if (currentRoomIdRef.current !== calculatedChatId) {
+            currentRoomIdRef.current = calculatedChatId;
+        }
 
-        setMessageInput("");
-        setIsSending(false);
+        // Persistir no backend PRIMEIRO (antes de enviar via socket)
+        // Isso garante que temos o ID correto e evitamos duplicação
+        try {
+            const persistedMessage = await createMessage(calculatedChatId, messageText);
+            console.log("[CLIENTE] Mensagem persistida:", persistedMessage.id);
+            
+            // Adicionar mensagem persistida ao estado
+            setMessages(prev => {
+                // Verificar se já existe (pode ter chegado via socket antes da persistência)
+                const alreadyExists = prev.some(msg => 
+                    msg.id === persistedMessage.id ||
+                    ((msg as ChatMessage & { userId?: string }).userId === persistedMessage.userId &&
+                     msg.message === persistedMessage.message &&
+                     msg.username === persistedMessage.username)
+                );
+                
+                if (alreadyExists) {
+                    console.log("[CLIENTE] Mensagem persistida já existe no estado, atualizando");
+                    // Atualizar mensagem existente com dados persistidos (garantir ID correto)
+                    return prev.map(msg => {
+                        if (msg.id === persistedMessage.id || 
+                            ((msg as ChatMessage & { userId?: string }).userId === persistedMessage.userId &&
+                             msg.message === persistedMessage.message &&
+                             msg.username === persistedMessage.username)) {
+                            return {
+                                ...msg,
+                                id: persistedMessage.id, // Garantir ID correto do banco
+                                userId: persistedMessage.userId
+                            } as ChatMessage & { userId?: string };
+                        }
+                        return msg;
+                    });
+                }
+                
+                // Adicionar mensagem persistida
+                console.log("[CLIENTE] Adicionando mensagem persistida ao estado");
+                return [...prev, {
+                    id: persistedMessage.id,
+                    chat: persistedMessage.chatId,
+                    username: persistedMessage.username,
+                    message: persistedMessage.message,
+                    timestamp: typeof persistedMessage.createdAt === 'string' 
+                        ? new Date(persistedMessage.createdAt) 
+                        : persistedMessage.createdAt,
+                    userId: persistedMessage.userId
+                } as ChatMessage & { userId?: string }];
+            });
+            
+            // Enviar via Socket.IO DEPOIS de persistir
+            // Quando chegar via socket, a verificação de duplicação vai ignorar porque já temos a persistida
+            socketRef.current.emit("chat:send-message", {
+                message: messageText,
+            });
+        } catch (error) {
+            console.error("Error persisting message in backend:", error);
+            // Se falhar a persistência, ainda enviar via socket (mensagem temporária)
+            socketRef.current.emit("chat:send-message", {
+                message: messageText,
+            });
+        } finally {
+            setIsSending(false);
+        }
     };
 
-    // Formatação de data/hora
+    // Format timestamp
     const formatTimestamp = (timestamp: Date | string) => {
         const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
         const now = new Date();
         const diff = now.getTime() - date.getTime();
         const minutes = Math.floor(diff / 60000);
 
-        if (minutes < 1) return "Agora";
-        if (minutes < 60) return `${minutes}min atrás`;
-        if (minutes < 1440) return `${Math.floor(minutes / 60)}h atrás`;
+        if (minutes < 1) return "Now";
+        if (minutes < 60) return `${minutes}min ago`;
+        if (minutes < 1440) return `${Math.floor(minutes / 60)}h ago`;
 
         return date.toLocaleDateString("pt-BR", {
             day: "2-digit",
@@ -270,36 +555,36 @@ export default function Chat({ chatId }: { chatId: string }) {
         return (
             <Card className="flex flex-col h-full">
                 <CardContent className="flex items-center justify-center flex-1">
-                    <p className="text-muted-foreground">Faça login para usar o chat</p>
+                    <p className="text-muted-foreground">Please login to use chat</p>
                 </CardContent>
             </Card>
         );
     }
 
-    const currentUsername = user.name || "Usuário";
+    const currentUsername = user.name || "User";
 
     return (
         <div className="grid gap-6 lg:grid-cols-[320px_1fr] h-full">
             <Card className="h-full">
                 <CardHeader>
-                    <CardTitle>Meus Chats</CardTitle>
-                    <CardDescription>Conversas com lojistas</CardDescription>
+                    <CardTitle>My Chats</CardTitle>
+                    <CardDescription>Conversations with store owners</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    {conversas.length === 0 ? (
+                    {conversations.length === 0 ? (
                         <p className="text-center text-sm text-muted-foreground">
-                            Nenhuma conversa ainda. Envie uma mensagem para começar!
+                            No conversations yet. Send a message to get started!
                         </p>
                     ) : (
-                        conversas.map((conversa) => {
-                            const preview = conversa.lastMessage?.message.slice(0, 70) ?? "";
-                            const isActive = conversa.marketId === chatId;
+                        conversations.map((conversation) => {
+                            const preview = conversation.lastMessage?.message.slice(0, 70) ?? "";
+                            const isActive = conversation.marketId === chatId;
 
                             return (
                                 <button
-                                    key={conversa.roomId}
+                                    key={conversation.chatId}
                                     type="button"
-                                    onClick={() => handleSelectConversa(conversa.marketId)}
+                                    onClick={() => handleSelectConversation(conversation.marketId)}
                                     className={cn(
                                         "w-full rounded-lg border p-4 text-left transition hover:bg-muted",
                                         isActive
@@ -308,10 +593,10 @@ export default function Chat({ chatId }: { chatId: string }) {
                                     )}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <div className="font-semibold text-sm">{conversa.lojistaUsername}</div>
+                                        <div className="font-semibold text-sm">{conversation.storeOwnerUsername}</div>
                                         <span className="text-xs text-muted-foreground">
-                                            {conversa.lastMessage
-                                                ? formatTimeShort(conversa.lastMessage.timestamp)
+                                            {conversation.lastMessage
+                                                ? formatTimeShort(conversation.lastMessage.timestamp)
                                                 : ""}
                                         </span>
                                     </div>
@@ -331,10 +616,10 @@ export default function Chat({ chatId }: { chatId: string }) {
                 <CardHeader className="border-b">
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col">
-                            <h2 className="text-lg font-semibold">Chat - Market {chatId}</h2>
-                            {lojistaUsername && (
+                            <h2 className="text-lg font-semibold">Chat - {chatId}</h2>
+                            {storeOwnerUsername && (
                                 <p className="text-sm text-muted-foreground">
-                                    Conversando com {lojistaUsername}
+                                    Chatting with {storeOwnerUsername}
                                 </p>
                             )}
                         </div>
@@ -346,7 +631,7 @@ export default function Chat({ chatId }: { chatId: string }) {
                                 )}
                             />
                             <span className="text-sm text-muted-foreground">
-                                {isConnected ? "Conectado" : "Desconectado"}
+                                {isConnected ? "Connected" : "Disconnected"}
                             </span>
                         </div>
                     </div>
@@ -356,7 +641,7 @@ export default function Chat({ chatId }: { chatId: string }) {
                     <div className="flex items-center justify-center flex-1">
                         <Loader2 className="h-6 w-6 animate-spin" />
                         <span className="ml-2 text-sm text-muted-foreground">
-                            Entrando na sala...
+                            Joining room...
                         </span>
                     </div>
                 ) : (
@@ -365,12 +650,16 @@ export default function Chat({ chatId }: { chatId: string }) {
                             <div className="space-y-4">
                                 {messages.length === 0 ? (
                                     <div className="text-center text-muted-foreground py-8">
-                                        <p>Nenhuma mensagem ainda.</p>
-                                        <p className="text-sm mt-2">Seja o primeiro a enviar uma mensagem!</p>
+                                        <p>No messages yet.</p>
+                                        <p className="text-sm mt-2">Be the first to send a message!</p>
                                     </div>
                                 ) : (
                                     messages.map((message) => {
-                                        const isOwnMessage = message.username === currentUsername;
+                                        // Comparar por userId se disponível, caso contrário usar username
+                                        const messageUserId = (message as ChatMessage & { userId?: string }).userId;
+                                        const isOwnMessage = messageUserId 
+                                            ? messageUserId === backendUserId 
+                                            : message.username === currentUsername;
                                         return (
                                             <div
                                                 key={message.id}
@@ -416,7 +705,7 @@ export default function Chat({ chatId }: { chatId: string }) {
                             <Input
                                 value={messageInput}
                                 onChange={(e) => setMessageInput(e.target.value)}
-                                placeholder="Digite sua mensagem..."
+                                placeholder="Type your message..."
                                 disabled={!isConnected || isSending}
                                 className="flex-1"
                                 onKeyDown={(e) => {
