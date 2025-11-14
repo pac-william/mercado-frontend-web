@@ -61,7 +61,7 @@ export default async function Header() {
 
                     <Separator orientation="vertical" className="hidden h-6 md:block" />
                     <div className="flex flex-row items-center gap-2">
-                        <Button variant="outline" size="icon" className="rounded-full">
+                        <Button variant="outline" size="icon" className="rounded-full" asChild aria-label="Chat">
                             <Link href="/my/chat/inbox">
                                 <MessageCircle />
                             </Link>
