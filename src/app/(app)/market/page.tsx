@@ -82,8 +82,8 @@ export default async function MarketsPage({
                                     <Card className="h-full border-border bg-card">
                                         <CardHeader className="flex flex-row items-start gap-4">
                                             <Avatar className="h-14 w-14 border">
-                                                {market.logo ? (
-                                                    <AvatarImage src={market.logo} alt={market.name} />
+                                                {market.profilePicture ? (
+                                                    <AvatarImage src={market.profilePicture} alt={market.name} />
                                                 ) : null}
                                                 <AvatarFallback className="text-base font-semibold">
                                                     {getInitials(market.name)}

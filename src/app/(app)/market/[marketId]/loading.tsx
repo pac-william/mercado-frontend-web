@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const PRODUCT_PLACEHOLDERS = 8;
@@ -25,6 +24,7 @@ export default function MarketDetailsLoading() {
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full" />
                             <Skeleton className="h-10 w-10 rounded-full" />
                             <Skeleton className="h-10 w-10 rounded-full" />
                         </div>

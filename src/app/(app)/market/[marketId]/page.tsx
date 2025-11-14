@@ -87,7 +87,7 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
         name,
     });
 
-    const bannerImage = market.logo || FALLBACK_MARKET_BANNER;
+    const bannerImage = market.bannerImage || FALLBACK_MARKET_BANNER;
     const ratingValue = typeof market.rating === "number" ? market.rating : DEFAULT_MARKET_RATING;
     const ratingLabel = ratingValue.toFixed(1).replace(".", ",");
 
@@ -109,8 +109,8 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
                     <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                         <div className="flex items-center gap-4">
                             <Avatar className="h-20 w-20 border">
-                                {market.logo ? (
-                                    <AvatarImage src={market.logo} alt={market.name} />
+                                {market.profilePicture ? (
+                                    <AvatarImage src={market.profilePicture} alt={market.name} />
                                 ) : null}
                                 <AvatarFallback className="text-lg font-semibold">
                                     {getInitials(market.name)}

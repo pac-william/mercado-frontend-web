@@ -27,6 +27,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "illustrations.popsy.co",
       },
+      {
+        protocol: "https",
+        hostname: "ji4nu4kqowkewksd.public.blob.vercel-storage.com",
+      },
     ],
     dangerouslyAllowSVG: true,
   },
