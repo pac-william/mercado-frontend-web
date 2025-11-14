@@ -3,13 +3,12 @@
 import { createChat, createMessage, getChatByChatId, getCustomerConversations } from "@/actions/chat.actions";
 import { getUserMe } from "@/actions/user.actions";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { Loader2, Send } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
@@ -36,8 +35,8 @@ interface Conversation {
 
 export default function Chat({ chatId }: { chatId: string }) {
     const { user, isLoading: userLoading } = useUser();
-    const router = useRouter();
     const [socket, setSocket] = useState<Socket | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [messageInput, setMessageInput] = useState("");
@@ -424,34 +423,6 @@ export default function Chat({ chatId }: { chatId: string }) {
         };
     }, [socket]);
 
-    // Select conversation
-    const handleSelectConversation = (marketId: string) => {
-        if (!socketRef.current?.connected) return;
-
-        // Update URL
-        router.push(`/my/chat/${marketId}`);
-
-        // Calculate roomId for new conversation
-        if (backendUserId) {
-            const newRoomId = `${backendUserId}-${marketId}`;
-
-            // Leave previous room if different
-            if (currentRoomIdRef.current && currentRoomIdRef.current !== newRoomId) {
-                socketRef.current.emit("chat:leave");
-            }
-
-            // Update current roomId
-            currentRoomIdRef.current = newRoomId;
-        }
-
-        // Join new room with backendUserId to ensure correct chatId
-        setIsJoiningRoom(true);
-        setMessages([]);
-        socketRef.current.emit("chat:join-market", {
-            marketId,
-            userId: backendUserId // Pass backendUserId to ensure correct chatId format
-        });
-    };
 
     // Send message
     const handleSendMessage = async (e: React.FormEvent) => {
@@ -573,14 +544,6 @@ export default function Chat({ chatId }: { chatId: string }) {
         });
     };
 
-    const formatTimeShort = (timestamp: Date | string) => {
-        const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
-        return date.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
-        });
-    };
-
     if (userLoading) {
         return (
             <Card className="flex flex-col h-full">
@@ -604,212 +567,163 @@ export default function Chat({ chatId }: { chatId: string }) {
     const currentUsername = user.name || "User";
 
     return (
-        <div className="flex flex-row flex-1 gap-6 ">
-            <Card className="w-[320px]">
-                <CardHeader>
-                    <CardTitle>My Chats</CardTitle>
-                    <CardDescription>Conversations with store owners</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    {conversations.length === 0 ? (
-                        <p className="text-center text-sm text-muted-foreground">
-                            No conversations yet. Send a message to get started!
-                        </p>
-                    ) : (
-                        conversations.map((conversation) => {
-                            const preview = conversation.lastMessage?.message.slice(0, 70) ?? "";
-                            const isActive = conversation.marketId === chatId;
-
-                            return (
-                                <button
-                                    key={conversation.chatId}
-                                    type="button"
-                                    onClick={() => handleSelectConversation(conversation.marketId)}
-                                    className={cn(
-                                        "w-full rounded-lg border p-4 text-left transition hover:bg-muted",
-                                        isActive
-                                            ? "border-primary bg-muted/60"
-                                            : "border-transparent bg-card"
-                                    )}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="font-semibold text-sm">{conversation.storeOwnerUsername}</div>
-                                        <span className="text-xs text-muted-foreground">
-                                            {conversation.lastMessage
-                                                ? formatTimeShort(conversation.lastMessage.timestamp)
-                                                : ""}
-                                        </span>
-                                    </div>
-                                    {preview && (
-                                        <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
-                                            {preview}
-                                        </p>
-                                    )}
-                                </button>
-                            );
-                        })
-                    )}
-                </CardContent>
-            </Card>
-
-            <Card className="flex flex-col flex-1">
-                <CardHeader className="border-b">
-                    <div className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                            <h2 className="text-lg font-semibold">Chat - {chatId}</h2>
-                            {storeOwnerUsername && (
-                                <p className="text-sm text-muted-foreground">
-                                    Chatting with {storeOwnerUsername}
-                                </p>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div
-                                className={cn(
-                                    "h-2 w-2 rounded-full",
-                                    isConnected ? "bg-green-500" : "bg-red-500"
-                                )}
-                            />
-                            <span className="text-sm text-muted-foreground">
-                                {isConnected ? "Connected" : "Disconnected"}
-                            </span>
-                        </div>
+        <Card className="flex flex-col flex-1">
+            <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                        <h2 className="text-lg font-semibold">Chat - {chatId}</h2>
+                        {storeOwnerUsername && (
+                            <p className="text-sm text-muted-foreground">
+                                Conversando com {storeOwnerUsername}
+                            </p>
+                        )}
                     </div>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col p-0">
-                    <ScrollArea className="flex flex-col flex-grow h-0 overflow-y-auto p-4">
-                        <div className="flex flex-col flex-1 gap-4">
-                            {messages.length === 0 ? (
-                                <div className="text-center text-muted-foreground py-8">
-                                    <p>No messages yet.</p>
-                                    <p className="text-sm mt-2">Be the first to send a message!</p>
-                                </div>
-                            ) : (
-                                // Remover duplicatas antes de renderizar usando useMemo equivalente inline
-                                (() => {
-                                    // Criar um Map para deduplicar mensagens por ID
-                                    const uniqueMessagesMap = new Map<string, ChatMessage & { userId?: string }>();
+                    <div className="flex items-center gap-2">
+                        <div
+                            className={cn(
+                                "h-2 w-2 rounded-full",
+                                isConnected ? "bg-green-500" : "bg-red-500"
+                            )}
+                        />
+                        <span className="text-sm text-muted-foreground">
+                            {isConnected ? "Connected" : "Disconnected"}
+                        </span>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col p-0">
+                <ScrollArea className="flex flex-col flex-grow h-0 overflow-y-auto p-4">
+                    <div className="flex flex-col flex-1 gap-4">
+                        {messages.length === 0 ? (
+                            <div className="text-center text-muted-foreground py-8">
+                                <p>No messages yet.</p>
+                                <p className="text-sm mt-2">Be the first to send a message!</p>
+                            </div>
+                        ) : (
+                            // Remover duplicatas antes de renderizar usando useMemo equivalente inline
+                            (() => {
+                                // Criar um Map para deduplicar mensagens por ID
+                                const uniqueMessagesMap = new Map<string, ChatMessage & { userId?: string }>();
 
-                                    // Primeira passada: adicionar todas as mensagens únicas
-                                    messages.forEach((message) => {
-                                        const msg = message as ChatMessage & { userId?: string };
+                                // Primeira passada: adicionar todas as mensagens únicas
+                                messages.forEach((message) => {
+                                    const msg = message as ChatMessage & { userId?: string };
 
-                                        if (!uniqueMessagesMap.has(msg.id)) {
-                                            // Não existe, adicionar
+                                    if (!uniqueMessagesMap.has(msg.id)) {
+                                        // Não existe, adicionar
+                                        uniqueMessagesMap.set(msg.id, msg);
+                                    } else {
+                                        // Já existe, verificar qual é melhor (preferir mensagem persistida com userId)
+                                        const existing = uniqueMessagesMap.get(msg.id)!;
+
+                                        // Preferir mensagem com userId (persistida)
+                                        if (msg.userId && !existing.userId) {
                                             uniqueMessagesMap.set(msg.id, msg);
-                                        } else {
-                                            // Já existe, verificar qual é melhor (preferir mensagem persistida com userId)
-                                            const existing = uniqueMessagesMap.get(msg.id)!;
+                                        } else if (msg.userId && existing.userId) {
+                                            // Ambas têm userId, usar a mais recente
+                                            const existingTime = typeof existing.timestamp === 'string'
+                                                ? new Date(existing.timestamp).getTime()
+                                                : existing.timestamp.getTime();
+                                            const newTime = typeof msg.timestamp === 'string'
+                                                ? new Date(msg.timestamp).getTime()
+                                                : msg.timestamp.getTime();
 
-                                            // Preferir mensagem com userId (persistida)
-                                            if (msg.userId && !existing.userId) {
+                                            if (newTime > existingTime) {
                                                 uniqueMessagesMap.set(msg.id, msg);
-                                            } else if (msg.userId && existing.userId) {
-                                                // Ambas têm userId, usar a mais recente
-                                                const existingTime = typeof existing.timestamp === 'string'
-                                                    ? new Date(existing.timestamp).getTime()
-                                                    : existing.timestamp.getTime();
-                                                const newTime = typeof msg.timestamp === 'string'
-                                                    ? new Date(msg.timestamp).getTime()
-                                                    : msg.timestamp.getTime();
-
-                                                if (newTime > existingTime) {
-                                                    uniqueMessagesMap.set(msg.id, msg);
-                                                }
                                             }
                                         }
+                                    }
+                                });
+
+                                // Converter para array, ordenar por timestamp e renderizar
+                                const uniqueMessages = Array.from(uniqueMessagesMap.values())
+                                    .sort((a, b) => {
+                                        const timeA = typeof a.timestamp === 'string'
+                                            ? new Date(a.timestamp).getTime()
+                                            : a.timestamp.getTime();
+                                        const timeB = typeof b.timestamp === 'string'
+                                            ? new Date(b.timestamp).getTime()
+                                            : b.timestamp.getTime();
+                                        return timeA - timeB;
                                     });
 
-                                    // Converter para array, ordenar por timestamp e renderizar
-                                    const uniqueMessages = Array.from(uniqueMessagesMap.values())
-                                        .sort((a, b) => {
-                                            const timeA = typeof a.timestamp === 'string'
-                                                ? new Date(a.timestamp).getTime()
-                                                : a.timestamp.getTime();
-                                            const timeB = typeof b.timestamp === 'string'
-                                                ? new Date(b.timestamp).getTime()
-                                                : b.timestamp.getTime();
-                                            return timeA - timeB;
-                                        });
+                                return uniqueMessages.map((message) => {
+                                    // Comparar por userId se disponível, caso contrário usar username
+                                    const messageUserId = message.userId;
+                                    const isOwnMessage = messageUserId
+                                        ? messageUserId === backendUserId
+                                        : message.username === currentUsername;
 
-                                    return uniqueMessages.map((message) => {
-                                        // Comparar por userId se disponível, caso contrário usar username
-                                        const messageUserId = message.userId;
-                                        const isOwnMessage = messageUserId
-                                            ? messageUserId === backendUserId
-                                            : message.username === currentUsername;
-
-                                        // Usar ID como key (já garantimos que são únicos)
-                                        return (
+                                    // Usar ID como key (já garantimos que são únicos)
+                                    return (
+                                        <div
+                                            key={message.id}
+                                            className={cn(
+                                                "flex flex-col gap-1",
+                                                isOwnMessage ? "items-end" : "items-start"
+                                            )}
+                                        >
                                             <div
-                                                key={message.id}
                                                 className={cn(
-                                                    "flex flex-col gap-1",
-                                                    isOwnMessage ? "items-end" : "items-start"
+                                                    "rounded-lg px-4 py-2 max-w-[80%]",
+                                                    isOwnMessage
+                                                        ? "bg-primary text-primary-foreground"
+                                                        : "bg-muted"
                                                 )}
                                             >
-                                                <div
+                                                {!isOwnMessage && (
+                                                    <p className="text-xs font-semibold mb-1 opacity-80">
+                                                        {message.username}
+                                                    </p>
+                                                )}
+                                                <p className="text-sm">{message.message}</p>
+                                                <p
                                                     className={cn(
-                                                        "rounded-lg px-4 py-2 max-w-[80%]",
-                                                        isOwnMessage
-                                                            ? "bg-primary text-primary-foreground"
-                                                            : "bg-muted"
+                                                        "text-xs mt-1",
+                                                        isOwnMessage ? "opacity-70" : "opacity-60"
                                                     )}
                                                 >
-                                                    {!isOwnMessage && (
-                                                        <p className="text-xs font-semibold mb-1 opacity-80">
-                                                            {message.username}
-                                                        </p>
-                                                    )}
-                                                    <p className="text-sm">{message.message}</p>
-                                                    <p
-                                                        className={cn(
-                                                            "text-xs mt-1",
-                                                            isOwnMessage ? "opacity-70" : "opacity-60"
-                                                        )}
-                                                    >
-                                                        {formatTimestamp(message.timestamp)}
-                                                    </p>
-                                                </div>
+                                                    {formatTimestamp(message.timestamp)}
+                                                </p>
                                             </div>
-                                        );
-                                    });
-                                })()
-                            )}
-                            <div ref={messagesEndRef} />
-                        </div>
-                    </ScrollArea>
-                    <form
-                        onSubmit={handleSendMessage}
-                        className="border-t p-4 flex gap-2"
+                                        </div>
+                                    );
+                                });
+                            })()
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+                </ScrollArea>
+                <form
+                    onSubmit={handleSendMessage}
+                    className="border-t p-4 flex gap-2"
+                >
+                    <Input
+                        value={messageInput}
+                        onChange={(e) => setMessageInput(e.target.value)}
+                        placeholder="Type your message..."
+                        disabled={!isConnected || isSending}
+                        className="flex-1"
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendMessage(e);
+                            }
+                        }}
+                    />
+                    <Button
+                        type="submit"
+                        disabled={!isConnected || !messageInput.trim() || isSending}
+                        size="icon"
                     >
-                        <Input
-                            value={messageInput}
-                            onChange={(e) => setMessageInput(e.target.value)}
-                            placeholder="Type your message..."
-                            disabled={!isConnected || isSending}
-                            className="flex-1"
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleSendMessage(e);
-                                }
-                            }}
-                        />
-                        <Button
-                            type="submit"
-                            disabled={!isConnected || !messageInput.trim() || isSending}
-                            size="icon"
-                        >
-                            {isSending ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <Send className="h-4 w-4" />
-                            )}
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
+                        {isSending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Send className="h-4 w-4" />
+                        )}
+                    </Button>
+                </form>
+            </CardContent>
+        </Card>
     );
 }

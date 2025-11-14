@@ -1,10 +1,12 @@
 import { getAddresses } from "@/actions/address.actions";
 import { getCart } from "@/actions/cart.actions";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CartItemResponseDTO } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
 import { SessionData, User } from "@auth0/nextjs-auth0/types";
+import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { AddressSelectionDialog } from "./AddressSelectionDialog";
 import AuthButtons from "./AuthButtons";
@@ -59,6 +61,11 @@ export default async function Header() {
 
                     <Separator orientation="vertical" className="hidden h-6 md:block" />
                     <div className="flex flex-row items-center gap-2">
+                        <Button variant="outline" size="icon" className="rounded-full">
+                            <Link href="/my/chat/inbox">
+                                <MessageCircle />
+                            </Link>
+                        </Button>
                         <AnimatedThemeToggler />
                         {session ? (
                             <ProfileMenuDropDown currentUser={session.user as User} />
