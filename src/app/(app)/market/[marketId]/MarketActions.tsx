@@ -17,9 +17,16 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Bell, Check, Copy, Heart, MapPin, Share2, Star } from "lucide-react";
+import { Bell, Check, Copy, Heart, MapPin, MoreVertical, Share2, Star } from "lucide-react";
 import GoogleMaps from "@/app/components/GoogleMaps";
 import { toast } from "sonner";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface MarketActionsProps {
     marketName: string;
@@ -30,35 +37,83 @@ interface MarketActionsProps {
 }
 
 export function MarketActions({ marketName, marketId, marketAddress, marketLatitude, marketLongitude }: MarketActionsProps) {
+    const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+    const [addressMapDialogOpen, setAddressMapDialogOpen] = useState(false);
+    const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+    const [shareDialogOpen, setShareDialogOpen] = useState(false);
+
     return (
         <>
-            <RatingDialog marketName={marketName} marketId={marketId} />
             <FavoriteButton marketId={marketId} />
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="rounded-full">
+                        <MoreVertical className="size-4" />
+                        <span className="sr-only">Mais ações</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem onClick={() => setRatingDialogOpen(true)}>
+                        <Star className="mr-2 size-4" />
+                        <span>Avaliar mercado</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setAddressMapDialogOpen(true)}>
+                        <MapPin className="mr-2 size-4" />
+                        <span>Ver endereço e mapa</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setNotificationDialogOpen(true)}>
+                        <Bell className="mr-2 size-4" />
+                        <span>Notificações</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
+                        <Share2 className="mr-2 size-4" />
+                        <span>Compartilhar</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <RatingDialog 
+                marketName={marketName} 
+                marketId={marketId}
+                open={ratingDialogOpen}
+                onOpenChange={setRatingDialogOpen}
+            />
             <AddressMapDialog 
                 marketName={marketName}
                 marketAddress={marketAddress}
                 marketLatitude={marketLatitude}
                 marketLongitude={marketLongitude}
+                open={addressMapDialogOpen}
+                onOpenChange={setAddressMapDialogOpen}
             />
-            <NotificationDialog marketName={marketName} />
-            <ShareDialog marketName={marketName} />
+            <NotificationDialog 
+                marketName={marketName}
+                open={notificationDialogOpen}
+                onOpenChange={setNotificationDialogOpen}
+            />
+            <ShareDialog 
+                marketName={marketName}
+                open={shareDialogOpen}
+                onOpenChange={setShareDialogOpen}
+            />
         </>
     );
 }
 
-function NotificationDialog({ marketName }: MarketActionsProps) {
+interface NotificationDialogProps {
+    marketName: string;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
+
+function NotificationDialog({ marketName, open, onOpenChange }: NotificationDialogProps) {
     const [notifyWhenOpen, setNotifyWhenOpen] = useState(true);
     const [notifyOrders, setNotifyOrders] = useState(false);
     const [notifyPromos, setNotifyPromos] = useState(true);
 
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full">
-                    <Bell className="size-4" />
-                    <span className="sr-only">Configurações de notificações</span>
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Notificações</DialogTitle>
@@ -125,7 +180,13 @@ function NotificationToggle({ id, label, description, checked, onCheckedChange }
     );
 }
 
-function ShareDialog({ marketName }: MarketActionsProps) {
+interface ShareDialogProps {
+    marketName: string;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
+
+function ShareDialog({ marketName, open, onOpenChange }: ShareDialogProps) {
     const [shareUrl, setShareUrl] = useState("");
     const [isCopied, setIsCopied] = useState(false);
 
@@ -170,13 +231,7 @@ function ShareDialog({ marketName }: MarketActionsProps) {
     }, [shareUrl, message]);
 
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full">
-                    <Share2 className="size-4" />
-                    <span className="sr-only">Opções de compartilhamento</span>
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Compartilhar mercado</DialogTitle>
@@ -262,7 +317,14 @@ function ShareButton({ icon, label, onClick, disabled }: ShareButtonProps) {
     );
 }
 
-function RatingDialog({ marketName, marketId }: { marketName: string; marketId: string }) {
+interface RatingDialogProps {
+    marketName: string;
+    marketId: string;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
+
+function RatingDialog({ marketName, marketId, open, onOpenChange }: RatingDialogProps) {
     const [rating, setRating] = useState(0);
     const [hoveredRating, setHoveredRating] = useState(0);
 
@@ -274,17 +336,12 @@ function RatingDialog({ marketName, marketId }: { marketName: string; marketId: 
         if (rating > 0) {
             // Aqui você pode adicionar a lógica para salvar a avaliação
             toast.success(`Você avaliou ${marketName} com ${rating} estrela${rating !== 1 ? 's' : ''}`);
+            onOpenChange?.(false);
         }
     };
 
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full">
-                    <Star className="size-4" />
-                    <span className="sr-only">Avaliar mercado</span>
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Avaliar mercado</DialogTitle>
@@ -380,17 +437,13 @@ interface AddressMapDialogProps {
     marketAddress: string;
     marketLatitude?: number | null;
     marketLongitude?: number | null;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-function AddressMapDialog({ marketName, marketAddress, marketLatitude, marketLongitude }: AddressMapDialogProps) {
+function AddressMapDialog({ marketName, marketAddress, marketLatitude, marketLongitude, open, onOpenChange }: AddressMapDialogProps) {
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full">
-                    <MapPin className="size-4" />
-                    <span className="sr-only">Ver endereço e mapa</span>
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Endereço e Localização</DialogTitle>
