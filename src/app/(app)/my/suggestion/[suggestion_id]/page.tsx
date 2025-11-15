@@ -3,11 +3,9 @@ import { getSuggestionById } from "@/actions/suggestion.actions";
 import ProductCard from "@/app/components/ProductCard";
 import { Product } from "@/app/domain/productDomain";
 import RouterBack from "@/components/RouterBack";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Suggestion } from "@/types/suggestion";
-import { Package, ShoppingBag, Utensils } from "lucide-react";
 import "moment/locale/pt-br";
 import { Metadata } from "next";
 import CategoryMenu from "./CategoryMenu";
@@ -56,10 +54,6 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
         return acc;
     }, {} as Record<string, typeof suggestionData.data.items>);
 
-    const essentialItems = suggestionData.data.items.filter(item => item.type === "essential");
-    const commonItems = suggestionData.data.items.filter(item => item.type === "common");
-    const utensilItems = suggestionData.data.items.filter(item => item.type === "utensil");
-
     const categorySections = Object.entries(itemsByCategory).map(([categoryName, items]) => ({
         id: formatCategoryId(categoryName),
         name: categoryName,
@@ -92,36 +86,9 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
                                     <h1 className="text-3xl font-bold text-foreground">
                                         {suggestionData.task}
                                     </h1>
-                                    <div className="flex items-center gap-4 mt-2">
-                                        <Badge variant="default" className="gap-1">
-                                            <Package className="h-3 w-3" />
-                                            {essentialItems.length} essenciais
-                                        </Badge>
-                                        <Badge variant="secondary" className="gap-1">
-                                            <ShoppingBag className="h-3 w-3" />
-                                            {commonItems.length} comuns
-                                        </Badge>
-                                        <Badge variant="outline" className="gap-1">
-                                            <Utensils className="h-3 w-3" />
-                                            {utensilItems.length} utensílios
-                                        </Badge>
-                                    </div>
                                 </div>
                             </div>
 
-                            <p className="text-muted-foreground leading-relaxed">
-                                Encontramos {suggestionData.data.items.length} produtos
-                                em {categorySections.length} categorias diferentes.
-                            </p>
-
-                            {/* Lista dos produtos necessários */}
-                            <div className="flex flex-col gap-2">
-                                {essentialItems.map(item => (
-                                    <Badge key={item.name} variant="outline" className="text-xs">
-                                        {item.name}
-                                    </Badge>
-                                ))}
-                            </div>
 
 
                             {/* Produtos por Categoria */}
