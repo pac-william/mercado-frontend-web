@@ -50,11 +50,14 @@ export default function Chat({ chatId }: { chatId: string }) {
     const [isSending, setIsSending] = useState(false);
     const [storeOwnerUsername, setStoreOwnerUsername] = useState<string | null>(null);
     const [backendUserId, setBackendUserId] = useState<string | null>(null);
+    const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const currentRoomIdRef = useRef<string | null>(null);
     const socketRef = useRef<Socket | null>(null);
     const backendUserIdRef = useRef<string | null>(null);
     const chatIdRef = useRef<string | null>(null);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const isTypingRef = useRef<boolean>(false);
 
     // Auto-scroll to last message
     const scrollToBottom = () => {
@@ -63,7 +66,7 @@ export default function Chat({ chatId }: { chatId: string }) {
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, isTyping]);
 
     // Connect to Socket.IO and setup events
     useEffect(() => {
@@ -377,6 +380,22 @@ export default function Chat({ chatId }: { chatId: string }) {
             }
         });
 
+        // Receber notificação quando lojista está digitando
+        newSocket.on("chat:typing", (data: { chatId: string; username: string; isTyping: boolean }) => {
+            const currentChatId = chatIdRef.current;
+            const currentBackendUserId = backendUserIdRef.current;
+
+            // Verificar se é do chat atual
+            const expectedChatId = currentBackendUserId && currentChatId
+                ? `${currentBackendUserId}-${currentChatId}`
+                : currentRoomIdRef.current;
+
+            if (expectedChatId && data.chatId === expectedChatId) {
+                console.log("[CLIENTE] Lojista está digitando:", data);
+                setIsTyping(data.isTyping);
+            }
+        });
+
         // Receber notificação quando lojista marca mensagens como lidas
         // (o cliente marca quando visualiza, então receber essa notificação confirma)
         // Este evento também é usado quando o lojista marca mensagens do cliente como lidas
@@ -406,6 +425,14 @@ export default function Chat({ chatId }: { chatId: string }) {
 
         // Cleanup on unmount
         return () => {
+            // Parar de digitar ao desmontar
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+            if (isTypingRef.current && newSocket.connected) {
+                newSocket.emit("chat:typing-stop");
+            }
+            
             if (newSocket) {
                 newSocket.emit("chat:leave");
                 newSocket.disconnect();
@@ -538,10 +565,49 @@ export default function Chat({ chatId }: { chatId: string }) {
     }, [socket]);
 
 
+    // Função para gerenciar o indicador de digitação
+    const handleTyping = () => {
+        if (!socketRef.current?.connected || !currentRoomIdRef.current) return;
+
+        // Se não estava digitando, enviar evento de início
+        if (!isTypingRef.current) {
+            isTypingRef.current = true;
+            socketRef.current.emit("chat:typing-start");
+        }
+
+        // Limpar timeout anterior
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Definir timeout para parar de digitar após 3 segundos de inatividade
+        typingTimeoutRef.current = setTimeout(() => {
+            if (isTypingRef.current && socketRef.current?.connected) {
+                isTypingRef.current = false;
+                socketRef.current.emit("chat:typing-stop");
+            }
+        }, 3000);
+    };
+
+    // Parar de digitar quando enviar mensagem
+    const stopTyping = () => {
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+            typingTimeoutRef.current = null;
+        }
+        if (isTypingRef.current && socketRef.current?.connected) {
+            isTypingRef.current = false;
+            socketRef.current.emit("chat:typing-stop");
+        }
+    };
+
     // Send message
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!socketRef.current || !messageInput.trim() || isSending || !chatId || !backendUserId) return;
+
+        // Parar de digitar ao enviar mensagem
+        stopTyping();
 
         const messageText = messageInput.trim();
         setMessageInput("");
@@ -870,6 +936,20 @@ export default function Chat({ chatId }: { chatId: string }) {
                                 });
                             })()
                         )}
+                        {isTyping && storeOwnerUsername ? (
+                            <div className="flex justify-start">
+                                <div className="max-w-[70%] rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+                                    <span className="flex items-center gap-2">
+                                        {storeOwnerUsername} está digitando
+                                        <span className="flex gap-1">
+                                            <span className="h-1 w-1 animate-pulse rounded-full bg-muted-foreground" />
+                                            <span className="h-1 w-1 animate-pulse rounded-full bg-muted-foreground delay-150" />
+                                            <span className="h-1 w-1 animate-pulse rounded-full bg-muted-foreground delay-300" />
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        ) : null}
                         <div ref={messagesEndRef} />
                     </div>
                 </ScrollArea>
@@ -879,7 +959,10 @@ export default function Chat({ chatId }: { chatId: string }) {
                 >
                     <Input
                         value={messageInput}
-                        onChange={(e) => setMessageInput(e.target.value)}
+                        onChange={(e) => {
+                            setMessageInput(e.target.value);
+                            handleTyping();
+                        }}
                         placeholder="Type your message..."
                         disabled={!isConnected || isSending}
                         className="flex-1"
@@ -887,6 +970,8 @@ export default function Chat({ chatId }: { chatId: string }) {
                             if (e.key === "Enter" && !e.shiftKey) {
                                 e.preventDefault();
                                 handleSendMessage(e);
+                            } else {
+                                handleTyping();
                             }
                         }}
                     />
