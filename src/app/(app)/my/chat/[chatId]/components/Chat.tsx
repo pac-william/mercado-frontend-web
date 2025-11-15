@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { AlertCircle, Check, CheckCheck, Loader2, Send } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 const MESSAGING_SERVER_URL = process.env.NEXT_PUBLIC_MESSAGING_SERVER_URL;
@@ -58,6 +58,9 @@ export default function Chat({ chatId }: { chatId: string }) {
     const chatIdRef = useRef<string | null>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const isTypingRef = useRef<boolean>(false);
+    const markReadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const lastMarkReadRef = useRef<number>(0);
+    const isWindowFocusedRef = useRef<boolean>(true);
 
     // Auto-scroll to last message
     const scrollToBottom = () => {
@@ -67,6 +70,57 @@ export default function Chat({ chatId }: { chatId: string }) {
     useEffect(() => {
         scrollToBottom();
     }, [messages, isTyping]);
+
+    // Função para marcar mensagens como lidas com debounce
+    const markMessagesAsReadDebounced = useCallback(() => {
+        if (!chatId || !backendUserId || !socketRef.current?.connected) return;
+
+        const calculatedChatId = `${backendUserId}-${chatId}`;
+        const now = Date.now();
+
+        // Evitar marcar como lido muito frequentemente (mínimo 2 segundos entre chamadas)
+        if (now - lastMarkReadRef.current < 2000) {
+            return;
+        }
+
+        // Limpar timeout anterior
+        if (markReadTimeoutRef.current) {
+            clearTimeout(markReadTimeoutRef.current);
+        }
+
+        // Debounce: aguardar 1 segundo após a última interação
+        markReadTimeoutRef.current = setTimeout(async () => {
+            // Só marcar como lido se a janela estiver em foco
+            if (!isWindowFocusedRef.current) {
+                return;
+            }
+
+            // Verificar se o outro usuário está no chat antes de marcar como lido
+            if (socketRef.current?.connected) {
+                socketRef.current.emit("chat:check-presence", { chatId: calculatedChatId }, (response: { hasOtherUser: boolean }) => {
+                    if (!response.hasOtherUser) {
+                        console.log("[CLIENTE] Outro usuário não está no chat, não marcando como lido");
+                        return;
+                    }
+
+                    // Marcar como lido apenas se o outro usuário estiver presente
+                    markMessagesAsRead(calculatedChatId).then(() => {
+                        lastMarkReadRef.current = Date.now();
+                        console.log("[CLIENTE] Mensagens marcadas como lidas após interação (outro usuário presente)");
+
+                        // Notificar o lojista via socket
+                        if (socketRef.current?.connected) {
+                            socketRef.current.emit("chat:messages-read", {
+                                chatId: calculatedChatId,
+                            });
+                        }
+                    }).catch((error) => {
+                        console.error("[CLIENTE] Erro ao marcar mensagens como lidas:", error);
+                    });
+                });
+            }
+        }, 1000);
+    }, [chatId, backendUserId]);
 
     // Connect to Socket.IO and setup events
     useEffect(() => {
@@ -530,24 +584,75 @@ export default function Chat({ chatId }: { chatId: string }) {
                 userId: backendUserId // Pass backendUserId to ensure correct chatId format
             });
 
-            // Marcar mensagens como lidas quando o cliente visualiza o chat
-            try {
-                await markMessagesAsRead(calculatedChatId);
-                console.log("[CLIENTE] Mensagens marcadas como lidas");
-                
-                // Notificar o lojista via socket que as mensagens foram lidas
-                if (socket.connected) {
-                    socket.emit("chat:messages-read", {
-                        chatId: calculatedChatId,
-                    });
-                }
-            } catch (error) {
-                console.error("[CLIENTE] Erro ao marcar mensagens como lidas:", error);
-            }
+            // Marcar mensagens como lidas quando o cliente entra no chat (chamada inicial)
+            // As interações subsequentes serão detectadas automaticamente
+            markMessagesAsReadDebounced();
         };
 
         enterChat();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chatId, isConnected, backendUserId]);
+
+    // Detectar interações do usuário para marcar mensagens como lidas
+    useEffect(() => {
+        if (!chatId || !backendUserId) return;
+
+        // Detectar foco da janela
+        const handleFocus = () => {
+            isWindowFocusedRef.current = true;
+            markMessagesAsReadDebounced();
+        };
+
+        const handleBlur = () => {
+            isWindowFocusedRef.current = false;
+        };
+
+        // Detectar scroll na área de mensagens
+        const handleScroll = () => {
+            if (isWindowFocusedRef.current) {
+                markMessagesAsReadDebounced();
+            }
+        };
+
+        // Detectar interações (clique, digitação, etc.)
+        const handleInteraction = () => {
+            if (isWindowFocusedRef.current) {
+                markMessagesAsReadDebounced();
+            }
+        };
+
+        // Adicionar listeners
+        window.addEventListener("focus", handleFocus);
+        window.addEventListener("blur", handleBlur);
+        window.addEventListener("click", handleInteraction);
+        window.addEventListener("keydown", handleInteraction);
+
+        // Adicionar listener de scroll no ScrollArea
+        const scrollArea = document.querySelector('[data-slot="scroll-area-viewport"]');
+        if (scrollArea) {
+            scrollArea.addEventListener("scroll", handleScroll);
+        }
+
+        return () => {
+            window.removeEventListener("focus", handleFocus);
+            window.removeEventListener("blur", handleBlur);
+            window.removeEventListener("click", handleInteraction);
+            window.removeEventListener("keydown", handleInteraction);
+            if (scrollArea) {
+                scrollArea.removeEventListener("scroll", handleScroll);
+            }
+            if (markReadTimeoutRef.current) {
+                clearTimeout(markReadTimeoutRef.current);
+            }
+        };
+    }, [chatId, backendUserId, markMessagesAsReadDebounced]);
+
+    // Marcar como lido quando novas mensagens chegam e o usuário está visualizando
+    useEffect(() => {
+        if (messages.length > 0 && isWindowFocusedRef.current) {
+            markMessagesAsReadDebounced();
+        }
+    }, [messages.length, markMessagesAsReadDebounced]);
 
     // Cleanup on page exit
     useEffect(() => {
