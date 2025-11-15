@@ -97,30 +97,20 @@ export default function Chat({ chatId }: { chatId: string }) {
                 return;
             }
 
-            // Verificar se o outro usuário está no chat antes de marcar como lido
-            if (socketRef.current?.connected) {
-                socketRef.current.emit("chat:check-presence", { chatId: calculatedChatId }, (response: { hasOtherUser: boolean }) => {
-                    if (!response.hasOtherUser) {
-                        console.log("[CLIENTE] Outro usuário não está no chat, não marcando como lido");
-                        return;
-                    }
+            // Marcar mensagens como lidas (cliente sempre marca, independente de presença)
+            markMessagesAsRead(calculatedChatId).then((result) => {
+                lastMarkReadRef.current = Date.now();
+                console.log("[CLIENTE] Mensagens marcadas como lidas:", result);
 
-                    // Marcar como lido apenas se o outro usuário estiver presente
-                    markMessagesAsRead(calculatedChatId).then(() => {
-                        lastMarkReadRef.current = Date.now();
-                        console.log("[CLIENTE] Mensagens marcadas como lidas após interação (outro usuário presente)");
-
-                        // Notificar o lojista via socket
-                        if (socketRef.current?.connected) {
-                            socketRef.current.emit("chat:messages-read", {
-                                chatId: calculatedChatId,
-                            });
-                        }
-                    }).catch((error) => {
-                        console.error("[CLIENTE] Erro ao marcar mensagens como lidas:", error);
+                // Notificar o lojista via socket se estiver conectado
+                if (socketRef.current?.connected) {
+                    socketRef.current.emit("chat:messages-read", {
+                        chatId: calculatedChatId,
                     });
-                });
-            }
+                }
+            }).catch((error) => {
+                console.error("[CLIENTE] Erro ao marcar mensagens como lidas:", error);
+            });
         }, 1000);
     }, [chatId, backendUserId]);
 
