@@ -27,6 +27,9 @@ export default function MarketDetailsLoading() {
                             <Skeleton className="h-10 w-10 rounded-full" />
                             <Skeleton className="h-10 w-10 rounded-full" />
                             <Skeleton className="h-10 w-10 rounded-full" />
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <Skeleton className="h-10 w-10 rounded-full" />
                         </div>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-4">

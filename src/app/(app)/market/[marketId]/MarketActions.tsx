@@ -17,15 +17,29 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Bell, Check, Copy, Share2 } from "lucide-react";
+import { Bell, Check, Copy, Heart, MapPin, Share2, Star } from "lucide-react";
+import GoogleMaps from "@/app/components/GoogleMaps";
+import { toast } from "sonner";
 
 interface MarketActionsProps {
     marketName: string;
+    marketId: string;
+    marketAddress: string;
+    marketLatitude?: number | null;
+    marketLongitude?: number | null;
 }
 
-export function MarketActions({ marketName }: MarketActionsProps) {
+export function MarketActions({ marketName, marketId, marketAddress, marketLatitude, marketLongitude }: MarketActionsProps) {
     return (
         <>
+            <RatingDialog marketName={marketName} marketId={marketId} />
+            <FavoriteButton marketId={marketId} />
+            <AddressMapDialog 
+                marketName={marketName}
+                marketAddress={marketAddress}
+                marketLatitude={marketLatitude}
+                marketLongitude={marketLongitude}
+            />
             <NotificationDialog marketName={marketName} />
             <ShareDialog marketName={marketName} />
         </>
@@ -245,6 +259,181 @@ function ShareButton({ icon, label, onClick, disabled }: ShareButtonProps) {
             {icon}
             {label}
         </Button>
+    );
+}
+
+function RatingDialog({ marketName, marketId }: { marketName: string; marketId: string }) {
+    const [rating, setRating] = useState(0);
+    const [hoveredRating, setHoveredRating] = useState(0);
+
+    const handleRatingClick = (value: number) => {
+        setRating(value);
+    };
+
+    const handleSubmitRating = () => {
+        if (rating > 0) {
+            // Aqui você pode adicionar a lógica para salvar a avaliação
+            toast.success(`Você avaliou ${marketName} com ${rating} estrela${rating !== 1 ? 's' : ''}`);
+        }
+    };
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="icon" className="rounded-full">
+                    <Star className="size-4" />
+                    <span className="sr-only">Avaliar mercado</span>
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>Avaliar mercado</DialogTitle>
+                    <DialogDescription>
+                        Avalie {marketName} de 1 a 5 estrelas.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="flex flex-col gap-4 py-4">
+                    <div className="flex items-center justify-center gap-2">
+                        {[1, 2, 3, 4, 5].map((value) => (
+                            <button
+                                key={value}
+                                type="button"
+                                onClick={() => handleRatingClick(value)}
+                                onMouseEnter={() => setHoveredRating(value)}
+                                onMouseLeave={() => setHoveredRating(0)}
+                                className={cn(
+                                    "transition-colors p-2 rounded-full",
+                                    (hoveredRating >= value || (hoveredRating === 0 && rating >= value))
+                                        ? "text-amber-400"
+                                        : "text-muted-foreground"
+                                )}
+                            >
+                                <Star
+                                    className={cn(
+                                        "size-8",
+                                        (hoveredRating >= value || (hoveredRating === 0 && rating >= value))
+                                            ? "fill-current"
+                                            : "fill-none"
+                                    )}
+                                />
+                            </button>
+                        ))}
+                    </div>
+                    <div className="text-center">
+                        <p className="text-sm text-muted-foreground">
+                            {rating === 0 ? "Selecione uma avaliação" : `${rating} de 5 estrelas`}
+                        </p>
+                    </div>
+                </div>
+
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">
+                            Fechar
+                        </Button>
+                    </DialogClose>
+                    <DialogClose asChild>
+                        <Button 
+                            type="button" 
+                            variant="default"
+                            disabled={rating === 0}
+                            onClick={handleSubmitRating}
+                        >
+                            Enviar avaliação
+                        </Button>
+                    </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function FavoriteButton({ marketId }: { marketId: string }) {
+    const [isFavorite, setIsFavorite] = useState(false);
+
+    const handleToggleFavorite = () => {
+        setIsFavorite(!isFavorite);
+        // Aqui você pode adicionar a lógica para favoritar/desfavoritar
+        toast.success(isFavorite ? "Mercado removido dos favoritos" : "Mercado adicionado aos favoritos");
+    };
+
+    return (
+        <Button
+            variant="outline"
+            size="icon"
+            className={cn(
+                "rounded-full",
+                isFavorite && "text-red-500 border-red-500 hover:bg-red-50 dark:hover:bg-red-950"
+            )}
+            onClick={handleToggleFavorite}
+            aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+        >
+            <Heart className={cn("size-4", isFavorite && "fill-current")} />
+            <span className="sr-only">{isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}</span>
+        </Button>
+    );
+}
+
+interface AddressMapDialogProps {
+    marketName: string;
+    marketAddress: string;
+    marketLatitude?: number | null;
+    marketLongitude?: number | null;
+}
+
+function AddressMapDialog({ marketName, marketAddress, marketLatitude, marketLongitude }: AddressMapDialogProps) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="icon" className="rounded-full">
+                    <MapPin className="size-4" />
+                    <span className="sr-only">Ver endereço e mapa</span>
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Endereço e Localização</DialogTitle>
+                    <DialogDescription>
+                        Localização completa de {marketName}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="flex flex-col gap-4">
+                    <div className="flex items-start gap-3 p-4 rounded-lg border border-border bg-muted/50">
+                        <MapPin className="size-5 text-primary mt-0.5 shrink-0" />
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-foreground mb-1">Endereço</p>
+                            <p className="text-sm text-muted-foreground">{marketAddress}</p>
+                        </div>
+                    </div>
+
+                    <div className="rounded-lg overflow-hidden border border-border">
+                        <GoogleMaps
+                            latitude={marketLatitude ?? undefined}
+                            longitude={marketLongitude ?? undefined}
+                            zoom={15}
+                            height="400px"
+                            interactive={true}
+                        />
+                    </div>
+
+                    {(!marketLatitude || !marketLongitude) && (
+                        <p className="text-xs text-muted-foreground text-center">
+                            Coordenadas não disponíveis. O mapa mostra uma localização aproximada.
+                        </p>
+                    )}
+                </div>
+
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">
+                            Fechar
+                        </Button>
+                    </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }
 

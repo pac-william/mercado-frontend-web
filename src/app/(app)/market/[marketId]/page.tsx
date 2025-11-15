@@ -137,7 +137,13 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
                                     <span className="sr-only">Chat</span>
                                 </Link>
                             </Button>
-                            <MarketActions marketName={market.name} />
+                            <MarketActions 
+                                marketName={market.name}
+                                marketId={marketId}
+                                marketAddress={market.address}
+                                marketLatitude={null}
+                                marketLongitude={null}
+                            />
                         </div>
                     </CardHeader>
                     <Separator />
