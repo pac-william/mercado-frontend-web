@@ -12,6 +12,7 @@ export interface ChatConversation {
         message: string;
         timestamp: Date | string;
     } | null;
+    unreadCount: number;
 }
 
 export interface ChatMessage {
@@ -20,6 +21,7 @@ export interface ChatMessage {
     username: string;
     userId: string;
     message: string;
+    status: "NOT_SENT" | "SENT" | "DELIVERED" | "READ";
     readAt: Date | string | null;
     createdAt: Date | string;
     updatedAt: Date | string;
@@ -203,6 +205,37 @@ export const markMessagesAsRead = async (chatId: string): Promise<{ success: boo
         return data;
     } catch (error) {
         console.error('Erro ao marcar mensagens como lidas:', error);
+        throw error;
+    }
+};
+
+export const getUnreadMessagesCount = async (): Promise<number> => {
+    try {
+        const session = await auth0.getSession();
+        if (!session) {
+            throw new Error('Usuário não autenticado');
+        }
+
+        const response = await fetch(`${baseUrl}/api/v1/chats/user/unread-count`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session.tokenSet.idToken}`,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Usuário não autenticado');
+            }
+            throw new Error('Erro ao buscar contagem de mensagens não lidas');
+        }
+
+        const data = await response.json() as { count: number };
+        return data.count;
+    } catch (error) {
+        console.error('Erro ao buscar contagem de mensagens não lidas:', error);
         throw error;
     }
 };
