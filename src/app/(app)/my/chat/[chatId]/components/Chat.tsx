@@ -1,6 +1,7 @@
 "use client"
 
 import { createChat, createMessage, getChatByChatId, getCustomerConversations, markMessagesAsRead } from "@/actions/chat.actions";
+import { getMarketById } from "@/actions/market.actions";
 import { getUserMe } from "@/actions/user.actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -51,6 +52,7 @@ export default function Chat({ chatId }: { chatId: string }) {
     const [storeOwnerUsername, setStoreOwnerUsername] = useState<string | null>(null);
     const [backendUserId, setBackendUserId] = useState<string | null>(null);
     const [isTyping, setIsTyping] = useState(false);
+    const [marketName, setMarketName] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const currentRoomIdRef = useRef<string | null>(null);
     const socketRef = useRef<Socket | null>(null);
@@ -514,6 +516,26 @@ export default function Chat({ chatId }: { chatId: string }) {
         backendUserIdRef.current = backendUserId;
     }, [chatId, backendUserId]);
 
+    // Buscar nome do mercado quando chatId mudar
+    useEffect(() => {
+        if (!chatId || chatId === "inbox") {
+            setMarketName(null);
+            return;
+        }
+
+        const fetchMarketName = async () => {
+            try {
+                const market = await getMarketById(chatId);
+                setMarketName(market.name);
+            } catch (error) {
+                console.error("Erro ao buscar nome do mercado:", error);
+                setMarketName(null);
+            }
+        };
+
+        fetchMarketName();
+    }, [chatId]);
+
     // Join chat when connected and when chatId changes
     useEffect(() => {
         const socket = socketRef.current;
@@ -916,7 +938,9 @@ export default function Chat({ chatId }: { chatId: string }) {
             <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                        <h2 className="text-lg font-semibold">Chat - {chatId}</h2>
+                        <h2 className="text-lg font-semibold">
+                            {marketName ? marketName : `Chat - ${chatId}`}
+                        </h2>
                         {storeOwnerUsername && (
                             <p className="text-sm text-muted-foreground">
                                 Conversando com {storeOwnerUsername}
