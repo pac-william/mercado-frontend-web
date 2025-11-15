@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Lock, Mail, MapPin, Store } from "lucide-react";
+import { Loader, Lock, Mail, MapPin, Store } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -237,7 +237,7 @@ export default function RegisterMarketPage() {
                         <Button type="submit" className="w-full" disabled={loading}>
                             {loading ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Loader className="mr-2 h-4 w-4 animate-spin" />
                                     Cadastrando...
                                 </>
                             ) : (

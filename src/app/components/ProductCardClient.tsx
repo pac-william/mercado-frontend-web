@@ -8,7 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { User as Auth0User } from "@auth0/nextjs-auth0/types";
-import { Loader2, ShoppingCart, Star } from "lucide-react";
+import { Loader, ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -205,7 +205,7 @@ export default function ProductCardClient({
                                 disabled={addingToCart}
                             >
                                 {addingToCart ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    <Loader className="w-4 h-4 animate-spin" />
                                 ) : (
                                     <ShoppingCart size={16} />
                                 )}
@@ -279,7 +279,7 @@ export default function ProductCardClient({
                                     disabled={addingToCart}
                                 >
                                     {addingToCart ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <Loader className="w-4 h-4 animate-spin" />
                                     ) : (
                                         <ShoppingCart size={16} />
                                     )}
@@ -325,7 +325,7 @@ export default function ProductCardClient({
                                     disabled={addingToCart}
                                 >
                                     {addingToCart ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <Loader className="w-4 h-4 animate-spin" />
                                     ) : (
                                         <ShoppingCart size={16} />
                                     )}
@@ -426,7 +426,7 @@ export default function ProductCardClient({
                                     disabled={addingToCart}
                                 >
                                     {addingToCart ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <Loader className="w-4 h-4 animate-spin" />
                                     ) : (
                                         <ShoppingCart size={16} />
                                     )}

@@ -308,7 +308,7 @@ export default async function ProductPage({ params }: { params: Promise<{ produc
                             )}
 
                             {/* Controles de quantidade e ações */}
-                            <ProductActions />
+                            <ProductActions productId={product.id} />
 
                             {/* Informações adicionais de entrega */}
                             <Card>

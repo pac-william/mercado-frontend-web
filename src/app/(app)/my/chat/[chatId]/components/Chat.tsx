@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { AlertCircle, Check, CheckCheck, Loader2, Send } from "lucide-react";
+import { AlertCircle, Check, CheckCheck, Loader, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
@@ -849,7 +849,7 @@ export default function Chat({ chatId }: { chatId: string }) {
         return (
             <Card className="flex flex-col h-full">
                 <CardContent className="flex items-center justify-center flex-1">
-                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <Loader className="h-6 w-6 animate-spin" />
                 </CardContent>
             </Card>
         );
@@ -1100,7 +1100,7 @@ export default function Chat({ chatId }: { chatId: string }) {
                         size="icon"
                     >
                         {isSending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader className="h-4 w-4 animate-spin" />
                         ) : (
                             <Send className="h-4 w-4" />
                         )}

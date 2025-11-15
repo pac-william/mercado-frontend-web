@@ -1,19 +1,45 @@
 "use client"
 
+import { addItemToCart } from "@/actions/cart.actions";
 import { Button } from "@/components/ui/button";
-import { MinusIcon, PlusIcon, ShoppingCart } from "lucide-react";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { Loader, MinusIcon, PlusIcon, ShoppingCart } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function ProductActions() {
+interface ProductActionsProps {
+    productId: string;
+}
+
+export default function ProductActions({ productId }: ProductActionsProps) {
     const [quantity, setQuantity] = useState(1);
+    const [addingToCart, setAddingToCart] = useState(false);
+    const { user, isLoading: userLoading } = useUser();
+    const router = useRouter();
 
-    const addToCart = () => {
-        toast.success(`${quantity} produto(s) adicionado(s) ao carrinho`);
-    };
+    const addToCart = async () => {
+        // Verificar se o usuário está autenticado
+        if (!user && !userLoading) {
+            const currentPath = window.location.pathname;
+            router.push(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
+            return;
+        }
 
-    const buyNow = () => {
-        toast.success("Redirecionando para o checkout...");
+        setAddingToCart(true);
+        try {
+            await addItemToCart({
+                productId: productId,
+                quantity: quantity
+            });
+            toast.success(`${quantity} produto(s) adicionado(s) ao carrinho`);
+        } catch (error) {
+            console.error("Erro ao adicionar ao carrinho:", error);
+            const errorMessage = error instanceof Error ? error.message : "Erro ao adicionar produto ao carrinho";
+            toast.error(errorMessage);
+        } finally {
+            setAddingToCart(false);
+        }
     };
 
     return (
@@ -49,17 +75,21 @@ export default function ProductActions() {
                 <Button
                     onClick={addToCart}
                     size="lg"
+                    disabled={addingToCart || userLoading}
                 >
-                    <ShoppingCart size={20} className="mr-2" />
-                    Adicionar ao Carrinho
+                    {addingToCart ? (
+                        <>
+                            <Loader size={20} className="mr-2 animate-spin" />
+                            Adicionando...
+                        </>
+                    ) : (
+                        <>
+                            <ShoppingCart size={20} className="mr-2" />
+                            Adicionar ao Carrinho
+                        </>
+                    )}
                 </Button>
-                <Button
-                    onClick={buyNow}
-                    variant="default"
-                    size="lg"
-                >
-                    Comprar Agora
-                </Button>
+
             </div>
         </div>
     );

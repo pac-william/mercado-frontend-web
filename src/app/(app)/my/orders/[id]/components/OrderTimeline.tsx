@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock, Loader2, Package, Truck, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Loader, Package, Truck, XCircle } from "lucide-react";
 
 interface OrderTimelineProps {
     currentStatus: string;
@@ -7,7 +7,7 @@ interface OrderTimelineProps {
 const statusSteps = [
     { key: "PENDING", label: "Pedido Recebido", icon: Clock },
     { key: "CONFIRMED", label: "Confirmado", icon: CheckCircle2 },
-    { key: "PREPARING", label: "Em Preparação", icon: Loader2 },
+    { key: "PREPARING", label: "Em Preparação", icon: Loader },
     { key: "READY_FOR_DELIVERY", label: "Pronto para Entrega", icon: Package },
     { key: "OUT_FOR_DELIVERY", label: "Saiu para Entrega", icon: Truck },
     { key: "DELIVERED", label: "Entregue", icon: CheckCircle2 }

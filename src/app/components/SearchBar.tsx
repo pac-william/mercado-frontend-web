@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useTypewriter } from "@/hooks/use-typewriter";
-import { Loader2, Mic, Pause, Play, SearchIcon, Send, Sparkles, X } from "lucide-react";
+import { Loader, Mic, Pause, Play, SearchIcon, Send, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface SearchAiBarProps {
@@ -256,7 +256,7 @@ export default function SearchAiBar({ className, particles }: SearchAiBarProps) 
                                     {isTranscribing ? (
                                         <>
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                            <Loader2 size={16} className="mr-2" />
+                                            <Loader size={16} className="mr-2" />
                                         </>
                                     ) : (
                                         <>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Loader2, MapPin, Search } from "lucide-react"
+import { Loader, MapPin, Search } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -109,7 +109,7 @@ export default function AddressInput() {
                                 size="icon"
                             >
                                 {loading ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    <Loader className="w-4 h-4 animate-spin" />
                                 ) : (
                                     <Search className="w-4 h-4" />
                                 )}

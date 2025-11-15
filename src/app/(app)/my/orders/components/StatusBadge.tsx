@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, Loader2, Package, Truck, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Loader, Package, Truck, XCircle } from "lucide-react";
 
 type OrderStatus = 
     | "PENDING" 
@@ -35,7 +35,7 @@ const statusConfig: Record<OrderStatus, {
     PREPARING: {
         label: "Preparando",
         variant: "default",
-        icon: Loader2,
+        icon: Loader,
         className: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
     },
     READY_FOR_DELIVERY: {
