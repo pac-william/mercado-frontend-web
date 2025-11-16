@@ -216,7 +216,7 @@ export default function ProductCardClient({
             );
         case "buy-now":
             return (
-                <Card className="flex flex-col max-w-xs w-full bg-card border-border">
+                <Card className="flex flex-col max-w-xs w-full bg-card border-border h-full">
                     <CardHeader className="flex flex-row gap-2">
                         <Link href={`/market/${product.marketId}`}>
                             <Avatar className="w-12 h-12 shadow-md border">
