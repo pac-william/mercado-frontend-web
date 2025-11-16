@@ -3,12 +3,14 @@ import { getProducts } from "@/actions/products.actions";
 import { getSuggestionById } from "@/actions/suggestion.actions";
 import ProductCard from "@/app/components/ProductCard";
 import { Product } from "@/app/domain/productDomain";
+import { formatPrice } from "@/app/utils/formatters";
 import RouterBack from "@/components/RouterBack";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Suggestion } from "@/types/suggestion";
+import { cn } from "@/lib/utils";
+import { Suggestion, SuggestionItem } from "@/types/suggestion";
 import "moment/locale/pt-br";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -79,12 +81,43 @@ export default async function SuggestionPage({ params, searchParams }: { params:
         })),
     }));
 
+    // Exemplo de métodos de preparo (substituir por dados reais quando disponíveis)
+    // Por enquanto, criar um exemplo baseado na task
+    const preparationMethods = suggestionData.task.toLowerCase().includes("churrasco") ||
+        suggestionData.task.toLowerCase().includes("churras") ? [
+        {
+            id: "preparation-steps",
+            name: "Modo de Preparo",
+            items: [
+                { name: "1. Prepare a churrasqueira e acenda o carvão até formar brasas.", anchorId: "prep-step-1" },
+                { name: "2. Tempere as carnes com sal grosso e deixe descansar.", anchorId: "prep-step-2" },
+                { name: "3. Coloque as carnes na grelha e vire conforme necessário.", anchorId: "prep-step-3" },
+                { name: "4. Sirva quente com acompanhamentos.", anchorId: "prep-step-4" },
+            ],
+        },
+    ] : undefined;
+
     const { markets } = await getMarkets();
+
+    // Calcular preços para cada mercado
+    const marketCalculations = await Promise.all(
+        markets.map(async (market) => {
+            const calculation = await calculateMarketPrice(market.id, suggestionData.data.items);
+            return {
+                market,
+                ...calculation,
+            };
+        })
+    );
 
     return (
         <div className="flex flex-col flex-1 container mx-auto my-4">
             <div className="flex flex-1 gap-4">
-                <CategoryMenu title={suggestionData.task} categories={menuCategories} />
+                <CategoryMenu
+                    title={suggestionData.task}
+                    categories={menuCategories}
+                    preparationMethods={preparationMethods}
+                />
                 <div className="flex flex-col flex-1 pr-2">
                     <ScrollArea className="flex flex-col flex-grow h-0">
                         <RouterBack />
@@ -97,69 +130,86 @@ export default async function SuggestionPage({ params, searchParams }: { params:
                                     </h1>
                                 </div>
                             </div>
-                            <div className="flex flex-row gap-4">
-                                {markets.map((market) => (
-                                    <Link key={market.id} href={`/my/suggestion/${suggestion_id}?marketId=${market.id}`} className="flex flex-1">
-                                        <Card className="flex flex-col gap-0">
-                                            <CardHeader className="flex flex-row gap-4">
-                                                <Avatar>
-                                                    <AvatarImage src={market.profilePicture || ""} alt={market.name} width={100} height={100} />
-                                                    <AvatarFallback className="bg-primary text-primary-foreground">CN</AvatarFallback>
-                                                </Avatar>
-                                                <CardTitle>
-                                                    {market.name}
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <Separator />
-                                            <CardContent className="flex flex-col gap-2">
-                                                <span className="text-lg font-bold text-foreground">Total: R$ 100,00</span>
-                                                <span className="text-sm text-muted-foreground">4 de 10 itens encontrados</span>
-                                            </CardContent>
-                                        </Card>
-                                    </Link>
+                            <div className="grid grid-cols-4 gap-4">
+                                {marketCalculations.slice(0, 4).map(({ market, totalPrice, itemsFound, totalItems }) => {
+                                    const isSelected = marketId === market.id;
+                                    return (
+                                        <Link key={market.id} href={`/my/suggestion/${suggestion_id}?marketId=${market.id}`} className="flex flex-1">
+                                            <Card className={cn(
+                                                "flex flex-col gap-0 transition-all w-full hover:bg-accent",
+                                                isSelected && "ring-2 ring-primary/50 bg-accent"
+                                            )}>
+                                                <CardHeader className="flex flex-row gap-4">
+                                                    <Avatar>
+                                                        <AvatarImage src={market.profilePicture || ""} alt={market.name} width={100} height={100} />
+                                                        <AvatarFallback className="bg-primary text-primary-foreground">CN</AvatarFallback>
+                                                    </Avatar>
+                                                    <CardTitle>
+                                                        {market.name}
+                                                    </CardTitle>
+                                                </CardHeader>
+                                                <Separator />
+                                                <CardContent className="flex flex-col gap-2">
+                                                    <span className="text-lg font-bold text-foreground">
+                                                        Total: {formatPrice(totalPrice)}
+                                                    </span>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {itemsFound} de {totalItems} itens encontrados
+                                                    </span>
+                                                </CardContent>
+                                            </Card>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+
+                        {marketId ? (
+                            <div className="flex flex-col gap-4 p-4 mb-32">
+                                <div className="flex items-center gap-4">
+                                    <div>
+                                        <h1 className="text-3xl font-bold text-foreground">
+                                            {suggestionData.task}
+                                        </h1>
+                                        <p className="text-sm text-muted-foreground mt-1">
+                                            Produtos do mercado selecionado
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Produtos por Categoria */}
+                                {categorySections.map(({ id, name, items }) => (
+                                    <Card
+                                        key={id}
+                                        id={id}
+                                        className="bg-card border-border"
+                                    >
+                                        <CardHeader>
+                                            <CardTitle className="text-xl font-semibold text-primary">
+                                                {name}
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="flex flex-col gap-6">
+                                            {items.map(item => (
+                                                <div key={item.anchorId} id={item.anchorId} className="flex flex-col gap-2">
+                                                    <h3 className="text-lg font-medium text-foreground">
+                                                        {item.name}
+                                                    </h3>
+                                                    <ProductSuggestion productName={item.name} categoryId={item.categoryId} marketId={marketId} />
+                                                </div>
+                                            ))}
+                                        </CardContent>
+                                    </Card>
                                 ))}
                             </div>
-                        </div>
-
-
-                        <div className="flex flex-col gap-4 p-4 mb-32">
-
-
-                            <div className="flex items-center gap-4">
-                                <div>
-                                    <h1 className="text-3xl font-bold text-foreground">
-                                        {suggestionData.task}
-                                    </h1>
-                                </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-16 px-4">
+                                <p className="text-lg text-muted-foreground text-center">
+                                    Selecione um mercado acima para ver os produtos disponíveis
+                                </p>
                             </div>
-
-
-
-                            {/* Produtos por Categoria */}
-                            {categorySections.map(({ id, name, items }) => (
-                                <Card
-                                    key={id}
-                                    id={id}
-                                    className="bg-card border-border"
-                                >
-                                    <CardHeader>
-                                        <CardTitle className="text-xl font-semibold text-primary">
-                                            {name}
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="flex flex-col gap-6">
-                                        {items.map(item => (
-                                            <div key={item.anchorId} id={item.anchorId} className="flex flex-col gap-2">
-                                                <h3 className="text-lg font-medium text-foreground">
-                                                    {item.name}
-                                                </h3>
-                                                <ProductSuggestion productName={item.name} categoryId={item.categoryId} marketId={marketId} />
-                                            </div>
-                                        ))}
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
+                        )}
                     </ScrollArea>
                 </div>
             </div>
@@ -172,11 +222,66 @@ const isValidObjectId = (value?: string) => {
     return /^[0-9a-fA-F]{24}$/.test(value);
 };
 
-async function ProductSuggestion({ productName, categoryId, marketId }: { productName: string, categoryId: string, marketId: string }) {
+interface MarketPriceCalculation {
+    totalPrice: number;
+    itemsFound: number;
+    totalItems: number;
+}
+
+async function calculateMarketPrice(
+    marketId: string,
+    suggestionItems: SuggestionItem[]
+): Promise<MarketPriceCalculation> {
+    let totalPrice = 0;
+    let itemsFound = 0;
+    const totalItems = suggestionItems.length;
+
+    // Buscar produtos para cada item da sugestão neste mercado
+    for (const item of suggestionItems) {
+        const filters: { name: string; size: number; categoryId?: string; marketId?: string } = {
+            name: item.name,
+            size: 1, // Apenas o primeiro (mais barato) ou podemos pegar o mais barato
+            marketId: marketId,
+        };
+
+        if (isValidObjectId(item.categoryId)) {
+            filters.categoryId = item.categoryId;
+        }
+
+        try {
+            const response = await getProducts(filters);
+            const products = response.products;
+
+            if (products.length > 0) {
+                // Pegar o produto mais barato disponível
+                const cheapestProduct = products.reduce((min, product) =>
+                    product.price < min.price ? product : min
+                );
+                totalPrice += cheapestProduct.price;
+                itemsFound++;
+            }
+        } catch (error) {
+            console.error(`Erro ao buscar produto ${item.name} para mercado ${marketId}:`, error);
+        }
+    }
+
+    return {
+        totalPrice,
+        itemsFound,
+        totalItems,
+    };
+}
+
+async function ProductSuggestion({ productName, categoryId, marketId }: { productName: string, categoryId: string, marketId?: string }) {
+    // Se não houver marketId selecionado, não mostrar produtos
+    if (!marketId) {
+        return null;
+    }
+
     const filters: { name: string; size: number; categoryId?: string; marketId?: string } = {
         name: productName,
         size: 20,
-        marketId: marketId,
+        marketId: marketId, // Garantir que sempre filtra por mercado
     };
 
     if (isValidObjectId(categoryId)) {
@@ -189,6 +294,14 @@ async function ProductSuggestion({ productName, categoryId, marketId }: { produc
         products = response.products;
     } catch (error) {
         console.error("Erro ao buscar produtos para sugestão:", error);
+    }
+
+    if (products.length === 0) {
+        return (
+            <p className="text-sm text-muted-foreground italic">
+                Nenhum produto encontrado para este item
+            </p>
+        );
     }
 
     return (
