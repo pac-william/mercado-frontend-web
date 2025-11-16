@@ -1,13 +1,17 @@
+import { getMarkets } from "@/actions/market.actions";
 import { getProducts } from "@/actions/products.actions";
 import { getSuggestionById } from "@/actions/suggestion.actions";
 import ProductCard from "@/app/components/ProductCard";
 import { Product } from "@/app/domain/productDomain";
 import RouterBack from "@/components/RouterBack";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Suggestion } from "@/types/suggestion";
 import "moment/locale/pt-br";
 import { Metadata } from "next";
+import Link from "next/link";
 import CategoryMenu from "./CategoryMenu";
 
 export const metadata: Metadata = {
@@ -26,8 +30,11 @@ const formatCategoryId = (name: string) =>
 const formatProductAnchorId = (categoryName: string, productName: string) =>
     `${formatCategoryId(categoryName)}-${formatCategoryId(productName)}`;
 
-export default async function SuggestionPage({ params }: { params: Promise<{ suggestion_id: string }> }) {
+export default async function SuggestionPage({ params, searchParams }: { params: Promise<{ suggestion_id: string }>, searchParams: Promise<{ marketId: string }> }) {
     const suggestion_id = (await params).suggestion_id;
+    const marketId = (await searchParams).marketId;
+
+    console.log(marketId);
 
     let suggestionData = null;
 
@@ -72,6 +79,8 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
         })),
     }));
 
+    const { markets } = await getMarkets();
+
     return (
         <div className="flex flex-col flex-1 container mx-auto my-4">
             <div className="flex flex-1 gap-4">
@@ -80,7 +89,42 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
                     <ScrollArea className="flex flex-col flex-grow h-0">
                         <RouterBack />
                         {/* Header da sugestão */}
+                        <div className="flex flex-col gap-4 p-4">
+                            <div className="flex items-center gap-4">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-foreground">
+                                        Melhores preços
+                                    </h1>
+                                </div>
+                            </div>
+                            <div className="flex flex-row gap-4">
+                                {markets.map((market) => (
+                                    <Link key={market.id} href={`/my/suggestion/${suggestion_id}?marketId=${market.id}`} className="flex flex-1">
+                                        <Card className="flex flex-col gap-0">
+                                            <CardHeader className="flex flex-row gap-4">
+                                                <Avatar>
+                                                    <AvatarImage src={market.profilePicture || ""} alt={market.name} width={100} height={100} />
+                                                    <AvatarFallback className="bg-primary text-primary-foreground">CN</AvatarFallback>
+                                                </Avatar>
+                                                <CardTitle>
+                                                    {market.name}
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <Separator />
+                                            <CardContent className="flex flex-col gap-2">
+                                                <span className="text-lg font-bold text-foreground">Total: R$ 100,00</span>
+                                                <span className="text-sm text-muted-foreground">4 de 10 itens encontrados</span>
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+
                         <div className="flex flex-col gap-4 p-4 mb-32">
+
+
                             <div className="flex items-center gap-4">
                                 <div>
                                     <h1 className="text-3xl font-bold text-foreground">
@@ -109,7 +153,7 @@ export default async function SuggestionPage({ params }: { params: Promise<{ sug
                                                 <h3 className="text-lg font-medium text-foreground">
                                                     {item.name}
                                                 </h3>
-                                                <ProductSuggestion productName={item.name} categoryId={item.categoryId} />
+                                                <ProductSuggestion productName={item.name} categoryId={item.categoryId} marketId={marketId} />
                                             </div>
                                         ))}
                                     </CardContent>
@@ -128,10 +172,11 @@ const isValidObjectId = (value?: string) => {
     return /^[0-9a-fA-F]{24}$/.test(value);
 };
 
-async function ProductSuggestion({ productName, categoryId }: { productName: string, categoryId: string }) {
-    const filters: { name: string; size: number; categoryId?: string } = {
+async function ProductSuggestion({ productName, categoryId, marketId }: { productName: string, categoryId: string, marketId: string }) {
+    const filters: { name: string; size: number; categoryId?: string; marketId?: string } = {
         name: productName,
         size: 20,
+        marketId: marketId,
     };
 
     if (isValidObjectId(categoryId)) {
