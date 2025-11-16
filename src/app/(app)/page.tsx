@@ -41,7 +41,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                 }))} /> */}
 
                 <div className="flex flex-1 gap-4 container mx-auto mt-20">
-                    <div className="w-[320px] h-[calc(100vh-113px)] sticky top-4">
+                    <div className="w-[320px] h-[calc(100vh-108px)] sticky top-4">
                         <Card className="flex flex-col h-full bg-card border-border">
                             <CardHeader>
                                 <CardTitle className="text-card-foreground">Filtros</CardTitle>

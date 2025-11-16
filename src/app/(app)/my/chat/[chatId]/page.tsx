@@ -42,15 +42,12 @@ export default async function ChatPage({ params }: ChatPageProps) {
                 </CardContent>
             </Card>
             {chatId === "inbox" ? (
-                <div className="flex flex-col flex-1 justify-center items-center">
+                <div className="flex flex-col flex-1 justify-center items-center rounded-lg border-2 border-dashed p-6">
                     <MessageCircle className="h-12 w-12 text-primary" />
                     <p className="text-2xl font-bold">Suas mensagens</p>
                     <p className="text-sm text-muted-foreground">Envie mensagens privadas para os lojistas</p>
-
                 </div>
-            ) : (
-                <Chat chatId={chatId} />
-            )}
+            ) : <Chat chatId={chatId} />}
         </div>
-    )
+    );
 }
