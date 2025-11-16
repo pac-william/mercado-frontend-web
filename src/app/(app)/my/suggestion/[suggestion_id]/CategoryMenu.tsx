@@ -49,7 +49,7 @@ export default function CategoryMenu({ title, categories, preparationMethods }: 
                             onClick={() => setActiveTab("ingredients")}
                             size="sm"
                             className={cn(
-                                "transition-colors"
+                                "transition-colors border border-transparent"
                             )}
                         >
                             Ingredientes
@@ -59,7 +59,7 @@ export default function CategoryMenu({ title, categories, preparationMethods }: 
                             onClick={() => setActiveTab("preparation-methods")}
                             size="sm"
                             className={cn(
-                                "transition-colors"
+                                "transition-colors border border-transparent"
                             )}
                         >
                             Modo de Preparo
