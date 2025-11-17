@@ -10,38 +10,77 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-const heroImages = [
-    "/hero/criativo-65b3c52c4e82aMjYvMDEvMjAyNCAxMWg0Mw==.jpg",
-    "/hero/5ad42047-7cd0-4f88-8717-005ad295fee8.jpg",
-    "/hero/a394c1be-7783-49fe-b792-8b46397f0037.jpg",
-    "/hero/Social_media_banner_here_has_savings_for_products_on_great_deals.jpg",
-    "/hero/10834881.jpg",
-    "/hero/10834883.jpg"
-];
+import { getActiveCampaignsForCarousel, type Campaign } from "@/actions/campaign.actions";
 
 export default function HeroSection() {
     const [api, setApi] = useState<CarouselApi | null>(null);
     const [current, setCurrent] = useState(0);
+    const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!api) return;
+        const fetchCampaigns = async () => {
+            try {
+                const activeCampaigns = await getActiveCampaignsForCarousel();
+                // Ordenar por slot para manter ordem
+                const sortedCampaigns = activeCampaigns.sort((a, b) => a.slot - b.slot);
+                setCampaigns(sortedCampaigns);
+            } catch (error) {
+                console.error("Erro ao buscar campanhas:", error);
+                setCampaigns([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCampaigns();
+    }, []);
+
+    useEffect(() => {
+        if (!api || campaigns.length <= 1) return;
 
         const interval = setInterval(() => {
             api.scrollNext();
         }, 10000);
 
         return () => clearInterval(interval);
-    }, [api]);
+    }, [api, campaigns.length]);
 
     useEffect(() => {
-        if (!api) return;
+        if (!api || campaigns.length <= 1) return;
 
         api.on("select", () => {
             setCurrent(api.selectedScrollSnap());
         });
-    }, [api]);
+    }, [api, campaigns.length]);
 
+    // Se não houver campanhas, não renderizar nada
+    if (loading || campaigns.length === 0) {
+        return null;
+    }
+
+    // Se houver apenas uma campanha, mostrar sem carousel
+    if (campaigns.length === 1) {
+        return (
+            <div className="w-full relative">
+                <div className="h-[500px] relative">
+                    <Image
+                        src={campaigns[0].imageUrl}
+                        alt={campaigns[0].title}
+                        fill
+                        className="w-full h-full object-cover"
+                        priority
+                    />
+                    {/* Texto sobrepondo a imagem */}
+                    <div className="absolute top-4 right-4 bg-black/70 text-white px-4 py-2 rounded-md text-sm font-medium backdrop-blur-sm">
+                        Promovido por Mercado
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Se houver múltiplas campanhas, mostrar carousel
     return (
         <div className="w-full relative">
             <Carousel
@@ -53,15 +92,19 @@ export default function HeroSection() {
                 }}
             >
                 <CarouselContent className="h-full">
-                    {heroImages.map((image, index) => (
-                        <CarouselItem key={index} className="h-[500px]">
+                    {campaigns.map((campaign) => (
+                        <CarouselItem key={campaign.id} className="h-[500px] relative">
                             <Image
-                                src={image}
-                                alt={`Hero Image ${index + 1}`}
+                                src={campaign.imageUrl}
+                                alt={campaign.title}
                                 width={1000}
                                 height={500}
                                 className="w-full h-full object-cover"
+                                priority={campaigns.indexOf(campaign) === 0}
                             />
+                            <div className="absolute top-4 right-4 bg-black/70 text-white px-4 py-2 rounded-md text-sm font-medium backdrop-blur-sm">
+                                Promovido por NOME DO MERCADO AQUI MEU BROTHERRRRR
+                            </div>
                         </CarouselItem>
                     ))}
                 </CarouselContent>
@@ -71,9 +114,9 @@ export default function HeroSection() {
 
                 {/* Indicadores de slide */}
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                    {heroImages.map((_, index) => (
+                    {campaigns.map((_, index) => (
                         <button
-                            key={index}
+                            key={campaigns[index].id}
                             className={`w-2 h-2 rounded-full transition-colors ${index === current ? "bg-primary" : "bg-primary/50"
                                 }`}
                             onClick={() => api?.scrollTo(index)}
