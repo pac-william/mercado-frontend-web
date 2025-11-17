@@ -11,11 +11,13 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { getActiveCampaignsForCarousel, type Campaign } from "@/actions/campaign.actions";
+import { getMarketById } from "@/actions/market.actions";
 
 export default function HeroSection() {
     const [api, setApi] = useState<CarouselApi | null>(null);
     const [current, setCurrent] = useState(0);
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+    const [marketNames, setMarketNames] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -24,6 +26,23 @@ export default function HeroSection() {
                 const activeCampaigns = await getActiveCampaignsForCarousel();
                 const sortedCampaigns = activeCampaigns.sort((a, b) => a.slot - b.slot);
                 setCampaigns(sortedCampaigns);
+
+                const uniqueMarketIds = [...new Set(sortedCampaigns.map(c => c.marketId))];
+                const marketNamesMap: Record<string, string> = {};
+                
+                await Promise.all(
+                    uniqueMarketIds.map(async (marketId) => {
+                        try {
+                            const market = await getMarketById(marketId);
+                            marketNamesMap[marketId] = market.name;
+                        } catch (error) {
+                            console.error(`Erro ao buscar mercado ${marketId}:`, error);
+                            marketNamesMap[marketId] = "Mercado";
+                        }
+                    })
+                );
+                
+                setMarketNames(marketNamesMap);
             } catch (error) {
                 console.error("Erro ao buscar campanhas:", error);
                 setCampaigns([]);
@@ -69,7 +88,7 @@ export default function HeroSection() {
                         priority
                     />
                     <div className="absolute top-4 right-4 bg-black/70 text-white px-4 py-2 rounded-md text-sm font-medium backdrop-blur-sm">
-                        Promovido por Mercado
+                        Promovido por {marketNames[campaigns[0].marketId] || "Mercado"}
                     </div>
                 </div>
             </div>
@@ -98,7 +117,7 @@ export default function HeroSection() {
                                 priority={campaigns.indexOf(campaign) === 0}
                             />
                             <div className="absolute top-4 right-4 bg-black/70 text-white px-4 py-2 rounded-md text-sm font-medium backdrop-blur-sm">
-                                Promovido por NOME DO MERCADO AQUI MEU BROTHERRRRR
+                                Promovido por {marketNames[campaign.marketId] || "Mercado"}
                             </div>
                         </CarouselItem>
                     ))}
