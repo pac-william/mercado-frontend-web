@@ -390,42 +390,21 @@ export function EditAddressDialog({ address }: EditAddressDialogProps) {
                                     )}
                                 />
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <FormField
-                                    control={form.control}
-                                    name="latitude"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Latitude</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    {...field}
-                                                    value={field.value ?? ""}
-                                                    readOnly
-                                                    placeholder="Selecione no mapa"
-                                                />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="longitude"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Longitude</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    {...field}
-                                                    value={field.value ?? ""}
-                                                    readOnly
-                                                    placeholder="Selecione no mapa"
-                                                />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+                            {/* Campos ocultos para latitude e longitude */}
+                            <FormField
+                                control={form.control}
+                                name="latitude"
+                                render={({ field }) => (
+                                    <input type="hidden" {...field} value={field.value ?? ""} />
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="longitude"
+                                render={({ field }) => (
+                                    <input type="hidden" {...field} value={field.value ?? ""} />
+                                )}
+                            />
                             <GoogleMaps
                                 latitude={latitudeValue}
                                 longitude={longitudeValue}

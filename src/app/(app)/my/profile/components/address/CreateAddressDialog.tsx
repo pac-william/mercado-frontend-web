@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { createAddress } from "@/actions/address.actions"
+import { reverseGeocode } from "@/actions/geocoding.actions"
 import GoogleMaps from "@/app/components/GoogleMaps"
 import { Button } from "@/components/ui/button"
 import {
@@ -29,32 +30,64 @@ import {
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AddressDTO as addressSchema, type AddressDTO as AddressFormValues } from "@/dtos/addressDTO"
-import { Plus } from "lucide-react"
+import { Navigation, Plus } from "lucide-react"
 
-export function CreateAddressDialog({ addressesCount }: { addressesCount: number }) {
+interface CreateAddressDialogProps {
+    addressesCount: number;
+    initialValues?: Partial<AddressFormValues>;
+    onOpenChange?: (open: boolean) => void;
+    defaultOpen?: boolean;
+}
+
+export function CreateAddressDialog({ 
+    addressesCount, // eslint-disable-line @typescript-eslint/no-unused-vars
+    initialValues,
+    onOpenChange,
+    defaultOpen = false
+}: CreateAddressDialogProps) {
     const router = useRouter()
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(defaultOpen)
     const [isPending, startTransition] = useTransition()
     const [isFetchingCep, setIsFetchingCep] = useState(false)
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false)
     const lastFetchedCepRef = useRef<string | null>(null)
 
     const form = useForm<AddressFormValues>({
         resolver: zodResolver(addressSchema),
         defaultValues: {
-            name: "",
-            street: "",
-            number: "",
-            neighborhood: "",
-            city: "",
-            state: "",
-            zipCode: "",
-            complement: "",
-            isFavorite: false,
-            isActive: true,
-            latitude: undefined,
-            longitude: undefined,
+            name: initialValues?.name ?? "",
+            street: initialValues?.street ?? "",
+            number: initialValues?.number ?? "",
+            neighborhood: initialValues?.neighborhood ?? "",
+            city: initialValues?.city ?? "",
+            state: initialValues?.state ?? "",
+            zipCode: initialValues?.zipCode ?? "",
+            complement: initialValues?.complement ?? "",
+            isFavorite: initialValues?.isFavorite ?? false,
+            isActive: initialValues?.isActive ?? true,
+            latitude: initialValues?.latitude ?? undefined,
+            longitude: initialValues?.longitude ?? undefined,
         },
     })
+
+    useEffect(() => {
+        if (initialValues) {
+            form.reset({
+                name: initialValues.name ?? "",
+                street: initialValues.street ?? "",
+                number: initialValues.number ?? "",
+                neighborhood: initialValues.neighborhood ?? "",
+                city: initialValues.city ?? "",
+                state: initialValues.state ?? "",
+                zipCode: initialValues.zipCode ?? "",
+                complement: initialValues.complement ?? "",
+                isFavorite: initialValues.isFavorite ?? false,
+                isActive: initialValues.isActive ?? true,
+                latitude: initialValues.latitude ?? undefined,
+                longitude: initialValues.longitude ?? undefined,
+            })
+        }
+    }, [initialValues, form])
 
     const zipCodeValue = form.watch("zipCode")
     const latitudeValue = form.watch("latitude")
@@ -178,8 +211,22 @@ export function CreateAddressDialog({ addressesCount }: { addressesCount: number
 
     const handleOpenChange = (nextOpen: boolean) => {
         setOpen(nextOpen)
+        onOpenChange?.(nextOpen)
         if (!nextOpen) {
-            form.reset()
+            form.reset({
+                name: "",
+                street: "",
+                number: "",
+                neighborhood: "",
+                city: "",
+                state: "",
+                zipCode: "",
+                complement: "",
+                isFavorite: false,
+                isActive: true,
+                latitude: undefined,
+                longitude: undefined,
+            })
             form.clearErrors()
             lastFetchedCepRef.current = null
             setIsFetchingCep(false)
@@ -189,6 +236,85 @@ export function CreateAddressDialog({ addressesCount }: { addressesCount: number
     const handleLocationChange = (coordinates: { latitude: number; longitude: number }) => {
         form.setValue("latitude", coordinates.latitude, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
         form.setValue("longitude", coordinates.longitude, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+    }
+
+    const handleGetLocation = async () => {
+        if (!navigator.geolocation) {
+            toast.error("Geolocalização não é suportada pelo seu navegador")
+            return
+        }
+
+        setIsLoadingLocation(true)
+
+        try {
+            try {
+                if (navigator.permissions) {
+                    const permissionStatus = await navigator.permissions.query({ name: "geolocation" as PermissionName })
+                    if (permissionStatus.state === "denied") {
+                        toast.error("Permissão de localização negada. Por favor, permita o acesso à localização nas configurações do navegador.")
+                        setIsLoadingLocation(false)
+                        return
+                    }
+                }
+            } catch {
+                //
+            }
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    resolve,
+                    reject,
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0,
+                    }
+                )
+            })
+
+            const { latitude, longitude } = position.coords
+            const addressData = await reverseGeocode(latitude, longitude)
+
+            if (addressData.street) {
+                form.setValue("street", addressData.street, { shouldDirty: true })
+            }
+            if (addressData.number) {
+                form.setValue("number", addressData.number, { shouldDirty: true })
+            }
+            if (addressData.neighborhood) {
+                form.setValue("neighborhood", addressData.neighborhood, { shouldDirty: true })
+            }
+            if (addressData.city) {
+                form.setValue("city", addressData.city, { shouldDirty: true })
+            }
+            if (addressData.state) {
+                form.setValue("state", addressData.state, { shouldDirty: true })
+            }
+            if (addressData.zipCode) {
+                form.setValue("zipCode", addressData.zipCode.replace(/\D/g, "").replace(/(\d{5})(\d{0,3})/, (_, p1: string, p2: string) => p2 ? `${p1}-${p2}` : p1), { shouldDirty: true })
+            }
+            form.setValue("latitude", addressData.latitude, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+            form.setValue("longitude", addressData.longitude, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+
+            toast.success("Endereço encontrado e preenchido automaticamente!")
+        } catch (error) {
+            if (error instanceof GeolocationPositionError) {
+                if (error.code === error.PERMISSION_DENIED) {
+                    toast.error("Permissão de localização negada. Por favor, permita o acesso à localização.")
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    toast.error("Localização indisponível. Tente novamente mais tarde.")
+                } else if (error.code === error.TIMEOUT) {
+                    toast.error("Tempo esgotado ao buscar localização. Tente novamente.")
+                } else {
+                    toast.error("Erro ao buscar localização. Tente novamente.")
+                }
+            } else if (error instanceof Error) {
+                toast.error(error.message || "Erro ao buscar endereço. Tente novamente.")
+            } else {
+                toast.error("Erro ao buscar endereço. Tente novamente.")
+            }
+        } finally {
+            setIsLoadingLocation(false)
+        }
     }
 
     const onSubmit = (values: AddressFormValues) => {
@@ -227,7 +353,7 @@ export function CreateAddressDialog({ addressesCount }: { addressesCount: number
         <Form {...form}>
             <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogTrigger asChild>
-                    <Button variant="outline" disabled={addressesCount >= 3}>
+                    <Button variant="outline" >
                         <Plus size={16} />
                         Adicionar endereço
                     </Button>
@@ -241,6 +367,16 @@ export function CreateAddressDialog({ addressesCount }: { addressesCount: number
                     </DialogHeader>
                     <ScrollArea className="flex flex-col flex-grow h-0 overflow-y-auto pr-4">
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleGetLocation}
+                                disabled={isLoadingLocation}
+                                className="w-full"
+                            >
+                                <Navigation className="mr-2 size-4" />
+                                {isLoadingLocation ? "Buscando localização..." : "Usar minha localização atual"}
+                            </Button>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <FormField
                                     control={form.control}
@@ -366,42 +502,21 @@ export function CreateAddressDialog({ addressesCount }: { addressesCount: number
                                     />
                                 </div>
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <FormField
-                                    control={form.control}
-                                    name="latitude"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Latitude</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    {...field}
-                                                    value={field.value ?? ""}
-                                                    readOnly
-                                                    placeholder="Selecione no mapa"
-                                                />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="longitude"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Longitude</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    {...field}
-                                                    value={field.value ?? ""}
-                                                    readOnly
-                                                    placeholder="Selecione no mapa"
-                                                />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+                            {/* Campos ocultos para latitude e longitude */}
+                            <FormField
+                                control={form.control}
+                                name="latitude"
+                                render={({ field }) => (
+                                    <input type="hidden" {...field} value={field.value ?? ""} />
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="longitude"
+                                render={({ field }) => (
+                                    <input type="hidden" {...field} value={field.value ?? ""} />
+                                )}
+                            />
                             <GoogleMaps
                                 latitude={latitudeValue}
                                 longitude={longitudeValue}
