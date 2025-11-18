@@ -8,7 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { User as Auth0User } from "@auth0/nextjs-auth0/types";
-import { Loader, ShoppingCart, Star } from "lucide-react";
+import { Dot, Loader, ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -231,14 +231,21 @@ export default function ProductCardClient({
                         <div className="rounded-full flex flex-col gap-2">
                             <div className="flex flex-col">
                                 <Link href={`/market/${product.marketId}`}>
-                                    <span className="text-sm font-bold text-card-foreground">{safeMarket.name}</span>
+                                    <span className="text-sm font-bold text-card-foreground line-clamp-1 text-ellipsis overflow-hidden">{safeMarket.name}</span>
                                 </Link>
-                                <div className="flex flex-row gap-1">
-                                    <Star size={16} className="text-amber-300" fill="currentColor" />
-                                    <Star size={16} className="text-amber-300" fill="currentColor" />
-                                    <Star size={16} className="text-amber-300" fill="currentColor" />
-                                    <Star size={16} className="text-amber-300" fill="currentColor" />
-                                    <Star size={16} className="text-amber-300" fill="currentColor" />
+                                <div className="flex flex-row gap-1 items-center">
+                                    <div className="flex flex-row gap-1 items-center justify-center">
+                                        <Star size={16} className="text-amber-300" fill="currentColor" />
+                                        <span className="text-sm text-amber-300 font-bold">
+                                            4.5
+                                        </span>
+                                    </div>
+                                    <Dot size={16} className="text-muted-foreground" />
+                                    <div className="flex flex-row gap-1 items-center">
+                                        <span className="text-sm text-muted-foreground">
+                                            0.9 km
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -261,14 +268,16 @@ export default function ProductCardClient({
                                         <>
                                             <p className="text-card-foreground">De</p>
                                             <div className="flex flex-row items-center ml-2">
-                                                {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
+                                                <span className="text-lg font-bold text-red-600">
+                                                    {mountPriceView(getDiscountPrice(product.price, product.id), "old")}
+                                                </span>
                                             </div>
                                             <p className="text-card-foreground">Por</p>
                                         </>
                                     ) : null
                                 }
                                 <div className="flex flex-row items-center ml-2">
-                                    {mountPriceView(product.price, "new")}
+                                    <span className="text-lg font-bold text-emerald-600">{mountPriceView(product.price, "new")}</span>
                                 </div>
                             </div>
                             <div className="flex flex-row gap-2 items-end">
@@ -369,7 +378,7 @@ export default function ProductCardClient({
         case "suggestion":
             return (
                 <Card className="flex flex-col max-w-xs w-full relative">
-                    
+
                     <CardHeader className="flex flex-row gap-2">
                         <Avatar className="w-12 h-12 shadow-md border">
                             {safeMarket.profilePicture ? (
