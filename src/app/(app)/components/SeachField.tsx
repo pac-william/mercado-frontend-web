@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -80,16 +79,16 @@ export default function SearchField({
     };
 
     return (
-        <div className={`flex flex-row ${className}`}>
-            <Button variant="outline" size="icon" className="rounded-r-none border-r-0 bg-background border-border hover:bg-accent hover:text-accent-foreground">
-                <SearchIcon size={24} className="text-muted-foreground" />
-            </Button>
-            <Input 
-                className={`${width} bg-background rounded-l-none border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary`}
-                placeholder={placeholder}
-                value={searchValue}
-                onChange={handleInputChange}
-            />
+        <div className={`flex flex-row items-center gap-2 ${className}`}>
+            <div className="relative flex items-center">
+                <SearchIcon size={16} className="absolute left-3 text-muted-foreground pointer-events-none" />
+                <Input 
+                    className={`${width} h-9 rounded-full bg-muted/50 hover:bg-muted text-foreground border-border placeholder:text-muted-foreground focus:border-primary focus:ring-primary pl-9`}
+                    placeholder={placeholder}
+                    value={searchValue}
+                    onChange={handleInputChange}
+                />
+            </div>
         </div>
     )
 }
