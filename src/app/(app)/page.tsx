@@ -8,7 +8,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
 import Footer from "../components/Footer";
-import HeroSection from "../components/HeroSection";
 import ProductCard from "../components/ProductCard";
 import SearchAiBar from "../components/SearchBar";
 import { Product } from "../domain/productDomain";
@@ -28,7 +27,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
     return (
         <ScrollArea className="flex flex-col flex-grow h-0">
             <div className="flex flex-col gap-4 items-center my-4 mb-20">
-                <HeroSection />
+                {/* <HeroSection /> */}
                 <div className="flex flex-col gap-4 items-center justify-center h-64">
                     <SearchAiBar particles />
                 </div>

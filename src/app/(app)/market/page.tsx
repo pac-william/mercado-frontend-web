@@ -2,12 +2,15 @@ import { getMarkets } from "@/actions/market.actions";
 import Footer from "@/app/components/Footer";
 import Pagination from "@/app/components/Pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { BadgeCheck, Dot, Star } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
+import MarketFilters from "./components/MarketFilters";
 
 interface MarketListSearchParams {
     page?: string;
@@ -59,6 +62,10 @@ export default async function MarketsPage({
                     </p>
                 </header>
 
+                <Suspense fallback={<div className="h-9" />}>
+                    <MarketFilters />
+                </Suspense>
+
                 <Separator />
 
                 {markets.length === 0 ? (
@@ -72,7 +79,7 @@ export default async function MarketsPage({
                     </Card>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             {markets.map((market) => (
                                 <Link
                                     key={market.id}
@@ -81,7 +88,7 @@ export default async function MarketsPage({
                                 >
                                     <Card className="h-full border-border bg-card">
                                         <CardHeader className="flex flex-row items-start gap-4">
-                                            <Avatar className="h-14 w-14 border">
+                                            <Avatar className="h-20 w-20 border">
                                                 {market.profilePicture ? (
                                                     <AvatarImage src={market.profilePicture} alt={market.name} />
                                                 ) : null}
@@ -90,20 +97,30 @@ export default async function MarketsPage({
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="flex flex-1 flex-col gap-1">
-                                                <CardTitle className="text-lg text-card-foreground">{market.name}</CardTitle>
-                                                <CardDescription className="text-xs uppercase tracking-wide text-primary">
+                                                <CardTitle className="flex items-center gap-2 text-lg text-card-foreground">
+                                                    <span className="line-clamp-1">{market.name}</span>
+                                                    <Tooltip>
+                                                        <TooltipTrigger>
+                                                            <BadgeCheck size={16} className="text-sky-500" />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Verificado</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </CardTitle>
+                                                <span className="flex items-center">
+                                                    <div className="flex items-center gap-1">
+                                                        <Star size={16} fill="currentColor" className="text-amber-300" />
+                                                        <span className="text-sm font-bold text-amber-300">4.5</span>
+                                                    </div>
+                                                    <Dot scale={16} />
+                                                    <span className="text-sm text-muted-foreground">R$ 7,50</span>
+                                                </span>
+                                                <CardDescription className="text-xs uppercase tracking-wide text-muted-foreground">
                                                     {market.address}
                                                 </CardDescription>
                                             </div>
                                         </CardHeader>
-                                        <CardContent className="flex flex-col gap-3">
-                                            <p className="text-sm text-muted-foreground">
-                                                Acesse para ver os produtos disponíveis, ofertas e promoções exclusivas.
-                                            </p>
-                                            <Badge variant="secondary" className="w-fit">
-                                                Ver detalhes
-                                            </Badge>
-                                        </CardContent>
                                     </Card>
                                 </Link>
                             ))}

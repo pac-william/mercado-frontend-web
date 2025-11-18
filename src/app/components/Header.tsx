@@ -37,7 +37,7 @@ export default async function Header() {
 
     return (
         <header className="border-b border-border bg-background">
-            <div className="container mx-auto flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between">
+            <div className="container mx-auto flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:gap-10">
                     <Link href="/" className="flex items-center text-2xl font-bold text-primary md:text-3xl">
                         Smart Market
