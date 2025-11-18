@@ -21,7 +21,7 @@ export const getMarkets = async (filters?: GetMarketsFilters) => {
         const response = await fetch(`${baseUrl}/api/v1/markets?${params.toString()}`, {
             cache: 'no-store',
         });
-        
+
         if (!response.ok) {
             throw new Error('Erro ao buscar mercados');
         }
