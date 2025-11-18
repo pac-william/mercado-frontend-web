@@ -163,7 +163,7 @@ export default function ProductCardClient({
                     <Separator />
 
                     <CardContent className="p-0 relative w-full aspect-square">
-                        <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
+                        <Image unoptimized src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
                     </CardContent>
 
                     <CardFooter className="flex flex-col flex-1 gap-2 items-start">
@@ -255,7 +255,7 @@ export default function ProductCardClient({
 
                     <CardContent className="p-0 relative w-full aspect-square">
                         <Link href={`/market/${product.marketId}/product/${product.id}`}>
-                            <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8 cursor-pointer" />
+                            <Image unoptimized src={getImageSrc()} alt="Product" fill className="object-cover p-8 cursor-pointer" />
                         </Link>
                     </CardContent>
 
@@ -303,7 +303,7 @@ export default function ProductCardClient({
                 <Card className="flex flex-col max-w-xs w-full bg-card border-border">
                     <CardContent className="p-0 relative w-full aspect-square">
                         <Link href={`/market/${product.marketId}/product/${product.id}`}>
-                            <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8 cursor-pointer" />
+                            <Image unoptimized src={getImageSrc()} alt="Product" fill className="object-cover p-8 cursor-pointer" />
                         </Link>
                     </CardContent>
 
@@ -348,7 +348,7 @@ export default function ProductCardClient({
             return (
                 <Card className="flex h-full flex-col max-w-xs w-full bg-card border-border">
                     <CardContent className="p-0 relative w-full aspect-square">
-                        <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
+                        <Image unoptimized src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
                     </CardContent>
 
                     <CardFooter className="flex flex-col flex-1 gap-2 items-start">
@@ -405,7 +405,7 @@ export default function ProductCardClient({
                     <Separator />
 
                     <CardContent className="p-0 relative w-full aspect-square">
-                        <Image src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
+                        <Image unoptimized src={getImageSrc()} alt="Product" fill className="object-cover p-8" />
                     </CardContent>
 
                     <CardFooter className="flex flex-col flex-1 gap-2 items-start">
