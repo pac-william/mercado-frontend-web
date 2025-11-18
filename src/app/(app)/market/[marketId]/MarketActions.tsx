@@ -33,9 +33,10 @@ interface MarketActionsProps {
     marketAddress: string;
     marketLatitude?: number | null;
     marketLongitude?: number | null;
+    deliveryRadius?: number; // Raio de entrega em metros
 }
 
-export function MarketActions({ marketName, marketId, marketAddress, marketLatitude, marketLongitude }: MarketActionsProps) {
+export function MarketActions({ marketName, marketId, marketAddress, marketLatitude, marketLongitude, deliveryRadius }: MarketActionsProps) {
     const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
     const [addressMapDialogOpen, setAddressMapDialogOpen] = useState(false);
     const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
@@ -83,6 +84,7 @@ export function MarketActions({ marketName, marketId, marketAddress, marketLatit
                 marketAddress={marketAddress}
                 marketLatitude={marketLatitude}
                 marketLongitude={marketLongitude}
+                deliveryRadius={deliveryRadius}
                 open={addressMapDialogOpen}
                 onOpenChange={setAddressMapDialogOpen}
             />
@@ -436,11 +438,12 @@ interface AddressMapDialogProps {
     marketAddress: string;
     marketLatitude?: number | null;
     marketLongitude?: number | null;
+    deliveryRadius?: number; // Raio de entrega em metros
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 }
 
-function AddressMapDialog({ marketName, marketAddress, marketLatitude, marketLongitude, open, onOpenChange }: AddressMapDialogProps) {
+function AddressMapDialog({ marketName, marketAddress, marketLatitude, marketLongitude, deliveryRadius, open, onOpenChange }: AddressMapDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-2xl">
@@ -460,13 +463,29 @@ function AddressMapDialog({ marketName, marketAddress, marketLatitude, marketLon
                         </div>
                     </div>
 
+                    {deliveryRadius && deliveryRadius > 0 && (
+                        <div className="flex items-start gap-3 p-4 rounded-lg border border-border bg-muted/50">
+                            <MapPin className="size-5 text-primary mt-0.5 shrink-0" />
+                            <div className="flex-1">
+                                <p className="text-sm font-medium text-foreground mb-1">Raio de entrega</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {deliveryRadius >= 1000 
+                                        ? `${(deliveryRadius / 1000).toFixed(1)} km` 
+                                        : `${deliveryRadius} m`}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="rounded-lg overflow-hidden border border-border">
                         <GoogleMaps
                             latitude={marketLatitude ?? undefined}
                             longitude={marketLongitude ?? undefined}
                             zoom={15}
                             height="400px"
-                            interactive={true}
+                            interactive={false}
+                            controls={false}
+                            deliveryRadius={deliveryRadius}
                         />
                     </div>
 

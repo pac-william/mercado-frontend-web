@@ -1,7 +1,7 @@
 "use client";
 
 import { useGoogleMapsLoader } from "@/context/GoogleMapsContext";
-import { GoogleMap, Marker } from "@react-google-maps/api";
+import { Circle, GoogleMap, Marker } from "@react-google-maps/api";
 import { Pin } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -18,6 +18,7 @@ interface GoogleMapsProps {
   onLocationChange?: (coordinates: { latitude: number; longitude: number }) => void;
   interactive?: boolean;
   controls?: boolean;
+  deliveryRadius?: number; // Raio de entrega em metros
 }
 
 export default function GoogleMaps({
@@ -28,6 +29,7 @@ export default function GoogleMaps({
   onLocationChange,
   interactive,
   controls,
+  deliveryRadius,
 }: GoogleMapsProps) {
   const { isLoaded, loadError } = useGoogleMapsLoader();
   const isInteractive = interactive ?? typeof onLocationChange === "function";
@@ -52,8 +54,39 @@ export default function GoogleMaps({
     [hasCoordinates, latitude, longitude],
   );
 
+  // Calcula o zoom apropriado baseado no raio de entrega
+  const calculatedZoom = useMemo(() => {
+    if (!deliveryRadius || !hasCoordinates || !latitude) return zoom;
+    
+    // Fórmula aproximada para calcular zoom baseado no raio em metros
+    // Ajusta o zoom para que o círculo seja visível com uma margem
+    const radiusInKm = deliveryRadius / 1000;
+    let calculatedZoom = zoom;
+    
+    if (radiusInKm >= 50) {
+      calculatedZoom = 10;
+    } else if (radiusInKm >= 20) {
+      calculatedZoom = 11;
+    } else if (radiusInKm >= 10) {
+      calculatedZoom = 12;
+    } else if (radiusInKm >= 5) {
+      calculatedZoom = 13;
+    } else if (radiusInKm >= 2) {
+      calculatedZoom = 14;
+    } else if (radiusInKm >= 1) {
+      calculatedZoom = 15;
+    } else if (radiusInKm >= 0.5) {
+      calculatedZoom = 16;
+    } else {
+      calculatedZoom = 17;
+    }
+    
+    return calculatedZoom;
+  }, [deliveryRadius, hasCoordinates, latitude, zoom]);
+
   const [mapCenter, setMapCenter] = useState(initialCenter);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const circleRef = useRef<google.maps.Circle | null>(null);
 
   useEffect(() => {
     if (hasCoordinates) {
@@ -74,8 +107,24 @@ export default function GoogleMaps({
     (map: google.maps.Map) => {
       mapRef.current = map;
       map.setCenter(mapCenter);
+      
+      // Ajusta o zoom e bounds quando há raio de entrega
+      if (hasCoordinates && deliveryRadius && deliveryRadius > 0) {
+        map.setZoom(calculatedZoom);
+        
+        // Ajusta os bounds para incluir o círculo completo
+        const circle = new google.maps.Circle({
+          center: mapCenter,
+          radius: deliveryRadius,
+        });
+        
+        const bounds = circle.getBounds();
+        if (bounds) {
+          map.fitBounds(bounds, 50); // Padding em pixels
+        }
+      }
     },
-    [mapCenter],
+    [mapCenter, hasCoordinates, deliveryRadius, calculatedZoom],
   );
 
   const handleMapUnmount = useCallback(() => {
@@ -152,7 +201,7 @@ export default function GoogleMaps({
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "100%" }}
         center={mapCenter}
-        zoom={zoom}
+        zoom={calculatedZoom}
         onLoad={handleMapLoad}
         onUnmount={handleMapUnmount}
         onIdle={handleMapIdle}
@@ -173,6 +222,29 @@ export default function GoogleMaps({
         }}
       >
         {!isInteractive && hasCoordinates ? <Marker position={mapCenter} /> : null}
+        {hasCoordinates && deliveryRadius && deliveryRadius > 0 && (
+          <Circle
+            onLoad={(circle) => {
+              circleRef.current = circle;
+              // Ajusta os bounds quando o círculo é carregado
+              if (mapRef.current) {
+                const bounds = circle.getBounds();
+                if (bounds) {
+                  mapRef.current.fitBounds(bounds, 50); // Padding em pixels
+                }
+              }
+            }}
+            center={mapCenter}
+            radius={deliveryRadius}
+            options={{
+              fillColor: "#3b82f6",
+              fillOpacity: 0.15,
+              strokeColor: "#3b82f6",
+              strokeOpacity: 0.5,
+              strokeWeight: 2,
+            }}
+          />
+        )}
       </GoogleMap>
 
       {isInteractive ? (

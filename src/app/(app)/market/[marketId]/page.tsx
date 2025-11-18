@@ -137,12 +137,13 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
                                     <span className="sr-only">Chat</span>
                                 </Link>
                             </Button>
-                            <MarketActions 
+                            <MarketActions
                                 marketName={market.name}
                                 marketId={marketId}
                                 marketAddress={market.address}
-                                marketLatitude={null}
-                                marketLongitude={null}
+                                marketLatitude={-23.55052} // São Paulo latitude
+                                marketLongitude={-46.633308} // São Paulo longitude
+                                deliveryRadius={1000}
                             />
                         </div>
                     </CardHeader>
