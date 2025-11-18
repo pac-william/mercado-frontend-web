@@ -2,13 +2,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { GoogleMapsProvider } from "@/context/GoogleMapsContext";
 import type { Metadata } from "next";
-import { Geist_Mono, Nunito } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const nunito = Nunito({
-  variable: "--font-nunito",
-  subsets: ["latin"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -27,7 +22,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body
-        className={`${nunito.variable} ${geistMono.variable} font-sans antialiased dark:bg-zinc-950 bg-slate-50`}
+        className={`${geistMono.variable} font-sans antialiased dark:bg-zinc-950 bg-slate-50`}
       >
         <ThemeProvider
           attribute="class"

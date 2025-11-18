@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import GoogleMaps from "@/app/components/GoogleMaps";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -11,15 +12,8 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+    DialogTitle
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
-import { Bell, Check, Copy, Heart, MapPin, MoreVertical, Share2, Star } from "lucide-react";
-import GoogleMaps from "@/app/components/GoogleMaps";
-import { toast } from "sonner";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -27,6 +21,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import { Bell, Check, Copy, Heart, MapPin, MoreVertical, Share2, Star } from "lucide-react";
+import { toast } from "sonner";
 
 interface MarketActionsProps {
     marketName: string;
