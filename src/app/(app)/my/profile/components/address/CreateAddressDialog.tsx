@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 import { AddressDTO as addressSchema, type AddressDTO as AddressFormValues } from "@/dtos/addressDTO"
 import { Navigation, Plus } from "lucide-react"
 
@@ -39,7 +40,7 @@ interface CreateAddressDialogProps {
     defaultOpen?: boolean;
 }
 
-export function CreateAddressDialog({ 
+export function CreateAddressDialog({
     addressesCount, // eslint-disable-line @typescript-eslint/no-unused-vars
     initialValues,
     onOpenChange,
@@ -358,198 +359,208 @@ export function CreateAddressDialog({
                         Adicionar endereço
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="flex flex-col flex-1 sm:max-w-[520px] h-[90vh]">
-                    <DialogHeader>
+                <DialogContent className="flex flex-col flex-1 sm:max-w-[520px] h-[90vh] p-0 gap-0">
+                    <DialogHeader className="p-4">
                         <DialogTitle>Novo endereço</DialogTitle>
                         <DialogDescription>
                             Preencha as informações abaixo para cadastrar um novo endereço de entrega.
                         </DialogDescription>
                     </DialogHeader>
-                    <ScrollArea className="flex flex-col flex-grow h-0 overflow-y-auto pr-4">
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleGetLocation}
-                                disabled={isLoadingLocation}
-                                className="w-full"
-                            >
-                                <Navigation className="mr-2 size-4" />
-                                {isLoadingLocation ? "Buscando localização..." : "Usar minha localização atual"}
-                            </Button>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <FormField
-                                    control={form.control}
-                                    name="zipCode"
-                                    render={({ field }) => (
-                                        <FormItem className="sm:col-span-2">
-                                            <FormLabel>CEP</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="00000-000"
-                                                    {...field}
-                                                    value={field.value}
-                                                    onChange={(event) => {
-                                                        const digitsOnly = event.target.value
-                                                            .replace(/\D/g, "")
-                                                            .slice(0, 8)
-                                                        const formatted = digitsOnly.replace(
-                                                            /(\d{5})(\d{0,3})/,
-                                                            (_, p1: string, p2: string) =>
-                                                                p2 ? `${p1}-${p2}` : p1,
-                                                        )
-                                                        lastFetchedCepRef.current = null
-                                                        field.onChange(formatted)
-                                                    }}
-                                                    onBlur={(event) => {
-                                                        field.onBlur()
-                                                        const digitsOnly = event.target.value.replace(/\D/g, "")
-                                                        if (digitsOnly.length !== 8) {
-                                                            form.setError("zipCode", {
-                                                                message: "Informe um CEP válido com 8 dígitos",
-                                                            })
-                                                        }
-                                                    }}
-                                                />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem className="sm:col-span-2">
-                                            <FormLabel>Identificação do endereço</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Casa" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="street"
-                                    render={({ field }) => (
-                                        <FormItem className="sm:col-span-2">
-                                            <FormLabel>Rua</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Rua das Flores" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="number"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Número</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="123" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="complement"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Complemento (opcional)</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Apto 101" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="neighborhood"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Bairro</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Centro" {...field} />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <div className="grid sm:grid-cols-3 gap-4 sm:col-span-1">
-                                    <FormField
-                                        control={form.control}
-                                        name="city"
-                                        render={({ field }) => (
-                                            <FormItem className="sm:col-span-2">
-                                                <FormLabel>Cidade</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="São Paulo" {...field} />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="state"
-                                        render={({ field }) => (
-                                            <FormItem className="sm:col-span-1">
-                                                <FormLabel>Estado</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="SP" maxLength={2} {...field} />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            </div>
-                            {/* Campos ocultos para latitude e longitude */}
-                            <FormField
-                                control={form.control}
-                                name="latitude"
-                                render={({ field }) => (
-                                    <input type="hidden" {...field} value={field.value ?? ""} />
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="longitude"
-                                render={({ field }) => (
-                                    <input type="hidden" {...field} value={field.value ?? ""} />
-                                )}
-                            />
-                            <GoogleMaps
-                                latitude={latitudeValue}
-                                longitude={longitudeValue}
-                                height="260px"
-                                zoom={hasLocation ? 16 : 12}
-                                onLocationChange={handleLocationChange}
-                            />
-                            {form.formState.errors.root?.message ? (
-                                <p className="text-sm text-destructive">
-                                    {form.formState.errors.root.message}
-                                </p>
-                            ) : null}
-                            <DialogFooter className="gap-2">
-                                <DialogClose asChild>
+
+                    <Separator />
+
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1">
+                        <ScrollArea className="flex flex-col flex-grow h-0 overflow-y-auto p-4 space-y-4">
+                            <div className="flex flex-col flex-1 gap-4">
+                                <div className="grid gap-4 sm:grid-cols-2">
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={() => handleOpenChange(false)}
-                                        disabled={isPending}
+                                        onClick={handleGetLocation}
+                                        disabled={isLoadingLocation}
+                                        className="w-full sm:col-span-2"
                                     >
-                                        Cancelar
+                                        <Navigation className="mr-2 size-4" />
+                                        {isLoadingLocation ? "Buscando localização..." : "Usar minha localização atual"}
                                     </Button>
-                                </DialogClose>
-                                <Button type="submit" disabled={isPending || isFetchingCep}>
-                                    {isPending
-                                        ? "Salvando..."
-                                        : isFetchingCep
-                                            ? "Consultando CEP..."
-                                            : "Salvar endereço"}
+                                    <FormField
+                                        control={form.control}
+                                        name="zipCode"
+                                        render={({ field }) => (
+                                            <FormItem className="sm:col-span-2">
+                                                <FormLabel>CEP</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="00000-000"
+                                                        {...field}
+                                                        value={field.value}
+                                                        onChange={(event) => {
+                                                            const digitsOnly = event.target.value
+                                                                .replace(/\D/g, "")
+                                                                .slice(0, 8)
+                                                            const formatted = digitsOnly.replace(
+                                                                /(\d{5})(\d{0,3})/,
+                                                                (_, p1: string, p2: string) =>
+                                                                    p2 ? `${p1}-${p2}` : p1,
+                                                            )
+                                                            lastFetchedCepRef.current = null
+                                                            field.onChange(formatted)
+                                                        }}
+                                                        onBlur={(event) => {
+                                                            field.onBlur()
+                                                            const digitsOnly = event.target.value.replace(/\D/g, "")
+                                                            if (digitsOnly.length !== 8) {
+                                                                form.setError("zipCode", {
+                                                                    message: "Informe um CEP válido com 8 dígitos",
+                                                                })
+                                                            }
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem className="sm:col-span-2">
+                                                <FormLabel>Identificação do endereço</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Casa" {...field} />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="street"
+                                        render={({ field }) => (
+                                            <FormItem className="sm:col-span-2">
+                                                <FormLabel>Rua</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Rua das Flores" {...field} />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="number"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Número</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="123" {...field} />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="complement"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Complemento (opcional)</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Apto 101" {...field} />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="neighborhood"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Bairro</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Centro" {...field} />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="latitude"
+                                        render={({ field }) => (
+                                            <input type="hidden" {...field} value={field.value ?? ""} />
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="longitude"
+                                        render={({ field }) => (
+                                            <input type="hidden" {...field} value={field.value ?? ""} />
+                                        )}
+                                    />
+                                    <div className="grid sm:grid-cols-3 gap-4 sm:col-span-1">
+                                        <FormField
+                                            control={form.control}
+                                            name="city"
+                                            render={({ field }) => (
+                                                <FormItem className="sm:col-span-2">
+                                                    <FormLabel>Cidade</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="São Paulo" {...field} />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="state"
+                                            render={({ field }) => (
+                                                <FormItem className="sm:col-span-1">
+                                                    <FormLabel>Estado</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="SP" maxLength={2} {...field} />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                </div>
+                                {/* Campos ocultos para latitude e longitude */}
+
+                                <GoogleMaps
+                                    latitude={latitudeValue}
+                                    longitude={longitudeValue}
+                                    height="260px"
+                                    zoom={hasLocation ? 16 : 12}
+                                    controls={false}
+                                    onLocationChange={handleLocationChange}
+                                />
+                            </div>
+                        </ScrollArea>
+                        
+                        <Separator />
+
+                        {form.formState.errors.root?.message ? (
+                            <p className="text-sm text-destructive">
+                                {form.formState.errors.root.message}
+                            </p>
+                        ) : null}
+                        <DialogFooter className="gap-2 p-4">
+                            <DialogClose asChild>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => handleOpenChange(false)}
+                                    disabled={isPending}
+                                >
+                                    Cancelar
                                 </Button>
-                            </DialogFooter>
-                        </form>
-                    </ScrollArea>
+                            </DialogClose>
+                            <Button type="submit" disabled={isPending || isFetchingCep}>
+                                {isPending
+                                    ? "Salvando..."
+                                    : isFetchingCep
+                                        ? "Consultando CEP..."
+                                        : "Salvar endereço"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
                 </DialogContent>
             </Dialog>
         </Form>

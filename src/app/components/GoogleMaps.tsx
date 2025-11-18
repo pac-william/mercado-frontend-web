@@ -17,6 +17,7 @@ interface GoogleMapsProps {
   height?: string;
   onLocationChange?: (coordinates: { latitude: number; longitude: number }) => void;
   interactive?: boolean;
+  controls?: boolean;
 }
 
 export default function GoogleMaps({
@@ -26,9 +27,11 @@ export default function GoogleMaps({
   height,
   onLocationChange,
   interactive,
+  controls,
 }: GoogleMapsProps) {
   const { isLoaded, loadError } = useGoogleMapsLoader();
   const isInteractive = interactive ?? typeof onLocationChange === "function";
+  const showControls = controls !== false && isInteractive;
 
   const containerStyle = useMemo(
     () => ({
@@ -160,13 +163,13 @@ export default function GoogleMaps({
           draggable: isInteractive,
           scrollwheel: isInteractive,
           keyboardShortcuts: isInteractive,
-          disableDefaultUI: !isInteractive,
+          disableDefaultUI: !isInteractive || controls === false,
           gestureHandling: isInteractive ? "greedy" : "none",
           clickableIcons: isInteractive,
-          zoomControl: isInteractive,
+          zoomControl: showControls,
           streetViewControl: false,
-          mapTypeControl: isInteractive,
-          fullscreenControl: isInteractive,
+          mapTypeControl: showControls,
+          fullscreenControl: showControls,
         }}
       >
         {!isInteractive && hasCoordinates ? <Marker position={mapCenter} /> : null}
