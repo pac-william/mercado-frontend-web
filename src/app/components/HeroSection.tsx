@@ -1,5 +1,7 @@
 "use client"
 
+import { getActiveCampaignsForCarousel, type Campaign } from "@/actions/campaign.actions";
+import { getMarketById } from "@/actions/market.actions";
 import {
     Carousel,
     CarouselContent,
@@ -10,8 +12,6 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { getActiveCampaignsForCarousel, type Campaign } from "@/actions/campaign.actions";
-import { getMarketById } from "@/actions/market.actions";
 
 export default function HeroSection() {
     const [api, setApi] = useState<CarouselApi | null>(null);
@@ -19,6 +19,7 @@ export default function HeroSection() {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [marketNames, setMarketNames] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
+    const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const fetchCampaigns = async () => {
@@ -72,23 +73,53 @@ export default function HeroSection() {
         });
     }, [api, campaigns.length]);
 
+    const handleImageError = (campaignId: string) => {
+        setImageErrors((prev) => new Set(prev).add(campaignId));
+    };
+
     if (loading || campaigns.length === 0) {
-        return null;
+        return (
+            <div className="w-full relative">
+                <div className="h-[500px] relative bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                    <div className="text-center space-y-4 px-4">
+                        <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                            {loading ? "Carregando ofertas..." : "Nenhuma oferta disponível no momento"}
+                        </h2>
+                        <p className="text-muted-foreground text-sm md:text-base">
+                            {loading ? "Aguarde enquanto buscamos as melhores promoções" : "Volte em breve para conferir nossas promoções"}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (campaigns.length === 1) {
+        const campaign = campaigns[0];
+        const hasError = imageErrors.has(campaign.id);
+        
         return (
             <div className="w-full relative">
                 <div className="h-[500px] relative">
-                    <Image
-                        src={campaigns[0].imageUrl}
-                        alt={campaigns[0].title}
-                        fill
-                        className="w-full h-full object-cover"
-                        priority
-                    />
+                    {hasError ? (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                            <div className="text-center space-y-2 px-4">
+                                <p className="text-gray-600 text-lg font-medium">Imagem não disponível</p>
+                                <p className="text-gray-500 text-sm">{campaign.title}</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <Image
+                            src={campaign.imageUrl}
+                            alt={campaign.title}
+                            fill
+                            className="w-full h-full object-cover"
+                            priority
+                            onError={() => handleImageError(campaign.id)}
+                        />
+                    )}
                     <div className="absolute top-4 right-4 bg-black/70 text-white px-4 py-2 rounded-md text-sm font-medium backdrop-blur-sm">
-                        Promovido por {marketNames[campaigns[0].marketId] || "Mercado"}
+                        Promovido por {marketNames[campaign.marketId] || "Mercado"}
                     </div>
                 </div>
             </div>
@@ -106,21 +137,34 @@ export default function HeroSection() {
                 }}
             >
                 <CarouselContent className="h-full">
-                    {campaigns.map((campaign) => (
-                        <CarouselItem key={campaign.id} className="h-[500px] relative">
-                            <Image
-                                src={campaign.imageUrl}
-                                alt={campaign.title}
-                                width={1000}
-                                height={500}
-                                className="w-full h-full object-cover"
-                                priority={campaigns.indexOf(campaign) === 0}
-                            />
-                            <div className="absolute top-4 right-4 bg-black/70 text-white px-4 py-2 rounded-md text-sm font-medium backdrop-blur-sm">
-                                Promovido por {marketNames[campaign.marketId] || "Mercado"}
-                            </div>
-                        </CarouselItem>
-                    ))}
+                    {campaigns.map((campaign) => {
+                        const hasError = imageErrors.has(campaign.id);
+                        return (
+                            <CarouselItem key={campaign.id} className="h-[500px] relative">
+                                {hasError ? (
+                                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                        <div className="text-center space-y-2 px-4">
+                                            <p className="text-gray-600 text-lg font-medium">Imagem não disponível</p>
+                                            <p className="text-gray-500 text-sm">{campaign.title}</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Image
+                                        src={campaign.imageUrl}
+                                        alt={campaign.title}
+                                        width={1000}
+                                        height={500}
+                                        className="w-full h-full object-cover"
+                                        priority={campaigns.indexOf(campaign) === 0}
+                                        onError={() => handleImageError(campaign.id)}
+                                    />
+                                )}
+                                <div className="absolute top-4 right-4 bg-black/70 text-white px-4 py-2 rounded-md text-sm font-medium backdrop-blur-sm">
+                                    Promovido por {marketNames[campaign.marketId] || "Mercado"}
+                                </div>
+                            </CarouselItem>
+                        );
+                    })}
                 </CarouselContent>
                     
                 <CarouselPrevious className="left-4" />
