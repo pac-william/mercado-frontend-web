@@ -7,6 +7,7 @@ import ProductCardClient from "./ProductCardClient";
 
 interface ProductCardProps {
     product: Product;
+    market?: Market | null;
     variant?: "quantity-select" | "buy-now" | "owner" | "history" | "suggestion";
     badgeText?: string;
     badgeVariant?: "default" | "secondary" | "destructive" | "outline";
@@ -14,10 +15,11 @@ interface ProductCardProps {
     onQuantityChange?: (productId: string, quantity: number) => void;
 }
 
-export default async function ProductCard({ 
-    product, 
-    variant = "buy-now", 
-    badgeText, 
+export default async function ProductCard({
+    product,
+    market,
+    variant = "buy-now",
+    badgeText,
     badgeVariant = "secondary",
     initialQuantity,
     onQuantityChange
@@ -25,13 +27,18 @@ export default async function ProductCard({
     const session = await auth0.getSession();
     
     // Try to get market, but handle errors gracefully
-    let market: Market | null = null;
-    try {
-        market = await getMarketById(product.marketId);
-    } catch (error) {
-        console.error(`Error fetching market ${product.marketId}:`, error);
-        // Create a fallback market object
-        market = new Market(
+    let resolvedMarket: Market | null = market ?? null;
+
+    if (!resolvedMarket) {
+        try {
+            resolvedMarket = await getMarketById(product.marketId);
+        } catch (error) {
+            console.error(`Error fetching market ${product.marketId}:`, error);
+        }
+    }
+
+    if (!resolvedMarket) {
+        resolvedMarket = new Market(
             product.marketId,
             "Market",
             "",
@@ -43,7 +50,7 @@ export default async function ProductCard({
     return (
         <ProductCardClient 
             product={product} 
-            market={market} 
+            market={resolvedMarket} 
             user={session?.user as Auth0User | undefined}
             variant={variant}
             badgeText={badgeText}

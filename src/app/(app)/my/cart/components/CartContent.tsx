@@ -1,7 +1,7 @@
 'use client';
 
 import { removeCartItem, updateCartItemQuantity } from "@/actions/cart.actions";
-import ProductCard from "@/app/components/ProductCard";
+import ProductCardClient from "@/app/components/ProductCardClient";
 import { Market } from "@/app/domain/marketDomain";
 import { formatPrice } from "@/app/utils/formatters";
 import RouterBack from "@/components/RouterBack";
@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { CartResponse } from "@/dtos/cartDTO";
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import MarketsCorousel from "./MarketsCorousel";
 
@@ -37,6 +37,14 @@ export default function CartContent({ initialCart, markets }: CartContentProps) 
 
     const subtotal = cart?.totalValue ?? 0;
     const total = subtotal + DELIVERY_FEE;
+
+    const marketMap = useMemo<Record<string, Market>>(() => {
+        const map: Record<string, Market> = {};
+        markets.forEach((market) => {
+            map[market.id] = market;
+        });
+        return map;
+    }, [markets]);
 
     const handleQuantityChange = async (productId: string, quantity: number) => {
         const cartItem = cartItems.find((item) => item.product.id === productId);
@@ -102,7 +110,7 @@ export default function CartContent({ initialCart, markets }: CartContentProps) 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                                     {cartItems.map((item) => {
                                         return (
-                                            <ProductCard
+                                            <ProductCardClient
                                                 key={item.id}
                                                 product={{
                                                     id: item.product.id,
@@ -114,6 +122,7 @@ export default function CartContent({ initialCart, markets }: CartContentProps) 
                                                 }}
                                                 variant="quantity-select"
                                                 initialQuantity={item.quantity}
+                                                market={marketMap[item.product.marketId]}
                                                 onQuantityChange={handleQuantityChange}
                                             />
                                         );
