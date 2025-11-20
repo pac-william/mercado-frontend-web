@@ -9,6 +9,7 @@ import Link from "next/link";
 import { AddressSelectionDialog } from "./AddressSelectionDialog";
 import AuthButtons from "./AuthButtons";
 import CartSheet from "./CartSheet";
+import { getMarketById } from "@/actions/market.actions";
 import ChatButton from "./ChatButton";
 import Navigation from "./Navigation";
 import { ProfileMenuDropDown } from "./ProfileMenuDropDown";
@@ -25,6 +26,7 @@ export default async function Header() {
     const defaultAddress = favoriteAddress ?? addresses[0];
 
     let items: CartItemResponseDTO[] = [];
+    const marketInfos: Record<string, { name: string; profilePicture?: string }> = {};
 
     if (session) {
         try {
@@ -33,6 +35,27 @@ export default async function Header() {
         } catch (error) {
             console.error("Erro ao carregar carrinho:", error);
         }
+    }
+
+    if (items.length > 0) {
+        const uniqueMarketIds = [...new Set(items.map((item) => item.product.marketId))];
+        await Promise.all(
+            uniqueMarketIds.map(async (marketId) => {
+                try {
+                    const market = await getMarketById(marketId);
+                    marketInfos[marketId] = {
+                        name: market.name,
+                        profilePicture: market.profilePicture,
+                    };
+                } catch (error) {
+                    console.error(`Erro ao buscar mercado ${marketId}:`, error);
+                    marketInfos[marketId] = {
+                        name: marketId,
+                        profilePicture: undefined,
+                    };
+                }
+            })
+        );
     }
 
     return (
@@ -54,7 +77,7 @@ export default async function Header() {
                     {session ? (
                         <>
                             <Separator orientation="vertical" className="hidden h-6 md:block" />
-                            <CartSheet cartItems={items} />
+                            <CartSheet cartItems={items} marketInfos={marketInfos} />
                         </>
                     ) : null}
 
