@@ -1,3 +1,4 @@
+import { getMarketById } from "@/actions/market.actions";
 import { getOrders } from "@/actions/order.actions";
 import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,6 +10,24 @@ export default async function MyOrdersPage() {
 
     const ordersResponse = await getOrders();
     const orders = ordersResponse?.orders ?? [];
+    const uniqueMarketIds = Array.from(new Set(orders.map((order) => order.marketId).filter(Boolean)));
+    const marketInfos: Record<string, { name?: string; address?: string; profilePicture?: string | null }> = {};
+
+    await Promise.all(
+        uniqueMarketIds.map(async (marketId) => {
+            try {
+                const market = await getMarketById(marketId);
+                marketInfos[marketId] = {
+                    name: market?.name,
+                    address: market?.address,
+                    profilePicture: market?.profilePicture,
+                };
+            } catch (error) {
+                console.error("Erro ao buscar mercado:", error);
+                marketInfos[marketId] = {};
+            }
+        })
+    );
 
 
     return (
@@ -24,7 +43,7 @@ export default async function MyOrdersPage() {
                         </p>
                     </div>
 
-                    <OrdersContent orders={orders} />
+                    <OrdersContent orders={orders} marketInfos={marketInfos} />
                 </div>
             </ScrollArea>
         </div>

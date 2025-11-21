@@ -1,10 +1,10 @@
 'use client'
 
-import { useMemo, useState } from "react"
-import { Package } from "lucide-react"
+import { Package } from "lucide-react";
+import { useMemo, useState } from "react";
 
-import StatusFilters from "./StatusFilters"
-import OrderCard from "./OrderCard"
+import OrderCard from "./OrderCard";
+import StatusFilters from "./StatusFilters";
 
 type FilterStatus =
     | "ALL"
@@ -13,19 +13,26 @@ type FilterStatus =
     | "PREPARING"
     | "OUT_FOR_DELIVERY"
     | "DELIVERED"
-    | "CANCELLED"
+    | "CANCELLED";
 
 interface OrderItem {
-    id: string
-    status: FilterStatus | string
-    total: number
-    deliveryAddress: string
-    createdAt?: string | Date
-    marketId?: string
+    id: string;
+    status: FilterStatus | string;
+    total: number;
+    deliveryAddress: string;
+    createdAt?: string | Date;
+    marketId?: string;
+}
+
+interface MarketInfo {
+    name?: string;
+    address?: string;
+    profilePicture?: string | null;
 }
 
 interface OrdersContentProps {
-    orders: OrderItem[]
+    orders: OrderItem[];
+    marketInfos?: Record<string, MarketInfo>;
 }
 
 const emptyCounts: Record<FilterStatus, number> = {
@@ -36,34 +43,48 @@ const emptyCounts: Record<FilterStatus, number> = {
     OUT_FOR_DELIVERY: 0,
     DELIVERED: 0,
     CANCELLED: 0,
-}
+};
 
-export default function OrdersContent({ orders }: OrdersContentProps) {
-    const [activeFilter, setActiveFilter] = useState<FilterStatus>("ALL")
+const MARKET_PLACEHOLDER = "https://placehold.co/64x64?text=Logo";
+
+const isValidUrl = (value?: string | null) => {
+    if (!value) {
+        return false;
+    }
+    try {
+        new URL(value);
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+export default function OrdersContent({ orders, marketInfos }: OrdersContentProps) {
+    const [activeFilter, setActiveFilter] = useState<FilterStatus>("ALL");
 
     const counts = useMemo(() => {
-        const initial = { ...emptyCounts }
+        const initial = { ...emptyCounts };
 
         orders.forEach((order) => {
-            initial.ALL += 1
-            const status = order.status as FilterStatus
+            initial.ALL += 1;
+            const status = order.status as FilterStatus;
             if (status in initial) {
-                initial[status] += 1
+                initial[status] += 1;
             }
-        })
+        });
 
-        return initial
-    }, [orders])
+        return initial;
+    }, [orders]);
 
     const filteredOrders = useMemo(() => {
         if (activeFilter === "ALL") {
-            return orders
+            return orders;
         }
 
-        return orders.filter((order) => order.status === activeFilter)
-    }, [activeFilter, orders])
+        return orders.filter((order) => order.status === activeFilter);
+    }, [activeFilter, orders]);
 
-    const hasOrders = filteredOrders.length > 0
+    const hasOrders = filteredOrders.length > 0;
 
     return (
         <div className="flex flex-col gap-6">
@@ -75,17 +96,28 @@ export default function OrdersContent({ orders }: OrdersContentProps) {
 
             {hasOrders ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredOrders.map((order) => (
-                        <OrderCard
-                            key={order.id}
-                            id={order.id}
-                            status={order.status}
-                            total={order.total}
-                            deliveryAddress={order.deliveryAddress}
-                            createdAt={order.createdAt ? new Date(order.createdAt) : undefined}
-                            marketId={order.marketId}
-                        />
-                    ))}
+                    {filteredOrders.map((order) => {
+                        const info = order.marketId ? marketInfos?.[order.marketId] : undefined;
+                        const imageSrc =
+                            info?.profilePicture && isValidUrl(info.profilePicture)
+                                ? info.profilePicture
+                                : MARKET_PLACEHOLDER;
+
+                        return (
+                            <OrderCard
+                                key={order.id}
+                                id={order.id}
+                                status={order.status}
+                                total={order.total}
+                                deliveryAddress={order.deliveryAddress}
+                                createdAt={order.createdAt ? new Date(order.createdAt) : undefined}
+                                marketId={order.marketId}
+                                marketName={info?.name}
+                                marketAddress={info?.address}
+                                marketPicture={imageSrc}
+                            />
+                        );
+                    })}
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -107,6 +139,6 @@ export default function OrdersContent({ orders }: OrdersContentProps) {
                 </div>
             )}
         </div>
-    )
+    );
 }
 
