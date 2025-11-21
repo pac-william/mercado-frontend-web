@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { deleteAddress, patchAddress } from "@/actions/address.actions";
 import { CreateAddressDialog } from "@/app/(app)/my/profile/components/address/CreateAddressDialog";
 import { AddressDomain } from "@/app/domain/addressDomain";
 import { Button } from "@/components/ui/button";
@@ -14,12 +15,14 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { ChevronDown, EllipsisVertical, Home, MapPin, Search } from "lucide-react";
+import { ChevronDown, EllipsisVertical, Home, MapPin, Search, Star, Trash } from "lucide-react";
+import { toast } from "sonner";
 
 interface AddressSelectionDialogProps {
     addresses: AddressDomain[];
@@ -64,10 +67,25 @@ export function AddressSelectionDialog({
     const [open, setOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [internalSelection, setInternalSelection] = useState(selectedAddressId);
+    const [addressesState, setAddressesState] = useState<AddressDomain[]>(addresses);
+    const [favoriteUpdating, setFavoriteUpdating] = useState<string | null>(null);
 
-    const displayAddresses = useMemo(() => addresses.map(formatDisplayAddress), [addresses]);
+    useEffect(() => {
+        setAddressesState(addresses);
+    }, [addresses]);
 
-    const effectiveSelection = selectedAddressId ?? internalSelection ?? addresses[0]?.id;
+    const sortedAddresses = useMemo(() => {
+        return [...addressesState].sort((a, b) => {
+            if (a.isFavorite === b.isFavorite) return 0;
+            return a.isFavorite ? -1 : 1;
+        });
+    }, [addressesState]);
+
+    const displayAddresses = useMemo(() => sortedAddresses.map(formatDisplayAddress), [sortedAddresses]);
+    const favoriteAddress = useMemo(() => sortedAddresses.find((address) => address.isFavorite), [sortedAddresses]);
+
+    const effectiveSelection =
+        selectedAddressId ?? internalSelection ?? favoriteAddress?.id ?? sortedAddresses[0]?.id;
     const selectedDisplayAddress = displayAddresses.find((item) => item.address.id === effectiveSelection);
 
     const filteredAddresses = useMemo(() => {
@@ -86,11 +104,54 @@ export function AddressSelectionDialog({
         onSelectAddress?.(displayAddress.address);
     };
 
+    const handleSetFavorite = async (addressId: string) => {
+        if (favoriteUpdating === addressId) return;
+        setFavoriteUpdating(addressId);
+        try {
+            const updated = await patchAddress(addressId, { isFavorite: true });
+            setAddressesState((prev) =>
+                prev.map((item) =>
+                    item.id === addressId
+                        ? updated
+                        : {
+                            ...item,
+                            isFavorite: false,
+                        },
+                ),
+            );
+            setInternalSelection(addressId);
+            onSelectAddress?.(updated);
+        } catch (error) {
+            console.error("Erro ao atualizar favorito:", error);
+        } finally {
+            setFavoriteUpdating(null);
+        }
+    };
+
     const fallbackSelectedText = selectedDisplayAddress
         ? [selectedDisplayAddress.title, selectedDisplayAddress.subtitle].filter(Boolean).join(" • ")
         : undefined;
 
     const triggerText = triggerDescription ?? fallbackSelectedText ?? triggerLabel;
+
+
+    const handleDeleteAddress = async (addressId: string) => {
+        if (favoriteUpdating === addressId) return;
+        setFavoriteUpdating(addressId);
+        try {
+            await deleteAddress(addressId);
+            setAddressesState((prev) =>
+                prev.filter((item) => item.id !== addressId),
+            );
+        } catch (error) {
+            console.error("Erro ao deletar endereço:", error);
+            toast.error("Erro ao deletar endereço");
+            toast.error(error instanceof Error ? error.message : "Erro ao deletar endereço");
+        }
+        finally {
+            setFavoriteUpdating(null);
+        }
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -183,19 +244,44 @@ export function AddressSelectionDialog({
                                             </span>
                                         ) : null}
                                     </div>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-muted-foreground hover:text-foreground"
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            handleSelect(item);
-                                        }}
-                                        aria-label={`Gerenciar endereço ${title}`}
-                                    >
-                                        <EllipsisVertical className="size-5" />
-                                    </Button>
+                                    {address.isFavorite && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="icon"
+                                            className={cn(
+                                                "transition-colors rounded-full",
+                                                "text-muted-foreground hover:text-foreground",
+                                                address.isFavorite ? "text-primary" : "",
+                                            )}
+                                            aria-label={`Marcar ${title} como favorito`}
+                                        >
+                                            <Star size={16} className="text-amber-300" fill={address.isFavorite ? "currentColor" : "none"} />
+                                        </Button>
+                                    )}
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" size="icon">
+                                                <EllipsisVertical className="size-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className="w-56" align="start">
+                                            <DropdownMenuLabel>Preferências</DropdownMenuLabel>
+                                            <DropdownMenuGroup>
+                                                {!address.isFavorite && (
+                                                    <DropdownMenuItem onClick={() => handleSetFavorite(address.id)}>
+                                                        <Star size={16} className="text-amber-300" fill={address.isFavorite ? "currentColor" : "none"} />
+                                                        Favoritar endereço
+                                                    </DropdownMenuItem>
+                                                )}
+
+                                                <DropdownMenuItem onClick={() => handleDeleteAddress(address.id)}>
+                                                    <Trash size={16} className="text-red-500" />
+                                                    Remover endereço
+                                                </DropdownMenuItem>
+                                            </DropdownMenuGroup>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </div>
                             );
                         })}

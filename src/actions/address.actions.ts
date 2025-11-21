@@ -221,7 +221,7 @@ export const updateAddress = async (id: string, data: AddressUpdateDTO): Promise
     }
 }
 
-export const patchAddress = async (id: string, data: AddressUpdateDTO): Promise<AddressDomain> => {
+export const patchAddress = async (id: string, data: Partial<AddressDTO>): Promise<AddressDomain> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -245,10 +245,6 @@ export const patchAddress = async (id: string, data: AddressUpdateDTO): Promise<
             if (response.status === 404) {
                 throw new Error('Endereço não encontrado');
             }
-            if (response.status === 400) {
-                const error = await response.json();
-                throw new Error(error.message || 'Erro de validação');
-            }
             throw new Error('Erro ao atualizar endereço');
         }
 
@@ -258,7 +254,7 @@ export const patchAddress = async (id: string, data: AddressUpdateDTO): Promise<
         console.error('Erro ao atualizar endereço:', error);
         throw error;
     }
-}
+};
 
 export const deleteAddress = async (id: string): Promise<AddressDomain> => {
     try {
