@@ -3,7 +3,7 @@ import { getCart } from "@/actions/cart.actions";
 import { getMarketById } from "@/actions/market.actions";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Separator } from "@/components/ui/separator";
-import { CartItemResponseDTO } from "@/dtos/cartDTO";
+import { CartItemResponseDTO, CartResponse } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
 import { SessionData, User } from "@auth0/nextjs-auth0/types";
 import Link from "next/link";
@@ -30,8 +30,8 @@ export default async function Header() {
 
     if (session) {
         try {
-            const cart = await getCart();
-            items = cart.items || [];
+            const carts = await getCart() as CartResponse[];
+            items = carts.flatMap((cart) => cart.items ?? []);
         } catch (error) {
             console.error("Erro ao carregar carrinho:", error);
         }

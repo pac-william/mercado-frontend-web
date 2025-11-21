@@ -137,7 +137,7 @@ export default function ProductCardClient({
         case "quantity-select":
             return (
                 <Card className="flex flex-col max-w-xs w-full bg-card border-border">
-                    <CardHeader className="flex flex-row gap-2">
+                    {/* <CardHeader className="flex flex-row gap-2">
                         <Avatar className="w-12 h-12 shadow-md border">
                             {safeMarket.profilePicture ? (
                                 <AvatarImage src={safeMarket.profilePicture} alt={safeMarket.name} />
@@ -160,7 +160,7 @@ export default function ProductCardClient({
                         </div>
                     </CardHeader>
 
-                    <Separator />
+                    <Separator /> */}
 
                     <CardContent className="p-0 relative w-full aspect-square">
                         <Image unoptimized src={getImageSrc()} alt="Product" fill className="object-cover p-8" />

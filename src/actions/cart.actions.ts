@@ -4,7 +4,7 @@ import { baseUrl } from "@/config/server";
 import { AddMultipleItemsDTO, CartResponse, CreateCartItemDTO, UpdateCartItemDTO } from "@/dtos/cartDTO";
 import { auth0 } from "@/lib/auth0";
 
-export const getCart = async (): Promise<CartResponse> => {
+export const getCart = async (): Promise<CartResponse[]> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -41,8 +41,11 @@ export const getCart = async (): Promise<CartResponse> => {
             }
         }
 
-        const data = await response.json() as CartResponse;
-        return data;
+        const data = await response.json();
+        if (Array.isArray(data)) {
+            return data as CartResponse[];
+        }
+        return [data as CartResponse];
     } catch (error) {
         console.error('Erro ao buscar carrinho:', error);
         throw error;
@@ -122,7 +125,7 @@ export const addItemToCart = async (data: CreateCartItemDTO): Promise<CartRespon
     }
 };
 
-export const addMultipleItemsToCart = async (data: AddMultipleItemsDTO): Promise<CartResponse> => {
+export const addMultipleItemsToCart = async (data: AddMultipleItemsDTO): Promise<CartResponse[]> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -154,7 +157,7 @@ export const addMultipleItemsToCart = async (data: AddMultipleItemsDTO): Promise
             throw new Error('Erro ao adicionar itens ao carrinho');
         }
 
-        const cart = await response.json() as CartResponse;
+        const cart = await response.json() as CartResponse[];
         return cart;
     } catch (error) {
         console.error('Erro ao adicionar itens ao carrinho:', error);

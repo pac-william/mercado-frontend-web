@@ -7,7 +7,7 @@ import CartContent from "./components/CartContent";
 export const dynamic = "force-dynamic";
 
 export default async function Cart() {
-    let cart: CartResponse | null = null;
+    let carts: CartResponse[] = [];
     let markets: Market[] = [];
 
     try {
@@ -16,11 +16,11 @@ export default async function Cart() {
             getMarkets(),
         ]);
 
-        cart = cartData;
+        carts = Array.isArray(cartData) ? cartData : [];
         markets = marketsData?.markets ?? [];
     } catch (error) {
         console.error("Erro ao carregar dados do carrinho:", error);
     }
 
-    return <CartContent initialCart={cart} markets={markets} />;
+    return <CartContent initialCarts={carts} markets={markets} />;
 }

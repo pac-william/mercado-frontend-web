@@ -48,7 +48,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
                                         <Carousel className="w-full" opts={{ align: "start", loop: true, dragFree: true }}>
                                             <CarouselContent className="flex flex-1">
                                                 {sectionItems.map((product: Product) => (
-                                                    <CarouselItem key={product.id} className="flex-shrink-0 max-w-[250px] min-w-[250px]">
+                                                    <CarouselItem key={product.id} className="2xl:basis-1/6 xl:basis-1/4 lg:basis-1/3 md:basis-1/2 sm:basis-1/1">
                                                         <ProductCard product={product} />
                                                     </CarouselItem>
                                                 ))}
