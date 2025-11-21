@@ -147,12 +147,19 @@ export function AddressSelectionDialog({
                             const { address, title, subtitle, description } = item;
                             const isSelected = address.id === effectiveSelection;
                             return (
-                                <button
+                                <div
                                     key={address.id}
-                                    type="button"
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() => handleSelect(item)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === "Enter" || event.key === " ") {
+                                            event.preventDefault();
+                                            handleSelect(item);
+                                        }
+                                    }}
                                     className={cn(
-                                        "flex w-full items-center gap-4 rounded-lg border bg-background p-4 text-left transition-all",
+                                        "flex w-full cursor-pointer items-center gap-4 rounded-lg border bg-background p-4 text-left transition-all",
                                         "hover:border-primary/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                                         isSelected ? "border-primary ring-2 ring-primary/20" : "border-border",
                                     )}
@@ -189,7 +196,7 @@ export function AddressSelectionDialog({
                                     >
                                         <EllipsisVertical className="size-5" />
                                     </Button>
-                                </button>
+                                </div>
                             );
                         })}
                     </div>

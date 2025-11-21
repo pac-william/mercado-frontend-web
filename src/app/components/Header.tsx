@@ -1,5 +1,6 @@
 import { getAddresses } from "@/actions/address.actions";
 import { getCart } from "@/actions/cart.actions";
+import { getMarketById } from "@/actions/market.actions";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Separator } from "@/components/ui/separator";
 import { CartItemResponseDTO } from "@/dtos/cartDTO";
@@ -9,7 +10,6 @@ import Link from "next/link";
 import { AddressSelectionDialog } from "./AddressSelectionDialog";
 import AuthButtons from "./AuthButtons";
 import CartSheet from "./CartSheet";
-import { getMarketById } from "@/actions/market.actions";
 import ChatButton from "./ChatButton";
 import Navigation from "./Navigation";
 import { ProfileMenuDropDown } from "./ProfileMenuDropDown";
@@ -69,13 +69,13 @@ export default async function Header() {
                 </div>
 
                 <div className="flex flex-1 flex-row items-center justify-end gap-4">
-                    <AddressSelectionDialog
-                        addresses={addresses}
-                        selectedAddressId={defaultAddress?.id}
-                    />
 
                     {session ? (
                         <>
+                            <AddressSelectionDialog
+                                addresses={addresses}
+                                selectedAddressId={defaultAddress?.id}
+                            />
                             <Separator orientation="vertical" className="hidden h-6 md:block" />
                             <CartSheet cartItems={items} marketInfos={marketInfos} />
                         </>
@@ -83,7 +83,7 @@ export default async function Header() {
 
                     <Separator orientation="vertical" className="hidden h-6 md:block" />
                     <div className="flex flex-row items-center gap-2">
-                        <ChatButton />
+                        {session && <ChatButton />}
                         <AnimatedThemeToggler />
                         {session ? (
                             <ProfileMenuDropDown currentUser={session.user as User} />

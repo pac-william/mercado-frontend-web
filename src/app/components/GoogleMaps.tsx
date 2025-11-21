@@ -2,7 +2,6 @@
 
 import { useGoogleMapsLoader } from "@/context/GoogleMapsContext";
 import { Circle, GoogleMap, Marker } from "@react-google-maps/api";
-import { Pin } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const DEFAULT_CENTER = {
@@ -57,12 +56,12 @@ export default function GoogleMaps({
   // Calcula o zoom apropriado baseado no raio de entrega
   const calculatedZoom = useMemo(() => {
     if (!deliveryRadius || !hasCoordinates || !latitude) return zoom;
-    
+
     // Fórmula aproximada para calcular zoom baseado no raio em metros
     // Ajusta o zoom para que o círculo seja visível com uma margem
     const radiusInKm = deliveryRadius / 1000;
     let calculatedZoom = zoom;
-    
+
     if (radiusInKm >= 50) {
       calculatedZoom = 10;
     } else if (radiusInKm >= 20) {
@@ -80,23 +79,23 @@ export default function GoogleMaps({
     } else {
       calculatedZoom = 17;
     }
-    
+
     return calculatedZoom;
   }, [deliveryRadius, hasCoordinates, latitude, zoom]);
 
-  const [mapCenter, setMapCenter] = useState(initialCenter);
+  const [markerCenter, setMarkerCenter] = useState(initialCenter);
   const mapRef = useRef<google.maps.Map | null>(null);
   const circleRef = useRef<google.maps.Circle | null>(null);
 
   useEffect(() => {
     if (hasCoordinates) {
       const nextCenter = { lat: latitude!, lng: longitude! };
-      setMapCenter(nextCenter);
+      setMarkerCenter(nextCenter);
       if (mapRef.current) {
         mapRef.current.setCenter(nextCenter);
       }
     } else if (!isInteractive) {
-      setMapCenter(DEFAULT_CENTER);
+      setMarkerCenter(DEFAULT_CENTER);
       if (mapRef.current) {
         mapRef.current.setCenter(DEFAULT_CENTER);
       }
@@ -106,25 +105,25 @@ export default function GoogleMaps({
   const handleMapLoad = useCallback(
     (map: google.maps.Map) => {
       mapRef.current = map;
-      map.setCenter(mapCenter);
-      
+      map.setCenter(markerCenter);
+
       // Ajusta o zoom e bounds quando há raio de entrega
       if (hasCoordinates && deliveryRadius && deliveryRadius > 0) {
         map.setZoom(calculatedZoom);
-        
+
         // Ajusta os bounds para incluir o círculo completo
         const circle = new google.maps.Circle({
-          center: mapCenter,
+          center: markerCenter,
           radius: deliveryRadius,
         });
-        
+
         const bounds = circle.getBounds();
         if (bounds) {
           map.fitBounds(bounds, 50); // Padding em pixels
         }
       }
     },
-    [mapCenter, hasCoordinates, deliveryRadius, calculatedZoom],
+    [markerCenter, hasCoordinates, deliveryRadius, calculatedZoom],
   );
 
   const handleMapUnmount = useCallback(() => {
@@ -143,7 +142,7 @@ export default function GoogleMaps({
 
     const lat = currentCenter.lat();
     const lng = currentCenter.lng();
-    setMapCenter((previous) => {
+    setMarkerCenter((previous) => {
       if (previous.lat === lat && previous.lng === lng) {
         return previous;
       }
@@ -152,6 +151,26 @@ export default function GoogleMaps({
 
     onLocationChange?.({ latitude: lat, longitude: lng });
   }, [isInteractive, onLocationChange]);
+
+  const handleCenterChanged = useCallback(() => {
+    if (!isInteractive || !mapRef.current) {
+      return;
+    }
+
+    const currentCenter = mapRef.current.getCenter();
+    if (!currentCenter) {
+      return;
+    }
+
+    const lat = currentCenter.lat();
+    const lng = currentCenter.lng();
+    setMarkerCenter((previous) => {
+      if (previous.lat === lat && previous.lng === lng) {
+        return previous;
+      }
+      return { lat, lng };
+    });
+  }, [isInteractive]);
 
   useEffect(() => {
     if (loadError) {
@@ -200,7 +219,6 @@ export default function GoogleMaps({
     >
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "100%" }}
-        center={mapCenter}
         zoom={calculatedZoom}
         onLoad={handleMapLoad}
         onUnmount={handleMapUnmount}
@@ -220,8 +238,23 @@ export default function GoogleMaps({
           mapTypeControl: showControls,
           fullscreenControl: showControls,
         }}
+        onCenterChanged={handleCenterChanged}
       >
-        {!isInteractive && hasCoordinates ? <Marker position={mapCenter} /> : null}
+        {(isInteractive || hasCoordinates) && (
+          <Marker
+            position={markerCenter}
+            icon={
+              isLoaded
+                ? {
+                  url: "https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi2_hdpi.png",
+                  scaledSize: new google.maps.Size(28, 44),
+                  anchor: new google.maps.Point(14, 44),
+                }
+                : undefined
+            }
+            clickable={false}
+          />
+        )}
         {hasCoordinates && deliveryRadius && deliveryRadius > 0 && (
           <Circle
             onLoad={(circle) => {
@@ -234,7 +267,7 @@ export default function GoogleMaps({
                 }
               }
             }}
-            center={mapCenter}
+            center={markerCenter}
             radius={deliveryRadius}
             options={{
               fillColor: "#3b82f6",
@@ -247,20 +280,6 @@ export default function GoogleMaps({
         )}
       </GoogleMap>
 
-      {isInteractive ? (
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -100%)",
-            pointerEvents: "none",
-            color: "#ef4444",
-          }}
-        >
-          <Pin className="size-6 text-destructive" />
-        </div>
-      ) : null}
     </div>
   );
 }
