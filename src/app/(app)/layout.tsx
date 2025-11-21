@@ -25,7 +25,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
     }
 
     return (
-        <div className="flex flex-1 flex-row h-screen bg-background text-foreground">
+        <div className="flex flex-1 flex-row h-screen w-full bg-background text-foreground">
             {session && <HistorySideMenu suggestions={suggestionData} />}
             <div className="flex flex-1 flex-col">
                 <Header />

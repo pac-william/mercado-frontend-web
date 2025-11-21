@@ -4,6 +4,7 @@ import SearchField from "@/app/(app)/components/SeachField";
 import Footer from "@/app/components/Footer";
 import Pagination from "@/app/components/Pagination";
 import ProductCard from "@/app/components/ProductCard";
+import PromoSection from "@/app/components/PromoSection";
 import { Product } from "@/app/domain/productDomain";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ProductFilters from "../../components/ProductFilters";
 import { MarketActions } from "./MarketActions";
 
 interface MarketPageParams {
@@ -92,105 +94,108 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
     const ratingLabel = ratingValue.toFixed(1).replace(".", ",");
 
     return (
-        <ScrollArea className="flex flex-col flex-grow h-0">
-            <div className="container mx-auto py-6 flex flex-col gap-6">
-                <Card className="bg-card border-border overflow-hidden">
-                    <div className="relative h-32 sm:h-48 w-full">
-                        <Image
-                            src={bannerImage}
-                            alt={`Banner do mercado ${market.name}`}
-                            fill
-                            priority
-                            className="object-cover"
-                            sizes="(min-width: 768px) 768px, 100vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-transparent" />
-                    </div>
-                    <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-20 w-20 border">
-                                {market.profilePicture ? (
-                                    <AvatarImage src={market.profilePicture} alt={market.name} />
-                                ) : null}
-                                <AvatarFallback className="text-lg font-semibold">
-                                    {getInitials(market.name)}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col gap-2">
-                                <CardTitle className="text-3xl text-card-foreground">{market.name}</CardTitle>
-                                <CardDescription className="text-muted-foreground">
-                                    {market.address}
-                                </CardDescription>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Star className="size-4 text-amber-300" fill="currentColor" />
-                                    <span className="font-medium text-amber-300">{ratingLabel}</span>
-                                    {typeof market.ratingCount === "number" ? (
-                                        <span>({market.ratingCount} avaliações)</span>
+        <div className="flex flex-col flex-1">
+
+            <ScrollArea className="flex flex-col flex-grow h-0">
+                <div className="container mx-auto py-6 flex flex-col gap-6 mb-20">
+                    <Card className="bg-card border-border overflow-hidden">
+                        <div className="relative h-32 sm:h-48 w-full">
+                            <Image
+                                src={bannerImage}
+                                alt={`Banner do mercado ${market.name}`}
+                                fill
+                                priority
+                                className="object-cover"
+                                sizes="(min-width: 768px) 768px, 100vw"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-transparent" />
+                        </div>
+                        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+                            <div className="flex items-center gap-4">
+                                <Avatar className="h-20 w-20 border">
+                                    {market.profilePicture ? (
+                                        <AvatarImage src={market.profilePicture} alt={market.name} />
                                     ) : null}
+                                    <AvatarFallback className="text-lg font-semibold">
+                                        {getInitials(market.name)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col gap-2">
+                                    <CardTitle className="text-3xl text-card-foreground">{market.name}</CardTitle>
+                                    <CardDescription className="text-muted-foreground">
+                                        {market.address}
+                                    </CardDescription>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Star className="size-4 text-amber-300" fill="currentColor" />
+                                        <span className="font-medium text-amber-300">{ratingLabel}</span>
+                                        {typeof market.ratingCount === "number" ? (
+                                            <span>({market.ratingCount} avaliações)</span>
+                                        ) : null}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                            <Button variant="outline" size="icon" className="rounded-full" asChild aria-label="Chat">
-                                <Link href={`/my/chat/${marketId}`}>
-                                    <MessageCircle className="size-4" />
-                                    <span className="sr-only">Chat</span>
-                                </Link>
-                            </Button>
-                            <MarketActions
-                                marketName={market.name}
-                                marketId={marketId}
-                                marketAddress={market.address}
-                                marketLatitude={-23.55052} // São Paulo latitude
-                                marketLongitude={-46.633308} // São Paulo longitude
-                                deliveryRadius={1000}
-                            />
-                        </div>
-                    </CardHeader>
-                    <Separator />
-                    <CardContent className="flex flex-col gap-4">
-                        <CardDescription className="text-muted-foreground">
-                            Explore os produtos disponíveis neste mercado e adicione seus favoritos ao carrinho.
-                        </CardDescription>
-                    </CardContent>
-                </Card>
-
-                <div className="flex flex-col gap-6">
-                    <div className="flex justify-center">
-                        <SearchField
-                            paramName="name"
-                            width="w-full sm:w-[320px]"
-                            placeholder="Buscar produtos deste mercado"
-                        />
-                    </div>
-
-                    {products?.length ? (
-                        <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
-                                {products.map((product: Product) => (
-                                    <ProductCard variant="owner" key={product.id} product={product} />
-                                ))}
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                <Button variant="outline" size="icon" className="rounded-full" asChild aria-label="Chat">
+                                    <Link href={`/my/chat/${marketId}`}>
+                                        <MessageCircle className="size-4" />
+                                        <span className="sr-only">Chat</span>
+                                    </Link>
+                                </Button>
+                                <MarketActions
+                                    marketName={market.name}
+                                    marketId={marketId}
+                                    marketAddress={market.address}
+                                    marketLatitude={-23.55052} // São Paulo latitude
+                                    marketLongitude={-46.633308} // São Paulo longitude
+                                    deliveryRadius={1000}
+                                />
                             </div>
-                            {meta ? (
-                                <Card className="p-4 bg-card border-border">
-                                    <Pagination meta={meta} />
-                                </Card>
-                            ) : null}
-                        </>
-                    ) : (
-                        <Card className="bg-card border-border">
-                            <CardContent className="flex flex-col items-center justify-center py-16 gap-2">
-                                <CardTitle className="text-lg text-card-foreground">Nenhum produto encontrado</CardTitle>
-                                <CardDescription className="text-muted-foreground text-center">
-                                    Tente ajustar sua busca ou volte mais tarde para conferir novos produtos.
-                                </CardDescription>
-                            </CardContent>
-                        </Card>
-                    )}
+                        </CardHeader>
+                        <Separator />
+                        <CardContent className="flex flex-col gap-4">
+                            <CardDescription className="text-muted-foreground">
+                                Explore os produtos disponíveis neste mercado e adicione seus favoritos ao carrinho.
+                            </CardDescription>
+                        </CardContent>
+                    </Card>
                 </div>
-            </div>
-            <Footer />
-        </ScrollArea>
+                <PromoSection />
+                <div className="container mx-auto py-6 flex flex-col gap-6 my-20">
+                    <div className="flex flex-col gap-6">
+                        <div className="flex flex-1 gap-4">
+                            <SearchField paramName="name" />
+                            <ProductFilters />
+                        </div>
+
+                        {products?.length ? (
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
+                                    {products.map((product: Product) => (
+                                        <ProductCard variant="owner" key={product.id} product={product} />
+                                    ))}
+                                </div>
+                                {meta ? (
+                                    <Card className="p-4 bg-card border-border">
+                                        <Pagination meta={meta} />
+                                    </Card>
+                                ) : null}
+                            </>
+                        ) : (
+                            <Card className="bg-card border-border">
+                                <CardContent className="flex flex-col items-center justify-center py-16 gap-2">
+                                    <CardTitle className="text-lg text-card-foreground">Nenhum produto encontrado</CardTitle>
+                                    <CardDescription className="text-muted-foreground text-center">
+                                        Tente ajustar sua busca ou volte mais tarde para conferir novos produtos.
+                                    </CardDescription>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                </div>
+                <Footer />
+            </ScrollArea>
+        </div>
+
     );
 }
 

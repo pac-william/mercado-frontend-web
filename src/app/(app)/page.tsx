@@ -1,6 +1,11 @@
 import { getProducts } from "@/actions/products.actions";
-import Pagination from "@/app/components/Pagination";
-import { Card } from "@/components/ui/card";
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Metadata } from "next";
 import Footer from "../components/Footer";
@@ -8,8 +13,6 @@ import HeroSection from "../components/HeroSection";
 import ProductCard from "../components/ProductCard";
 import SearchAiBar from "../components/SearchBar";
 import { Product } from "../domain/productDomain";
-import ProductFilters from "./components/ProductFilters";
-import SearchField from "./components/SeachField";
 
 
 export const metadata: Metadata = {
@@ -19,61 +22,50 @@ export const metadata: Metadata = {
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ page: number, size: number, name: string }> }) {
     const { page, size, name } = await searchParams;
-    const { products, meta } = await getProducts({ page: page || 1, size: size || 100, name: name });
+    const { products } = await getProducts({ page: page || 1, size: size || 100, name: name });
     /* const { markets } = await getMarkets(); */
 
+    const sections = ["Promoções", "Destaques", "Novidades"];
+
     return (
-        <ScrollArea className="flex flex-col flex-grow h-0">
-            <div className="flex flex-col gap-4 items-center my-4 mb-20">
+        <div className="flex flex-col flex-1">
+            <ScrollArea className="flex flex-col flex-grow h-0 overflow-y-auto pr-4">
                 <HeroSection />
                 <div className="flex flex-col gap-4 items-center justify-center h-64">
                     <SearchAiBar particles />
                 </div>
-
-                {/* <MarqueeDemo reviews={markets.map((market) => ({
-                    name: market.name,
-                    username: market.address,
-                    body: market.logo || "",
-                    img: market.logo || "https://placehold.co/150",
-                }))} /> */}
-
-                <div className="flex flex-1 gap-4 container mx-auto mt-20">
-
-                    <div className="flex flex-col flex-1 gap-4">
-                        <div className="flex flex-1 gap-4">
-                            <SearchField paramName="name" />
-                            <ProductFilters />
-                        </div>
-                        {
-                            products?.length > 0 ? (
-                                <>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 flex-1">
-                                        {products?.map((product: Product) => {
-                                            return (
-                                                <div key={product.id}>
-                                                    <ProductCard
-                                                        product={product}
-                                                    />
-                                                </div>
-                                            );
-                                        })}
+                <div className="flex flex-1 gap-4 my-20 container mx-auto select-none">
+                    <div className="flex flex-col flex-1 gap-12 w-full">
+                        {sections.map((section, index) => {
+                            const sectionItems = products.slice(index * 12, (index + 1) * 12);
+                            if (sectionItems.length === 0) return null;
+                            return (
+                                <div key={section} className="flex flex-col gap-6">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-4xl font-bold text-primary">{section}</h2>
                                     </div>
-                                    <Card className="p-4 bg-card border-border">
-                                        <Pagination meta={meta} />
-                                    </Card>
-                                </>
-                            ) : (
-                                <div className="flex flex-col gap-4 items-center justify-center">
-                                    <h1 className="text-2xl font-bold text-nowrap text-foreground">Nenhum produto encontrado</h1>
+                                    <div className="flex flex-grow">
+                                        <Carousel className="w-full" opts={{ align: "start", loop: true, dragFree: true }}>
+                                            <CarouselContent className="flex flex-1">
+                                                {sectionItems.map((product: Product) => (
+                                                    <CarouselItem key={product.id} className="flex-shrink-0 max-w-[250px] min-w-[250px]">
+                                                        <ProductCard product={product} />
+                                                    </CarouselItem>
+                                                ))}
+                                            </CarouselContent>
+                                            <div className="flex justify-end gap-2 mt-2">
+                                                <CarouselPrevious />
+                                                <CarouselNext />
+                                            </div>
+                                        </Carousel>
+                                    </div>
                                 </div>
-                            )
-                        }
-
+                            );
+                        })}
                     </div>
                 </div>
-
-            </div>
-            <Footer />
-        </ScrollArea >
+                <Footer />
+            </ScrollArea >
+        </div>
     )
 }

@@ -231,7 +231,7 @@ export default function ProductCardClient({
                         <div className="rounded-full flex flex-col gap-2">
                             <div className="flex flex-col">
                                 <Link href={`/market/${product.marketId}`}>
-                                    <span className="text-sm font-bold text-card-foreground line-clamp-1 text-ellipsis overflow-hidden">{safeMarket.name}</span>
+                                    <span className="text-sm font-bold text-card-foreground line-clamp-1 text-ellipsis overflow-hidden hover:underline">{safeMarket.name}</span>
                                 </Link>
                                 <div className="flex flex-row gap-1 items-center">
                                     <div className="flex flex-row gap-1 items-center justify-center">
