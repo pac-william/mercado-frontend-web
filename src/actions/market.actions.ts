@@ -23,7 +23,17 @@ export const getMarkets = async (filters?: GetMarketsFilters) => {
         });
 
         if (!response.ok) {
-            throw new Error('Erro ao buscar mercados');
+            const errorText = await response.text();
+            let errorMessage = `Erro ao buscar mercados: ${response.status}`;
+            
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson?.error || errorJson?.message || errorMessage;
+            } catch {
+                errorMessage = errorText || errorMessage;
+            }
+            
+            throw new Error(errorMessage);
         }
         
         const data = await response.json() as MarketPaginatedResponse;

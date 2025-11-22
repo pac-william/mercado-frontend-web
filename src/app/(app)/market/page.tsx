@@ -45,10 +45,11 @@ export const metadata: Metadata = {
 export default async function MarketsPage({
     searchParams,
 }: {
-    searchParams: MarketListSearchParams;
+    searchParams: Promise<MarketListSearchParams>;
 }) {
-    const pageNumber = parseNumberParam(searchParams?.page, DEFAULT_PAGE);
-    const pageSize = parseNumberParam(searchParams?.size, DEFAULT_SIZE);
+    const resolvedSearchParams = await searchParams;
+    const pageNumber = parseNumberParam(resolvedSearchParams?.page, DEFAULT_PAGE);
+    const pageSize = parseNumberParam(resolvedSearchParams?.size, DEFAULT_SIZE);
 
     const { markets, meta } = await getMarkets({ page: pageNumber, size: pageSize });
 
