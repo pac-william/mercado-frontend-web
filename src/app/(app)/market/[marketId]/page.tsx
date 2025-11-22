@@ -1,4 +1,5 @@
 import { getMarketById } from "@/actions/market.actions";
+import { getMarketAddressByMarketId } from "@/actions/marketAddress.actions";
 import { getProductsByMarket } from "@/actions/products.actions";
 import SearchField from "@/app/(app)/components/SeachField";
 import Footer from "@/app/components/Footer";
@@ -83,6 +84,11 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
         throw error;
     });
 
+    const marketAny = market as typeof market & { addressData?: { latitude?: number | null; longitude?: number | null } | null };
+    const marketAddress = marketAny.addressData 
+        ? marketAny.addressData 
+        : await getMarketAddressByMarketId(marketId).catch(() => null);
+
     const { products, meta } = await getProductsByMarket(marketId, {
         page: pageNumber,
         size: pageSize,
@@ -145,8 +151,8 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
                                     marketName={market.name}
                                     marketId={marketId}
                                     marketAddress={market.address}
-                                    marketLatitude={-23.55052} // São Paulo latitude
-                                    marketLongitude={-46.633308} // São Paulo longitude
+                                    marketLatitude={marketAddress?.latitude ?? null}
+                                    marketLongitude={marketAddress?.longitude ?? null}
                                     deliveryRadius={1000}
                                 />
                             </div>
