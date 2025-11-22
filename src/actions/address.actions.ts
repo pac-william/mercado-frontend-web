@@ -47,7 +47,7 @@ export const getAddresses = async (filters?: GetAddressesFilters): Promise<Addre
     }
 }
 
-export const getAddressById = async (id: string): Promise<AddressDomain> => {
+export const getAddressById = async (id: string): Promise<AddressDomain | null> => {
     try {
         const session = await auth0.getSession();
         if (!session) {
@@ -68,7 +68,7 @@ export const getAddressById = async (id: string): Promise<AddressDomain> => {
                 throw new Error('Usuário não autenticado');
             }
             if (response.status === 404) {
-                throw new Error('Endereço não encontrado');
+                return null;
             }
             throw new Error('Erro ao buscar endereço');
         }

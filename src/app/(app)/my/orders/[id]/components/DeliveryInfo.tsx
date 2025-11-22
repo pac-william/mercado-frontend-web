@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { MapPin, User } from "lucide-react";
 
 interface DeliveryInfoProps {
-    address: AddressDomain;
+    address: AddressDomain | null;
     delivererId?: string | null;
 }
 
@@ -19,16 +19,27 @@ export default function DeliveryInfo({ address, delivererId }: DeliveryInfoProps
             </CardHeader>
             <Separator />
             <CardContent className="pt-6 space-y-4">
-                <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                        Endereço de Entrega
-                    </label>
-                    <p className="mt-1 text-card-foreground">
-                        {address.street} {address.number} {address.complement && ` - ${address.complement}`}
-                        {address.neighborhood && ` - ${address.neighborhood}`}
-                        {address.city && ` - ${address.city} - ${address.state} - ${address.zipCode}`}
-                    </p>
-                </div>
+                {address ? (
+                    <div>
+                        <label className="text-sm font-medium text-muted-foreground">
+                            Endereço de Entrega
+                        </label>
+                        <p className="mt-1 text-card-foreground">
+                            {address.street} {address.number} {address.complement && ` - ${address.complement}`}
+                            {address.neighborhood && ` - ${address.neighborhood}`}
+                            {address.city && ` - ${address.city} - ${address.state} - ${address.zipCode}`}
+                        </p>
+                    </div>
+                ) : (
+                    <div>
+                        <label className="text-sm font-medium text-muted-foreground">
+                            Endereço de Entrega
+                        </label>
+                        <p className="mt-1 text-muted-foreground">
+                            Endereço não disponível
+                        </p>
+                    </div>
+                )}
 
                 {delivererId && (
                     <>

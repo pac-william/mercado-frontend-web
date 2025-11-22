@@ -4,7 +4,6 @@ import RouterBack from "@/components/RouterBack";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CalendarDays } from "lucide-react";
 import moment from "moment";
-import DeliveryInfo from "./components/DeliveryInfo";
 import OrderProducts from "./components/OrderProducts";
 import OrderSummary from "./components/OrderSummary";
 import OrderTimeline from "./components/OrderTimeline";
@@ -16,7 +15,13 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
 
     const order = await getOrderById(id);
 
-    const address = await getAddressById(order.addressId);
+    let address = null;
+    try {
+        address = await getAddressById(order.addressId);
+    } catch (error) {
+        console.error('Erro ao buscar endereço do pedido:', error);
+    }
+    
     return (
         <div className="flex flex-col flex-1">
             <ScrollArea className="flex flex-col flex-grow h-0">
@@ -39,10 +44,6 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                         <div className="lg:col-span-2 flex flex-col gap-6">
                             <OrderTimeline currentStatus="pending" />
                             <OrderProducts items={order.items} />
-                            <DeliveryInfo
-                                address={address}
-                                delivererId={order.delivererId}
-                            />
                         </div>
 
                         <div className="lg:col-span-1">
