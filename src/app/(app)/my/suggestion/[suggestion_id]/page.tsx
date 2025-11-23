@@ -36,8 +36,6 @@ export default async function SuggestionPage({ params, searchParams }: { params:
     const suggestion_id = (await params).suggestion_id;
     const marketId = (await searchParams).marketId;
 
-    console.log(marketId);
-
     let suggestionData = null;
 
     try {
@@ -81,22 +79,6 @@ export default async function SuggestionPage({ params, searchParams }: { params:
         })),
     }));
 
-    // Exemplo de métodos de preparo (substituir por dados reais quando disponíveis)
-    // Por enquanto, criar um exemplo baseado na task
-    const preparationMethods = suggestionData.task.toLowerCase().includes("churrasco") ||
-        suggestionData.task.toLowerCase().includes("churras") ? [
-        {
-            id: "preparation-steps",
-            name: "Modo de Preparo",
-            items: [
-                { name: "1. Prepare a churrasqueira e acenda o carvão até formar brasas.", anchorId: "prep-step-1" },
-                { name: "2. Tempere as carnes com sal grosso e deixe descansar.", anchorId: "prep-step-2" },
-                { name: "3. Coloque as carnes na grelha e vire conforme necessário.", anchorId: "prep-step-3" },
-                { name: "4. Sirva quente com acompanhamentos.", anchorId: "prep-step-4" },
-            ],
-        },
-    ] : undefined;
-
     const { markets } = await getMarkets();
 
     // Calcular preços para cada mercado
@@ -111,106 +93,108 @@ export default async function SuggestionPage({ params, searchParams }: { params:
     );
 
     return (
-        <div className="flex flex-col flex-1 container mx-auto my-4">
-            <div className="flex flex-1 gap-4">
-                <CategoryMenu
-                    title={suggestionData.task}
-                    categories={menuCategories}
-                    preparationMethods={preparationMethods}
-                />
-                <div className="flex flex-col flex-1 pr-2">
-                    <ScrollArea className="flex flex-col flex-grow h-0">
-                        <RouterBack />
-                        {/* Header da sugestão */}
-                        <div className="flex flex-col gap-4 p-4">
-                            <div className="flex items-center gap-4">
-                                <div>
-                                    <h1 className="text-3xl font-bold text-foreground">
-                                        Melhores preços
-                                    </h1>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-4 gap-4">
-                                {marketCalculations.slice(0, 4).map(({ market, totalPrice, itemsFound, totalItems }) => {
-                                    const isSelected = marketId === market.id;
-                                    return (
-                                        <Link key={market.id} href={`/my/suggestion/${suggestion_id}?marketId=${market.id}`} className="flex flex-1">
-                                            <Card className={cn(
-                                                "flex flex-col gap-0 transition-all w-full hover:bg-accent",
-                                                isSelected && "ring-2 ring-primary/50 bg-accent"
-                                            )}>
-                                                <CardHeader className="flex flex-row gap-4">
-                                                    <Avatar>
-                                                        <AvatarImage src={market.profilePicture || ""} alt={market.name} width={100} height={100} />
-                                                        <AvatarFallback className="bg-primary text-primary-foreground">CN</AvatarFallback>
-                                                    </Avatar>
-                                                    <CardTitle>
-                                                        {market.name}
-                                                    </CardTitle>
-                                                </CardHeader>
-                                                <Separator />
-                                                <CardContent className="flex flex-col gap-2">
-                                                    <span className="text-lg font-bold text-foreground">
-                                                        Total: {formatPrice(totalPrice)}
-                                                    </span>
-                                                    <span className="text-sm text-muted-foreground">
-                                                        {itemsFound} de {totalItems} itens encontrados
-                                                    </span>
-                                                </CardContent>
-                                            </Card>
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-
-                        {marketId ? (
-                            <div className="flex flex-col gap-4 p-4 mb-32">
+        <div className="flex flex-1 flex-row gap-4 container mx-auto">
+            <CategoryMenu
+                title={suggestionData.task}
+                categories={menuCategories}
+                receipt={suggestionData.data.receipt || undefined}
+            />
+            <div className="flex flex-col flex-1  my-4">
+                <div className="flex flex-1 gap-4">
+                    <div className="flex flex-col flex-1 pr-2">
+                        <ScrollArea className="flex flex-col flex-grow h-0">
+                            <RouterBack />
+                            {/* Header da sugestão */}
+                            <div className="flex flex-col gap-4 p-4">
                                 <div className="flex items-center gap-4">
                                     <div>
                                         <h1 className="text-3xl font-bold text-foreground">
-                                            {suggestionData.task}
+                                            Melhores preços
                                         </h1>
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                            Produtos do mercado selecionado
-                                        </p>
                                     </div>
                                 </div>
+                                <div className="grid grid-cols-4 gap-4">
+                                    {marketCalculations.slice(0, 4).map(({ market, totalPrice, itemsFound, totalItems }) => {
+                                        const isSelected = marketId === market.id;
+                                        return (
+                                            <Link key={market.id} href={`/my/suggestion/${suggestion_id}?marketId=${market.id}`} className="flex flex-1">
+                                                <Card className={cn(
+                                                    "flex flex-col gap-0 transition-all w-full hover:bg-accent",
+                                                    isSelected && "ring-2 ring-primary/50 bg-accent"
+                                                )}>
+                                                    <CardHeader className="flex flex-row gap-4">
+                                                        <Avatar>
+                                                            <AvatarImage src={market.profilePicture || ""} alt={market.name} width={100} height={100} />
+                                                            <AvatarFallback className="bg-primary text-primary-foreground">CN</AvatarFallback>
+                                                        </Avatar>
+                                                        <CardTitle>
+                                                            {market.name}
+                                                        </CardTitle>
+                                                    </CardHeader>
+                                                    <Separator />
+                                                    <CardContent className="flex flex-col gap-2">
+                                                        <span className="text-lg font-bold text-foreground">
+                                                            Total: {formatPrice(totalPrice)}
+                                                        </span>
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {itemsFound} de {totalItems} itens encontrados
+                                                        </span>
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
 
-                                {/* Produtos por Categoria */}
-                                {categorySections.map(({ id, name, items }) => (
-                                    <Card
-                                        key={id}
-                                        id={id}
-                                        className="bg-card border-border"
-                                    >
-                                        <CardHeader>
-                                            <CardTitle className="text-xl font-semibold text-primary">
-                                                {name}
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="flex flex-col gap-6">
-                                            {items.map(item => (
-                                                <div key={item.anchorId} id={item.anchorId} className="flex flex-col gap-2">
-                                                    <h3 className="text-lg font-medium text-foreground">
-                                                        {item.name}
-                                                    </h3>
-                                                    <ProductSuggestion productName={item.name} categoryId={item.categoryId} marketId={marketId} />
-                                                </div>
-                                            ))}
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-16 px-4">
-                                <p className="text-lg text-muted-foreground text-center">
-                                    Selecione um mercado acima para ver os produtos disponíveis
-                                </p>
-                            </div>
-                        )}
-                    </ScrollArea>
+
+                            {marketId ? (
+                                <div className="flex flex-col gap-4 p-4 mb-32">
+                                    <div className="flex items-center gap-4">
+                                        <div>
+                                            <h1 className="text-3xl font-bold text-foreground">
+                                                {suggestionData.task}
+                                            </h1>
+                                            <p className="text-sm text-muted-foreground mt-1">
+                                                Produtos do mercado selecionado
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Produtos por Categoria */}
+                                    {categorySections.map(({ id, name, items }) => (
+                                        <Card
+                                            key={id}
+                                            id={id}
+                                            className="bg-card border-border"
+                                        >
+                                            <CardHeader>
+                                                <CardTitle className="text-xl font-semibold text-primary">
+                                                    {name}
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="flex flex-col gap-6">
+                                                {items.map(item => (
+                                                    <div key={item.anchorId} id={item.anchorId} className="flex flex-col gap-2">
+                                                        <h3 className="text-lg font-medium text-foreground">
+                                                            {item.name}
+                                                        </h3>
+                                                        <ProductSuggestion productName={item.name} categoryId={item.categoryId} marketId={marketId} />
+                                                    </div>
+                                                ))}
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-16 px-4">
+                                    <p className="text-lg text-muted-foreground text-center">
+                                        Selecione um mercado acima para ver os produtos disponíveis
+                                    </p>
+                                </div>
+                            )}
+                        </ScrollArea>
+                    </div>
                 </div>
             </div>
         </div>
