@@ -4,6 +4,7 @@ import { createSuggestion } from "@/actions/suggestion.actions";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { forwardRef, useImperativeHandle, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { MultiStepLoader as Loader } from "./ui/multi-step-loader";
 
@@ -81,7 +82,20 @@ export const MultiStepLoaderSearch = forwardRef<MultiStepLoaderSearchRef, MultiS
 
       } catch (error) {
         console.error('Erro ao criar sugestão:', error);
-        // Em caso de erro, não redirecionar, apenas parar o loading
+        
+        // Verificar se é erro de validação ética
+        if (error instanceof Error && error.message.includes('viola as políticas éticas')) {
+          toast.error("Solicitação não permitida", {
+            description: error.message,
+            duration: 5000,
+          });
+        } else {
+          toast.error("Erro ao criar sugestão", {
+            description: error instanceof Error ? error.message : "Ocorreu um erro inesperado. Tente novamente.",
+            duration: 5000,
+          });
+        }
+        
         setLoading(false);
       }
     }

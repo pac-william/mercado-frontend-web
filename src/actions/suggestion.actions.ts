@@ -26,6 +26,12 @@ export async function createSuggestion(task: string): Promise<SuggestionCreateRe
     });
 
     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      
+      if (errorData.message && errorData.message.includes('viola as políticas éticas')) {
+        throw new Error(errorData.message);
+      }
+      
       throw new Error(`Erro ao criar sugestão: ${response.status}`);
     }
 
