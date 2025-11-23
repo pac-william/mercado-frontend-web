@@ -1,6 +1,7 @@
 "use server"
 
 import { baseUrl } from "@/config/server";
+import { auth0 } from "@/lib/auth0";
 
 export interface RegisterMarketRequest {
     name: string;
@@ -152,5 +153,15 @@ export const registerMarket = async (data: RegisterMarketRequest): Promise<Regis
             throw error;
         }
         throw new Error('Erro ao registrar mercado');
+    }
+};
+
+export const checkSession = async (): Promise<boolean> => {
+    try {
+        const session = await auth0.getSession();
+        return !!session;
+    } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+        return false;
     }
 };

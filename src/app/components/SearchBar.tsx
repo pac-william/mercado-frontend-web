@@ -1,5 +1,6 @@
 "use client";
 
+import { checkSession } from "@/actions/auth.actions";
 import { createTrascribe } from "@/actions/trascribe.actions";
 import { MultiStepLoaderSearch, MultiStepLoaderSearchRef } from "@/components/MultiStepLoader";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useTypewriter } from "@/hooks/use-typewriter";
 import { Loader, Mic, Pause, Play, SearchIcon, Send, Sparkles, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 interface SearchAiBarProps {
@@ -16,6 +18,7 @@ interface SearchAiBarProps {
 }
 
 export default function SearchAiBar({ className, particles }: SearchAiBarProps) {
+    const router = useRouter();
     const [isRecording, setIsRecording] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
@@ -150,9 +153,24 @@ export default function SearchAiBar({ className, particles }: SearchAiBarProps) 
         }
     };
 
-    const handleSearch = () => {
-        if (searchText.trim() && multiStepLoaderRef.current) {
-            multiStepLoaderRef.current.triggerSearch();
+    const handleSearch = async () => {
+        if (!searchText.trim()) {
+            return;
+        }
+
+        try {
+            const hasSession = await checkSession();
+            if (!hasSession) {
+                router.push('/auth/login');
+                return;
+            }
+
+            if (multiStepLoaderRef.current) {
+                multiStepLoaderRef.current.triggerSearch();
+            }
+        } catch (error) {
+            console.error('Erro ao verificar sessão:', error);
+            router.push('/auth/login');
         }
     };
 
