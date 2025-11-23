@@ -107,3 +107,30 @@ export const updateUser = async (id: string, data: UserUpdateDTO): Promise<User>
     const user = await response.json() as User;
     return user;
 };
+
+export const updateUserProfile = async (formData: FormData): Promise<{ success: boolean; message?: string }> => {
+    try {
+        const session = await auth0.getSession();
+        if (!session) {
+            throw new Error("Usuário não autenticado");
+        }
+
+        const user = await getUserMe();
+        const name = formData.get("name") as string;
+        const email = formData.get("email") as string;
+
+        if (!name || !email) {
+            throw new Error("Nome e email são obrigatórios");
+        }
+
+        await updateUser(user.id, {
+            name: name.trim(),
+            email: email.trim(),
+        });
+
+        return { success: true };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Erro ao atualizar perfil";
+        return { success: false, message };
+    }
+};
