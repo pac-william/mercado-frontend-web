@@ -262,13 +262,13 @@ async function ProductSuggestion({ productName, categoryId, marketId }: { produc
 
     const filters: { name: string; categoryId?: string; marketId?: string } = {
         name: productName,
-        /* size: 20,
-        marketId: marketId, // Garantir que sempre filtra por mercado */
+        /* size: 20,*/
+        marketId: marketId, // Garantir que sempre filtra por mercado 
     };
 
-    if (isValidObjectId(categoryId)) {
+    /* if (isValidObjectId(categoryId)) {
         filters.categoryId = categoryId;
-    }
+    } */
 
     let products: Product[] = [];
     try {
