@@ -1,6 +1,6 @@
 import { getMarketById } from "@/actions/market.actions";
 import { getMarketAddressByMarketId } from "@/actions/marketAddress.actions";
-import { getProductsByMarket } from "@/actions/products.actions";
+import { getProducts } from "@/actions/products.actions";
 import SearchField from "@/app/(app)/components/SeachField";
 import Footer from "@/app/components/Footer";
 import Pagination from "@/app/components/Pagination";
@@ -89,7 +89,8 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
         ? marketAny.addressData 
         : await getMarketAddressByMarketId(marketId).catch(() => null);
 
-    const { products, meta } = await getProductsByMarket(marketId, {
+    const { products, meta } = await getProducts({
+        marketId,
         page: pageNumber,
         size: pageSize,
         name,
