@@ -112,7 +112,7 @@ export default function CartContent({ initialCarts, markets }: CartContentProps)
                                                                         alt={market.name ?? `Mercado ${group.marketId}`}
                                                                         width={52}
                                                                         height={52}
-                                                                        className="w-full h-full object-cover"
+                                                                        className="object-cover"
                                                                     />
                                                                 ) : (
                                                                     <ShoppingCart className="w-6 h-6 text-muted-foreground" />
