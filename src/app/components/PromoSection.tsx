@@ -27,7 +27,7 @@ export default function PromoSection() {
                         {Array.from({ length: 10 }).map((_, index) => (
                             <CarouselItem key={index} className="basis-1/1 sm:basis-1/2 md:basis-1/3 lg:basis-1/3 xl:basis-1/4">
                                 <div className="relative h-52 w-full overflow-hidden rounded-lg">
-                                    <Image src="https://placehold.co/400x250/png?text=1280x720" alt="Promoção" fill className="object-cover" sizes="(min-width: 768px) 320px, 100vw" priority />
+                                    <Image unoptimized src="https://placehold.co/400x250/png?text=1280x720" alt="Promoção" fill className="object-cover" sizes="(min-width: 768px) 320px, 100vw" priority />
                                 </div>
                             </CarouselItem>
                         ))}

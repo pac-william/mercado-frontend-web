@@ -188,6 +188,7 @@ export default function CartSheet({ cartItems, marketInfos = {} }: CartSheetProp
                                                     <div className="w-10 h-10 bg-white rounded-md flex items-center justify-center overflow-hidden">
                                                         {marketInfos[group.marketId]?.profilePicture ? (
                                                             <Image
+                                                                unoptimized
                                                                 src={marketInfos[group.marketId]?.profilePicture as string}
                                                                 alt={marketInfos[group.marketId]?.name ?? `Mercado ${group.marketId}`}
                                                                 width={40}
@@ -212,6 +213,7 @@ export default function CartSheet({ cartItems, marketInfos = {} }: CartSheetProp
                                                         <div className="w-16 h-16 bg-white rounded-md flex items-center justify-center">
                                                             {item.product.image ? (
                                                                 <Image
+                                                                    unoptimized
                                                                     src={item.product.image}
                                                                     alt={item.product.name}
                                                                     width={64}

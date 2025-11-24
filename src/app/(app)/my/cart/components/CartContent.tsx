@@ -107,6 +107,7 @@ export default function CartContent({ initialCarts, markets }: CartContentProps)
                                                             <div className="bg-white rounded-full flex items-center justify-center overflow-hidden">
                                                                 {market?.profilePicture ? (
                                                                     <Image
+                                                                        unoptimized
                                                                         src={market.profilePicture}
                                                                         alt={market.name ?? `Mercado ${group.marketId}`}
                                                                         width={52}

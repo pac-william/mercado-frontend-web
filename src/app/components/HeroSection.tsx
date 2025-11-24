@@ -110,6 +110,7 @@ export default function HeroSection() {
                         </div>
                     ) : (
                         <Image
+                            unoptimized
                             src={campaign.imageUrl}
                             alt={campaign.title}
                             fill
@@ -150,6 +151,7 @@ export default function HeroSection() {
                                     </div>
                                 ) : (
                                     <Image
+                                        unoptimized
                                         src={campaign.imageUrl}
                                         alt={campaign.title}
                                         width={1000}

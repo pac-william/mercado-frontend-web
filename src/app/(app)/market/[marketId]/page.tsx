@@ -114,6 +114,7 @@ export default async function MarketPage({ params, searchParams }: MarketPagePro
                                 priority
                                 className="object-cover"
                                 sizes="(min-width: 768px) 768px, 100vw"
+                                unoptimized
                             />
                             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-transparent" />
                         </div>

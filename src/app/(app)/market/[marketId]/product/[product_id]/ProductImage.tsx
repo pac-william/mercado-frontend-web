@@ -20,6 +20,7 @@ export default function ProductImage({ imageSrc, alt }: ProductImageProps) {
             lensSize={170}
         >
             <Image
+                unoptimized
                 src={imageSrc}
                 alt={alt}
                 className="object-cover"

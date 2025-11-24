@@ -250,6 +250,7 @@ export default async function ProductPage({ params }: { params: Promise<{ produc
                                         <div className="flex flex-col gap-3">
                                             <div className="flex items-center gap-3">
                                                 <Image
+                                                    unoptimized
                                                     src={market.profilePicture || "/placeholder-market.png"}
                                                     alt={market.name}
                                                     width={48}

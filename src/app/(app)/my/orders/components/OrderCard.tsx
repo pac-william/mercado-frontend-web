@@ -1,9 +1,9 @@
-import Image from "next/image";
 import { formatPrice } from "@/app/utils/formatters";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { CalendarDays, MapPin, Package } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import StatusBadge from "./StatusBadge";
 
@@ -73,6 +73,7 @@ export default function OrderCard({
                     <div className="flex items-center gap-3 text-sm">
                         <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full bg-muted">
                             <Image
+                                unoptimized
                                 src={marketPicture ?? MARKET_PLACEHOLDER}
                                 alt={marketName ? `Logo de ${marketName}` : "Logo do mercado"}
                                 width={44}
