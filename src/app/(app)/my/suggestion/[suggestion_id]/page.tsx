@@ -222,19 +222,17 @@ async function calculateMarketPrice(
 
     // Buscar produtos para cada item da sugestão neste mercado
     for (const item of suggestionItems) {
-        const filters: { name: string; size: number; categoryId?: string; marketId?: string } = {
+        const filters: { name: string; categoryId?: string; marketId?: string } = {
             name: item.name,
-            size: 1, // Apenas o primeiro (mais barato) ou podemos pegar o mais barato
             marketId: marketId,
         };
 
-        if (isValidObjectId(item.categoryId)) {
+        /* if (isValidObjectId(item.categoryId)) {
             filters.categoryId = item.categoryId;
-        }
+        } */
 
         try {
-            const response = await getProducts(filters);
-            const products = response.products;
+            const { products } = await getProducts(filters);
 
             if (products.length > 0) {
                 // Pegar o produto mais barato disponível
@@ -262,10 +260,10 @@ async function ProductSuggestion({ productName, categoryId, marketId }: { produc
         return null;
     }
 
-    const filters: { name: string; size: number; categoryId?: string; marketId?: string } = {
+    const filters: { name: string; categoryId?: string; marketId?: string } = {
         name: productName,
-        size: 20,
-        marketId: marketId, // Garantir que sempre filtra por mercado
+        /* size: 20,
+        marketId: marketId, // Garantir que sempre filtra por mercado */
     };
 
     if (isValidObjectId(categoryId)) {
