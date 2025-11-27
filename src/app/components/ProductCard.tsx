@@ -47,10 +47,35 @@ export default async function ProductCard({
         );
     }
 
+    // Convert classes to plain objects for Client Component
+    const productPlain = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        unit: product.unit,
+        marketId: product.marketId,
+        image: product.image,
+        categoryId: product.categoryId,
+        sku: product.sku,
+        category: null,
+    };
+
+    const marketPlain = resolvedMarket ? {
+        id: resolvedMarket.id,
+        name: resolvedMarket.name,
+        address: resolvedMarket.address,
+        profilePicture: resolvedMarket.profilePicture,
+        bannerImage: resolvedMarket.bannerImage,
+        rating: resolvedMarket.rating,
+        ratingCount: resolvedMarket.ratingCount,
+        addressId: resolvedMarket.addressId,
+        addressData: resolvedMarket.addressData,
+    } : null;
+
     return (
         <ProductCardClient 
-            product={product} 
-            market={resolvedMarket} 
+            product={productPlain} 
+            market={marketPlain} 
             user={session?.user as Auth0User | undefined}
             variant={variant}
             badgeText={badgeText}

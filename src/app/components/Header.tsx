@@ -1,6 +1,7 @@
 import { getAddresses } from "@/actions/address.actions";
 import { getCart } from "@/actions/cart.actions";
 import { getMarketById } from "@/actions/market.actions";
+import { AddressDomain } from "@/app/domain/addressDomain";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Separator } from "@/components/ui/separator";
 import { CartItemResponseDTO, CartResponse } from "@/dtos/cartDTO";
@@ -17,13 +18,20 @@ import { ProfileMenuDropDown } from "./ProfileMenuDropDown";
 export default async function Header() {
     const session = await auth0.getSession() as SessionData;
 
-    const addressResponse = await getAddresses().catch((error) => {
-        console.error("Erro ao obter endereços:", error);
-        return { addresses: [] };
-    });
-    const { addresses } = addressResponse;
-    const favoriteAddress = addresses.find((address) => address.isFavorite);
-    const defaultAddress = favoriteAddress ?? addresses[0];
+    let addresses: AddressDomain[] = [];
+    let defaultAddress: AddressDomain | null = null;
+
+    if (session) {
+        try {
+            const addressResponse = await getAddresses();
+            addresses = addressResponse.addresses || [];
+            const favoriteAddress = addresses.find((address) => address.isFavorite);
+            defaultAddress = favoriteAddress ?? addresses[0];
+        } catch (error) {
+            console.error("Erro ao obter endereços:", error);
+            addresses = [];
+        }
+    }
 
     let items: CartItemResponseDTO[] = [];
     const marketInfos: Record<string, { name: string; profilePicture?: string }> = {};
@@ -43,10 +51,17 @@ export default async function Header() {
             uniqueMarketIds.map(async (marketId) => {
                 try {
                     const market = await getMarketById(marketId);
-                    marketInfos[marketId] = {
-                        name: market.name,
-                        profilePicture: market.profilePicture,
-                    };
+                    if (market) {
+                        marketInfos[marketId] = {
+                            name: market.name,
+                            profilePicture: market.profilePicture,
+                        };
+                    } else {
+                        marketInfos[marketId] = {
+                            name: marketId,
+                            profilePicture: undefined,
+                        };
+                    }
                 } catch (error) {
                     console.error(`Erro ao buscar mercado ${marketId}:`, error);
                     marketInfos[marketId] = {
