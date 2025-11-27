@@ -14,36 +14,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { MarketAddressData } from "../domain/marketDomain";
+import { Market } from "../domain/marketDomain";
+import { Product } from "../domain/productDomain";
 import { formatPrice } from "../utils/formatters";
 
-type ProductPlain = {
-    id: string;
-    name: string;
-    price: number;
-    unit: string;
-    marketId: string;
-    image?: string | null;
-    categoryId?: string;
-    sku?: string | null;
-    category?: null;
-};
-
-type MarketPlain = {
-    id: string;
-    name: string;
-    address: string;
-    profilePicture: string;
-    bannerImage: string;
-    rating?: number;
-    ratingCount?: number;
-    addressId?: string | null;
-    addressData?: MarketAddressData | null;
-} | null;
-
 interface ProductCardClientProps {
-    product: ProductPlain;
-    market: MarketPlain;
+    product: Product;
+    market: Market | null;
     user?: Auth0User;
     variant: "quantity-select" | "buy-now" | "owner" | "history" | "suggestion";
     badgeText?: string;
@@ -57,6 +34,8 @@ export default function ProductCardClient({
     market,
     user: serverUser,
     variant,
+    badgeText,
+    badgeVariant = "secondary",
     initialQuantity,
     onQuantityChange
 }: ProductCardClientProps) {
@@ -69,13 +48,13 @@ export default function ProductCardClient({
     const user = clientUser || serverUser;
 
     // Create a safe market object with defaults if market is null
-    const safeMarket: MarketPlain = market || {
-        id: product.marketId,
-        name: "Market",
-        address: "",
-        profilePicture: "",
-        bannerImage: "",
-    };
+    const safeMarket: Market = market || new Market(
+        product.marketId,
+        "Market",
+        "",
+        "",
+        ""
+    );
 
     const getInitials = (name?: string) => {
         if (!name) return "MK";
